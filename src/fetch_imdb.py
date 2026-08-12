@@ -11,67 +11,94 @@ print("🚀 شروع فرآیند دریافت اطلاعات...")
 
 # کوکی‌ها را از Environment Variable می‌خوانیم
 cookies_str = os.environ.get('IMDB_COOKIES', '')
-print(f"📋 کوکی دریافت شد: {cookies_str[:50]}... (طول: {len(cookies_str)})")
+print(f"📋 کوکی دریافت شد (طول: {len(cookies_str)})")
 
 if not cookies_str:
     print("❌ خطا: کوکی‌ها در IMDB_COOKIES تنظیم نشده‌اند.")
     sys.exit(1)
 
-# تبدیل کوکی‌ها به دیکشنری
+# تبدیل کوکی‌ها به دیکشنری - روش پیشرفته‌تر
 cookies = {}
-for item in cookies_str.split('; '):
+# ابتدا با ; کوکی‌ها را جدا می‌کنیم
+for item in cookies_str.split(';'):
+    item = item.strip()
     if '=' in item:
         key, value = item.split('=', 1)
-        cookies[key] = value
+        # بعضی کوکی‌ها ممکن است شامل = های اضافی باشند، بنابراین فقط اولی رو جدا می‌کنیم
+        cookies[key.strip()] = value.strip()
 
 print(f"✅ {len(cookies)} کوکی شناسایی شد.")
 
 # دریافت کلید OMDb API
 OMDB_API_KEY = os.environ.get('OMDB_API_KEY', '')
-print(f"🔑 کلید OMDb: {OMDB_API_KEY[:10]}...")
-
 if not OMDB_API_KEY:
     print("❌ خطا: کلید OMDb API در OMDB_API_KEY تنظیم نشده است.")
     sys.exit(1)
 
-def test_imdb_connection(cookies):
-    """تست اتصال به IMDb با کوکی‌ها"""
-    url = "https://www.imdb.com/"
-    headers = {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
-        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8'
-    }
+# ===== تنظیمات هدرهای مرورگر واقعی =====
+HEADERS = {
+    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+    'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8',
+    'Accept-Language': 'en-US,en;q=0.9,fa;q=0.8',
+    'Accept-Encoding': 'gzip, deflate, br',
+    'DNT': '1',
+    'Connection': 'keep-alive',
+    'Upgrade-Insecure-Requests': '1',
+    'Sec-Fetch-Dest': 'document',
+    'Sec-Fetch-Mode': 'navigate',
+    'Sec-Fetch-Site': 'none',
+    'Sec-Fetch-User': '?1',
+    'Cache-Control': 'max-age=0',
+}
+
+def test_imdb_connection(session, cookies):
+    """تست اتصال با رفتن به صفحه اصلی و سپس Ratings"""
     try:
-        response = requests.get(url, cookies=cookies, headers=headers, timeout=15)
-        print(f"📡 اتصال به IMDb: وضعیت {response.status_code}")
+        # مرحله 1: رفتن به صفحه اصلی برای دریافت کوکی‌های جلسه
+        print("📡 مرحله 1: اتصال به صفحه اصلی IMDb...")
+        response = session.get('https://www.imdb.com/', headers=HEADERS, timeout=15)
+        print(f"   وضعیت: {response.status_code}")
+        
         if response.status_code == 200:
-            print("✅ اتصال به IMDb برقرار است.")
-            return True
+            print("✅ صفحه اصلی با موفقیت بارگذاری شد.")
+        elif response.status_code == 202:
+            print("⚠️ صفحه اصلی وضعیت 202 داد (احتمالاً صفحه چالش). اما ادامه می‌دهیم...")
         else:
-            print(f"❌ خطا در اتصال به IMDb: {response.status_code}")
+            print(f"❌ خطا در صفحه اصلی: {response.status_code}")
             return False
+        
+        # مرحله 2: رفتن به صفحه Ratings
+        print("📡 مرحله 2: اتصال به صفحه Ratings...")
+        ratings_url = 'https://www.imdb.com/user/ur0/ratings?sort=date_added&direction=desc'
+        response = session.get(ratings_url, headers=HEADERS, timeout=15)
+        print(f"   وضعیت: {response.status_code}")
+        
+        if response.status_code == 200:
+            print("✅ صفحه Ratings با موفقیت بارگذاری شد.")
+            return True
+        elif response.status_code == 202:
+            print("⚠️ صفحه Ratings وضعیت 202 داد. ممکن است نیاز به کوکی‌های بیشتر باشد.")
+            return False
+        else:
+            print(f"❌ خطا در صفحه Ratings: {response.status_code}")
+            return False
+            
     except Exception as e:
         print(f"❌ خطا در اتصال: {e}")
         return False
 
-def get_imdb_ratings(cookies):
+def get_imdb_ratings(session):
     """دریافت لیست فیلم‌های امتیاز داده شده از IMDb"""
-    url = "https://www.imdb.com/user/ur0/ratings?sort=date_added&direction=desc"
-    
-    headers = {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
-        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
-        'Accept-Language': 'en-US,en;q=0.9',
-    }
-    
     all_movies = []
     page = 1
-    max_pages = 5  # برای تست فقط 5 صفحه اول
+    max_pages = 10  # برای جلوگیری از درخواست زیاد
     
     while page <= max_pages:
         try:
+            url = f'https://www.imdb.com/user/ur0/ratings?sort=date_added&direction=desc&page={page}'
             print(f"📥 دریافت صفحه {page}...")
-            response = requests.get(f"{url}&page={page}", cookies=cookies, headers=headers, timeout=20)
+            
+            response = session.get(url, headers=HEADERS, timeout=20)
             
             if response.status_code != 200:
                 print(f"⚠️ خطا در دریافت صفحه {page}: {response.status_code}")
@@ -82,7 +109,11 @@ def get_imdb_ratings(cookies):
             # پیدا کردن آیتم‌های فیلم
             items = soup.select('.lister-item')
             if not items:
+                # ممکن است صفحه خالی باشد یا ساختار تغییر کرده باشد
                 print(f"❌ آیتمی در صفحه {page} پیدا نشد.")
+                # برای دیباگ، بخش کوچکی از HTML را چاپ می‌کنیم
+                print("🔍 نمونه از HTML دریافت شده:")
+                print(response.text[:500])
                 break
             
             print(f"✅ {len(items)} فیلم در صفحه {page} پیدا شد.")
@@ -116,6 +147,7 @@ def get_imdb_ratings(cookies):
                     print(f"⚠️ خطا در پردازش یک آیتم: {e}")
                     continue
             
+            # بررسی صفحه بعدی
             next_button = soup.select_one('.next-page')
             if not next_button:
                 print("📄 صفحه آخر رسید.")
@@ -160,16 +192,21 @@ def fetch_omdb_details(imdb_id, api_key):
 
 def main():
     try:
+        # ایجاد session
+        session = requests.Session()
+        session.cookies.update(cookies)
+        
         # تست اتصال
-        if not test_imdb_connection(cookies):
+        if not test_imdb_connection(session, cookies):
             print("❌ اتصال به IMDb ناموفق بود. لطفاً کوکی‌ها را بررسی کنید.")
+            print("💡 نکته: ممکن است نیاز باشد کوکی‌های جدید از مرورگر دریافت کنید.")
             sys.exit(1)
         
         # دریافت لیست فیلم‌ها
-        movies = get_imdb_ratings(cookies)
+        movies = get_imdb_ratings(session)
         
         if not movies:
-            print("❌ هیچ فیلمی دریافت نشد. لطفاً کوکی‌ها را بررسی کنید.")
+            print("❌ هیچ فیلمی دریافت نشد. ممکن است صفحه Ratings خالی باشد یا نیاز به بروزرسانی کوکی داشته باشید.")
             sys.exit(1)
         
         print(f"🎬 دریافت جزئیات {len(movies)} فیلم از OMDb API...")
