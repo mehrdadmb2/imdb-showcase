@@ -22,7 +22,7 @@ jobs:
         run: |
           cd src
           pip install -r requirements.txt
-          pip install --upgrade requests beautifulsoup4 imdb-core
+          pip install --upgrade cloudscraper requests beautifulsoup4
       
       - name: اجرای اسکریپت دریافت اطلاعات
         env:
