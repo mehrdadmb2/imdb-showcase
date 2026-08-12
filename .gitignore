@@ -13,3 +13,4 @@ venv/
 *.egg-info/
 dist/
 build/
+src/ratings.csv
