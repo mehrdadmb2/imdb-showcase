@@ -10,13 +10,25 @@ import time
 
 print("🚀 شروع فرآیند دریافت اطلاعات از فایل CSV...")
 
-# ===== لیست کلیدهای OMDb (۴ کلید) =====
-OMDB_KEYS = [
-    '4243603a',   # کلید قبلی
-    '47b7a160',   # جدید
-    '963db753',   # جدید
-    'bab92b09'    # جدید
-]
+# ===== دریافت لیست کلیدهای OMDb از Secrets =====
+# اول از Secret جدید می‌خوانیم، اگر نبود از Secret قدیمی
+omdb_keys_str = os.environ.get('OMDB_API_KEYS', '')
+if not omdb_keys_str:
+    # اگر Secret جدید نبود، از Secret قدیمی استفاده کن (برای سازگاری)
+    old_key = os.environ.get('OMDB_API_KEY', '')
+    if old_key:
+        omdb_keys_str = old_key
+    else:
+        print("❌ خطا: هیچ کلید OMDb تنظیم نشده است!")
+        sys.exit(1)
+
+# تبدیل رشته به لیست
+OMDB_KEYS = [k.strip() for k in omdb_keys_str.split(',') if k.strip()]
+print(f"✅ {len(OMDB_KEYS)} کلید OMDb شناسایی شد.")
+
+if not OMDB_KEYS:
+    print("❌ خطا: هیچ کلید معتبری پیدا نشد!")
+    sys.exit(1)
 
 # ===== مدیریت چرخشی کلیدها =====
 current_key_index = 0
@@ -54,11 +66,9 @@ def read_csv():
                 if not imdb_id:
                     continue
                 
-                # تاریخ را به فرمت استاندارد تبدیل می‌کنیم
                 date_rated = row.get('Date Rated', '').strip()
                 if date_rated:
                     try:
-                        # تاریخ به فرمت M/D/YYYY
                         parts = date_rated.split('/')
                         if len(parts) == 3:
                             date_rated = f"{parts[2]}-{parts[0].zfill(2)}-{parts[1].zfill(2)}"
@@ -98,10 +108,8 @@ def fetch_omdb(imdb_id):
     if imdb_id in omdb_cache:
         return omdb_cache[imdb_id]
     
-    # دریافت کلید بعدی
     key = get_next_omdb_key()
     if not key:
-        # همه کلیدها پر شده‌اند
         omdb_cache[imdb_id] = None
         return None
     
@@ -116,7 +124,6 @@ def fetch_omdb(imdb_id):
                 omdb_success_count += 1
                 return data
             else:
-                # ممکن است فیلم در OMDb نباشد
                 omdb_cache[imdb_id] = None
                 omdb_fail_count += 1
                 return None
@@ -140,7 +147,6 @@ def process_movies(movies):
     for idx, movie in enumerate(movies):
         print(f"⏳ {idx+1}/{total}: {movie['title']} - {movie['imdb_id']}")
         
-        # اطلاعات پایه از CSV
         result = {
             'imdb_id': movie['imdb_id'],
             'title': movie['title'],
@@ -162,7 +168,6 @@ def process_movies(movies):
             'omdb_found': False
         }
         
-        # تلاش برای دریافت از OMDb (فقط برای پوستر و خلاصه)
         omdb_data = fetch_omdb(movie['imdb_id'])
         if omdb_data:
             result['poster'] = omdb_data.get('Poster', '')
@@ -170,7 +175,6 @@ def process_movies(movies):
             result['rated'] = omdb_data.get('Rated', 'N/A')
             result['actors'] = omdb_data.get('Actors', 'N/A')
             result['writer'] = omdb_data.get('Writer', 'N/A')
-            # اگر اطلاعات CSV کامل‌تر بود، آن را نگه می‌داریم
             if not result['genres'] or result['genres'] == 'N/A':
                 result['genres'] = omdb_data.get('Genre', 'N/A')
             if not result['imdb_rating'] or result['imdb_rating'] == 'N/A':
