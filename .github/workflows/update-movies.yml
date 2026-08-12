@@ -1,15 +1,19 @@
-name: به‌روزرسانی خودکار فیلم‌ها
+name: به‌روزرسانی و انتشار سایت
 
 on:
   schedule:
     - cron: '0 */12 * * *'
   workflow_dispatch:
 
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
 jobs:
-  update:
+  # Job 1: ساخت و به‌روزرسانی داده‌ها
+  update-data:
     runs-on: ubuntu-latest
-    permissions:
-      contents: write
     steps:
       - uses: actions/checkout@v5
       
@@ -32,10 +36,27 @@ jobs:
           cd src
           python fetch_imdb.py
       
-      - name: ارسال تغییرات
+      - name: آپلود فایل‌های docs به عنوان Artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: 'docs'
+      
+      - name: Commit و Push تغییرات movies.json (اختیاری)
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add public/movies.json
+          git add docs/movies.json
           git diff --staged --quiet || git commit -m "به‌روزرسانی خودکار فیلم‌ها [skip ci]"
           git push
+
+  # Job 2: انتشار روی GitHub Pages
+  deploy:
+    runs-on: ubuntu-latest
+    needs: update-data
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: انتشار به GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
