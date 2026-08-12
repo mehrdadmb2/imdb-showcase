@@ -145,9 +145,9 @@ def extract_movies_from_items(items):
             continue
     return movies
 
-# ===== بخش ۲: خواندن از فایل CSV =====
+# ===== بخش ۲: خواندن از فایل CSV (نسخه‌ی به‌روز برای فایل شما) =====
 def try_fetch_from_csv():
-    """خواندن اطلاعات از فایل CSV"""
+    """خواندن اطلاعات از فایل CSV خروجی IMDb"""
     csv_file = 'ratings.csv'
     if not os.path.exists(csv_file):
         print(f"⚠️ فایل {csv_file} پیدا نشد.")
@@ -160,18 +160,26 @@ def try_fetch_from_csv():
         with open(csv_file, 'r', encoding='utf-8') as f:
             reader = csv.DictReader(f)
             for row in reader:
-                imdb_id = row.get('Const', '')
+                # ستون‌های فایل CSV شما
+                imdb_id = row.get('Const', '').strip()
                 if not imdb_id:
                     continue
                 
-                title = row.get('Title', '')
-                year = row.get('Year', '')
-                user_rating = row.get('Your Rating', '')
+                title = row.get('Title', '').strip()
+                year = row.get('Year', '').strip()
+                user_rating = row.get('Your Rating', '').strip()
                 
+                # تبدیل امتیاز به عدد
                 try:
                     user_rating = float(user_rating) if user_rating else 0
                 except:
                     user_rating = 0
+                
+                # اگر سال به صورت کامل نیست، فقط عدد سال را بگیریم
+                if year and not year.isdigit():
+                    year_match = re.search(r'\d{4}', year)
+                    if year_match:
+                        year = year_match.group()
                 
                 movies.append({
                     'imdb_id': imdb_id,
@@ -181,11 +189,15 @@ def try_fetch_from_csv():
                 })
     except Exception as e:
         print(f"❌ خطا در خواندن CSV: {e}")
+        traceback.print_exc()
         return None
     
     if movies:
         print(f"✅ {len(movies)} فیلم از CSV دریافت شد.")
-    return movies
+        return movies
+    else:
+        print("⚠️ فایل CSV خالی است یا فرمت آن صحیح نیست.")
+        return None
 
 # ===== بخش ۳: دریافت جزئیات از OMDb API =====
 def fetch_omdb_details(imdb_id, api_key):
@@ -245,6 +257,7 @@ def save_movies(movies):
                 'rated': details.get('rated', 'N/A')
             })
         else:
+            # اگر OMDb اطلاعاتی نداشت، از اطلاعات CSV استفاده می‌کنیم
             output.append({
                 'imdb_id': movie['imdb_id'],
                 'title': movie['title'],
@@ -260,10 +273,10 @@ def save_movies(movies):
                 'rated': 'N/A'
             })
     
-    # اطمینان از وجود پوشه docs (مسیر جدید)
+    # اطمینان از وجود پوشه docs
     os.makedirs('../docs', exist_ok=True)
     
-    # ذخیره در فایل JSON در پوشه docs
+    # ذخیره در فایل JSON
     with open('../docs/movies.json', 'w', encoding='utf-8') as f:
         json.dump(output, f, ensure_ascii=False, indent=2)
     
@@ -274,12 +287,15 @@ def save_movies(movies):
 # ===== اجرای اصلی =====
 def main():
     try:
+        # تلاش با کوکی
         movies = try_fetch_from_imdb()
         
+        # اگر کوکی کار نکرد، از CSV استفاده کن
         if not movies:
             print("🔄 تلاش برای دریافت از فایل CSV...")
             movies = try_fetch_from_csv()
         
+        # اگر هیچکدام کار نکرد، خطا بده
         if not movies:
             print("❌ هیچ فیلمی از هیچ منبعی دریافت نشد.")
             print("💡 لطفاً یکی از این کارها را انجام دهید:")
@@ -287,6 +303,7 @@ def main():
             print("   2. فایل ratings.csv را در پوشه src قرار دهید.")
             sys.exit(1)
         
+        # ذخیره در docs/movies.json
         save_movies(movies)
         
     except Exception as e:
