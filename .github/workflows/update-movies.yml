@@ -22,7 +22,7 @@ jobs:
         run: |
           cd src
           pip install -r requirements.txt
-          pip install --upgrade cloudscraper requests beautifulsoup4
+          pip install --upgrade cloudscraper
       
       - name: اجرای اسکریپت دریافت اطلاعات
         env:
