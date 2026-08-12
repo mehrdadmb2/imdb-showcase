@@ -5,13 +5,13 @@ import requests
 from datetime import datetime
 import sys
 import time
+from bs4 import BeautifulSoup  # 用于解析 IMDb 页面
 
-print("🚀 شروع دریافت اطلاعات با ۴ کلید OMDb...")
+print("🚀 شروع فرآیند دریافت اطلاعات از فایل CSV...")
 
-# ===== دریافت لیست کلیدها از Secrets =====
+# --- 配置与密钥 ---
 omdb_keys_str = os.environ.get('OMDB_API_KEYS', '')
 if not omdb_keys_str:
-    # اگر متغیر جدید نبود، از قدیمی استفاده کن
     old_key = os.environ.get('OMDB_API_KEY', '')
     if old_key:
         omdb_keys_str = old_key
@@ -26,7 +26,6 @@ if not OMDB_KEYS:
     print("❌ کلید معتبری پیدا نشد!")
     sys.exit(1)
 
-# ===== مدیریت چرخشی کلیدها =====
 current_key_index = 0
 key_usage = {key: 0 for key in OMDB_KEYS}
 MAX_PER_KEY = 1000
@@ -39,10 +38,37 @@ def get_next_key():
             current_key_index = (current_key_index + 1) % len(OMDB_KEYS)
             return key
         current_key_index = (current_key_index + 1) % len(OMDB_KEYS)
-    print("⚠️ همه کلیدها پر شدند!")
+    print("⚠️ همه کلیدها به محدودیت روزانه رسیده‌اند!")
     return None
 
-# ===== خواندن CSV =====
+# --- 辅助函数：从 IMDb 页面抓取海报 ---
+def fetch_poster_from_imdb(imdb_id):
+    """尝试从 IMDb 的电影页面获取海报 URL"""
+    url = f"https://www.imdb.com/title/{imdb_id}/"
+    headers = {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
+    }
+    try:
+        response = requests.get(url, headers=headers, timeout=10)
+        if response.status_code != 200:
+            return None
+        
+        soup = BeautifulSoup(response.text, 'html.parser')
+        # 查找海报图片标签
+        poster_tag = soup.find('meta', property='og:image')
+        if poster_tag and poster_tag.get('content'):
+            poster_url = poster_tag['content']
+            # 确保 URL 是高清版本
+            if '_V1_' in poster_url:
+                # 尝试获取更高分辨率的图片
+                poster_url = poster_url.split('._V1_')[0] + '._V1_.jpg'
+            return poster_url
+        return None
+    except Exception as e:
+        print(f"⚠️ 从 IMDb 获取海报失败 ({imdb_id}): {e}")
+        return None
+
+# --- 读取 CSV ---
 def read_csv():
     csv_file = 'ratings.csv'
     if not os.path.exists(csv_file):
@@ -57,7 +83,7 @@ def read_csv():
             imdb_id = row.get('Const', '').strip()
             if not imdb_id:
                 continue
-            # تاریخ را تبدیل می‌کنیم
+            # 处理日期格式
             date_rated = row.get('Date Rated', '').strip()
             if date_rated:
                 try:
@@ -83,7 +109,7 @@ def read_csv():
     print(f"✅ {len(movies)} فیلم از CSV دریافت شد.")
     return movies
 
-# ===== دریافت از OMDb =====
+# --- 从 OMDb 获取数据 ---
 omdb_cache = {}
 success_count = 0
 fail_count = 0
@@ -116,7 +142,7 @@ def fetch_omdb(imdb_id):
         omdb_cache[imdb_id] = None
         return None
 
-# ===== پردازش =====
+# --- 处理所有电影数据 ---
 def process_movies(movies):
     total = len(movies)
     print(f"🎬 پردازش {total} فیلم...")
@@ -125,6 +151,7 @@ def process_movies(movies):
     for idx, m in enumerate(movies):
         print(f"⏳ {idx+1}/{total}: {m['title']}")
 
+        # 基础信息（全部来自 CSV）
         result = {
             'imdb_id': m['imdb_id'],
             'title': m['title'],
@@ -146,7 +173,7 @@ def process_movies(movies):
             'omdb_found': False
         }
 
-        # OMDb
+        # 1. 尝试从 OMDb 获取
         omdb = fetch_omdb(m['imdb_id'])
         if omdb:
             result['poster'] = omdb.get('Poster', '')
@@ -164,23 +191,38 @@ def process_movies(movies):
                 result['directors'] = omdb.get('Director', 'N/A')
             result['omdb_found'] = True
 
+        # 2. 如果 OMDb 没有海报，尝试从 IMDb 抓取
+        if not result['poster'] or result['poster'] == 'N/A':
+            imdb_poster = fetch_poster_from_imdb(m['imdb_id'])
+            if imdb_poster:
+                result['poster'] = imdb_poster
+                print(f"   ✅ 从 IMDb 获取到海报: {m['title']}")
+
         output.append(result)
 
-    print(f"✅ OMDb موفق: {success_count} از {total}")
+    print(f"✅ OMDb 成功: {success_count} از {total}")
     print(f"📊 وضعیت کلیدها:")
     for k, v in key_usage.items():
         print(f"   {k}: {v} درخواست")
     return output
 
-# ===== ذخیره =====
+# --- 保存 JSON，并记录最后手动更新时间 ---
 def save_json(data):
     os.makedirs('../docs', exist_ok=True)
+    
+    # 添加元数据
+    final_data = {
+        'last_manual_update': datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
+        'movies': data
+    }
+    
     with open('../docs/movies.json', 'w', encoding='utf-8') as f:
-        json.dump(data, f, ensure_ascii=False, indent=2)
+        json.dump(final_data, f, ensure_ascii=False, indent=2)
+    
     print(f"✅ {len(data)} فیلم در docs/movies.json ذخیره شد.")
-    print(f"🕐 {datetime.now()}")
+    print(f"🕐 آخرین به‌روزرسانی دستی: {final_data['last_manual_update']}")
 
-# ===== اجرا =====
+# --- 主程序 ---
 def main():
     movies = read_csv()
     if not movies:
