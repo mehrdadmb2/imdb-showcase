@@ -5,18 +5,39 @@ import requests
 from datetime import datetime
 import sys
 import traceback
+from collections import defaultdict
+import time
 
 print("🚀 شروع فرآیند دریافت اطلاعات از فایل CSV...")
 
-# دریافت کلید OMDb API
-OMDB_API_KEY = os.environ.get('OMDB_API_KEY', '')
-if not OMDB_API_KEY:
-    print("❌ خطا: کلید OMDb API تنظیم نشده است.")
-    sys.exit(1)
+# ===== لیست کلیدهای OMDb (۴ کلید) =====
+OMDB_KEYS = [
+    '4243603a',   # کلید قبلی
+    '47b7a160',   # جدید
+    '963db753',   # جدید
+    'bab92b09'    # جدید
+]
 
-# ===== خواندن از فایل CSV =====
-def read_csv_file():
-    """خواندن اطلاعات از فایل CSV خروجی IMDb"""
+# ===== مدیریت چرخشی کلیدها =====
+current_key_index = 0
+key_usage_count = {key: 0 for key in OMDB_KEYS}
+MAX_REQUESTS_PER_KEY = 1000
+
+def get_next_omdb_key():
+    global current_key_index
+    # پیدا کردن کلیدی که کمتر از ۱۰۰۰ درخواست استفاده شده
+    for _ in range(len(OMDB_KEYS)):
+        key = OMDB_KEYS[current_key_index]
+        if key_usage_count[key] < MAX_REQUESTS_PER_KEY:
+            current_key_index = (current_key_index + 1) % len(OMDB_KEYS)
+            return key
+        current_key_index = (current_key_index + 1) % len(OMDB_KEYS)
+    # اگر همه کلیدها پر شده بودند
+    print("⚠️ همه کلیدها به محدودیت روزانه رسیده‌اند!")
+    return None
+
+# ===== خواندن CSV =====
+def read_csv():
     csv_file = 'ratings.csv'
     if not os.path.exists(csv_file):
         print(f"❌ فایل {csv_file} پیدا نشد!")
@@ -28,73 +49,90 @@ def read_csv_file():
     try:
         with open(csv_file, 'r', encoding='utf-8') as f:
             reader = csv.DictReader(f)
-            # نمایش نام ستون‌ها برای دیباگ
-            print(f"📋 ستون‌های فایل CSV: {', '.join(reader.fieldnames)}")
-            
             for row in reader:
                 imdb_id = row.get('Const', '').strip()
                 if not imdb_id:
                     continue
                 
-                title = row.get('Title', '').strip()
-                year = row.get('Year', '').strip()
-                user_rating = row.get('Your Rating', '').strip()
-                
-                try:
-                    user_rating = float(user_rating) if user_rating else 0
-                except:
-                    user_rating = 0
+                # تاریخ را به فرمت استاندارد تبدیل می‌کنیم
+                date_rated = row.get('Date Rated', '').strip()
+                if date_rated:
+                    try:
+                        # تاریخ به فرمت M/D/YYYY
+                        parts = date_rated.split('/')
+                        if len(parts) == 3:
+                            date_rated = f"{parts[2]}-{parts[0].zfill(2)}-{parts[1].zfill(2)}"
+                    except:
+                        pass
                 
                 movies.append({
                     'imdb_id': imdb_id,
-                    'title': title,
-                    'year': year,
-                    'user_rating': user_rating
+                    'title': row.get('Title', '').strip(),
+                    'year': row.get('Year', '').strip(),
+                    'user_rating': float(row.get('Your Rating', 0) or 0),
+                    'date_rated': date_rated,
+                    'url': row.get('URL', '').strip(),
+                    'title_type': row.get('Title Type', '').strip(),
+                    'imdb_rating': row.get('IMDb Rating', '').strip(),
+                    'runtime': row.get('Runtime (mins)', '').strip(),
+                    'genres': row.get('Genres', '').strip(),
+                    'num_votes': row.get('Num Votes', '').strip(),
+                    'release_date': row.get('Release Date', '').strip(),
+                    'directors': row.get('Directors', '').strip(),
                 })
     except Exception as e:
         print(f"❌ خطا در خواندن CSV: {e}")
         traceback.print_exc()
         return None
     
-    if movies:
-        print(f"✅ {len(movies)} فیلم از CSV دریافت شد.")
-        return movies
-    else:
-        print("⚠️ فایل CSV خالی است یا فرمت آن صحیح نیست.")
-        return None
+    print(f"✅ {len(movies)} فیلم از CSV دریافت شد.")
+    return movies
 
-# ===== دریافت جزئیات از OMDb API =====
-def fetch_omdb_details(imdb_id, api_key):
-    """دریافت جزئیات فیلم از OMDb API"""
-    url = f"http://www.omdbapi.com/?i={imdb_id}&apikey={api_key}"
+# ===== دریافت از OMDb با مدیریت کلیدها =====
+omdb_cache = {}
+omdb_success_count = 0
+omdb_fail_count = 0
+
+def fetch_omdb(imdb_id):
+    global omdb_success_count, omdb_fail_count
+    if imdb_id in omdb_cache:
+        return omdb_cache[imdb_id]
+    
+    # دریافت کلید بعدی
+    key = get_next_omdb_key()
+    if not key:
+        # همه کلیدها پر شده‌اند
+        omdb_cache[imdb_id] = None
+        return None
+    
+    url = f"http://www.omdbapi.com/?i={imdb_id}&apikey={key}"
     try:
         response = requests.get(url, timeout=10)
+        key_usage_count[key] += 1
         if response.status_code == 200:
             data = response.json()
             if data.get('Response') == 'True':
-                return {
-                    'title': data.get('Title', ''),
-                    'year': data.get('Year', ''),
-                    'rated': data.get('Rated', 'N/A'),
-                    'released': data.get('Released', 'N/A'),
-                    'runtime': data.get('Runtime', 'N/A'),
-                    'genre': data.get('Genre', 'N/A'),
-                    'director': data.get('Director', 'N/A'),
-                    'writer': data.get('Writer', 'N/A'),
-                    'actors': data.get('Actors', 'N/A'),
-                    'plot': data.get('Plot', 'N/A'),
-                    'poster': data.get('Poster', 'N/A'),
-                    'imdb_rating': data.get('imdbRating', 'N/A'),
-                    'imdb_votes': data.get('imdbVotes', 'N/A')
-                }
+                omdb_cache[imdb_id] = data
+                omdb_success_count += 1
+                return data
+            else:
+                # ممکن است فیلم در OMDb نباشد
+                omdb_cache[imdb_id] = None
+                omdb_fail_count += 1
+                return None
+        else:
+            omdb_cache[imdb_id] = None
+            omdb_fail_count += 1
+            return None
     except Exception as e:
         print(f"⚠️ خطا در OMDb برای {imdb_id}: {e}")
-    return None
+        omdb_cache[imdb_id] = None
+        omdb_fail_count += 1
+        return None
 
-# ===== ذخیره در پوشه docs =====
-def save_movies(movies):
-    """ذخیره فیلم‌ها در فایل JSON در پوشه docs"""
-    print(f"🎬 دریافت جزئیات {len(movies)} فیلم از OMDb API...")
+# ===== پردازش نهایی =====
+def process_movies(movies):
+    print(f"🎬 پردازش {len(movies)} فیلم...")
     
     output = []
     total = len(movies)
@@ -102,63 +140,75 @@ def save_movies(movies):
     for idx, movie in enumerate(movies):
         print(f"⏳ {idx+1}/{total}: {movie['title']} - {movie['imdb_id']}")
         
-        details = fetch_omdb_details(movie['imdb_id'], OMDB_API_KEY)
+        # اطلاعات پایه از CSV
+        result = {
+            'imdb_id': movie['imdb_id'],
+            'title': movie['title'],
+            'year': movie['year'],
+            'user_rating': movie['user_rating'],
+            'date_rated': movie['date_rated'],
+            'title_type': movie['title_type'],
+            'imdb_rating': movie['imdb_rating'] or 'N/A',
+            'runtime': movie['runtime'] or 'N/A',
+            'genres': movie['genres'] or 'N/A',
+            'num_votes': movie['num_votes'] or 'N/A',
+            'release_date': movie['release_date'] or 'N/A',
+            'directors': movie['directors'] or 'N/A',
+            'poster': '',
+            'plot': 'N/A',
+            'rated': 'N/A',
+            'actors': 'N/A',
+            'writer': 'N/A',
+            'omdb_found': False
+        }
         
-        if details:
-            output.append({
-                'imdb_id': movie['imdb_id'],
-                'title': details.get('title', movie['title']),
-                'year': details.get('year', movie['year']),
-                'user_rating': movie['user_rating'],
-                'imdb_rating': details.get('imdb_rating', 'N/A'),
-                'genre': details.get('genre', 'N/A'),
-                'director': details.get('director', 'N/A'),
-                'actors': details.get('actors', 'N/A'),
-                'plot': details.get('plot', 'N/A'),
-                'poster': details.get('poster', ''),
-                'runtime': details.get('runtime', 'N/A'),
-                'rated': details.get('rated', 'N/A'),
-                'released': details.get('released', 'N/A'),
-                'imdb_votes': details.get('imdb_votes', 'N/A')
-            })
-        else:
-            output.append({
-                'imdb_id': movie['imdb_id'],
-                'title': movie['title'],
-                'year': movie['year'],
-                'user_rating': movie['user_rating'],
-                'imdb_rating': 'N/A',
-                'genre': 'N/A',
-                'director': 'N/A',
-                'actors': 'N/A',
-                'plot': 'N/A',
-                'poster': '',
-                'runtime': 'N/A',
-                'rated': 'N/A',
-                'released': 'N/A',
-                'imdb_votes': 'N/A'
-            })
+        # تلاش برای دریافت از OMDb (فقط برای پوستر و خلاصه)
+        omdb_data = fetch_omdb(movie['imdb_id'])
+        if omdb_data:
+            result['poster'] = omdb_data.get('Poster', '')
+            result['plot'] = omdb_data.get('Plot', 'N/A')
+            result['rated'] = omdb_data.get('Rated', 'N/A')
+            result['actors'] = omdb_data.get('Actors', 'N/A')
+            result['writer'] = omdb_data.get('Writer', 'N/A')
+            # اگر اطلاعات CSV کامل‌تر بود، آن را نگه می‌داریم
+            if not result['genres'] or result['genres'] == 'N/A':
+                result['genres'] = omdb_data.get('Genre', 'N/A')
+            if not result['imdb_rating'] or result['imdb_rating'] == 'N/A':
+                result['imdb_rating'] = omdb_data.get('imdbRating', 'N/A')
+            if not result['runtime'] or result['runtime'] == 'N/A':
+                result['runtime'] = omdb_data.get('Runtime', 'N/A')
+            if not result['directors'] or result['directors'] == 'N/A':
+                result['directors'] = omdb_data.get('Director', 'N/A')
+            result['omdb_found'] = True
+        
+        output.append(result)
     
-    os.makedirs('../docs', exist_ok=True)
+    print(f"✅ OMDb موفق: {omdb_success_count} از {total} فیلم")
+    print(f"⚠️ فیلم‌های بدون پوستر: {total - omdb_success_count} (از ایموجی استفاده می‌شود)")
+    print(f"📊 وضعیت کلیدها:")
+    for key, count in key_usage_count.items():
+        print(f"   کلید {key}: {count} درخواست")
     
-    with open('../docs/movies.json', 'w', encoding='utf-8') as f:
-        json.dump(output, f, ensure_ascii=False, indent=2)
-    
-    print(f"✅ {len(output)} فیلم با موفقیت ذخیره شد.")
-    print(f"📁 مسیر: docs/movies.json")
-    print(f"🕐 زمان به‌روزرسانی: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
+    return output
 
-# ===== اجرای اصلی =====
+# ===== ذخیره در docs =====
+def save_json(data):
+    os.makedirs('../docs', exist_ok=True)
+    with open('../docs/movies.json', 'w', encoding='utf-8') as f:
+        json.dump(data, f, ensure_ascii=False, indent=2)
+    print(f"✅ {len(data)} فیلم در docs/movies.json ذخیره شد.")
+    print(f"🕐 زمان: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
+
+# ===== اجرا =====
 def main():
     try:
-        movies = read_csv_file()
-        
+        movies = read_csv()
         if not movies:
             print("❌ هیچ فیلمی دریافت نشد.")
-            print("💡 لطفاً فایل ratings.csv را در پوشه src قرار دهید.")
             sys.exit(1)
         
-        save_movies(movies)
+        processed = process_movies(movies)
+        save_json(processed)
         
     except Exception as e:
         print(f"❌ خطای کلی: {e}")
