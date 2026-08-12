@@ -11,7 +11,6 @@ permissions:
   id-token: write
 
 jobs:
-  # Job 1: ساخت و به‌روزرسانی داده‌ها
   update-data:
     runs-on: ubuntu-latest
     steps:
@@ -26,22 +25,20 @@ jobs:
         run: |
           cd src
           pip install -r requirements.txt
-          pip install --upgrade cloudscraper
       
       - name: اجرای اسکریپت دریافت اطلاعات
         env:
-          IMDB_COOKIES: ${{ secrets.IMDB_COOKIES }}
           OMDB_API_KEY: ${{ secrets.OMDB_API_KEY }}
         run: |
           cd src
           python fetch_imdb.py
       
-      - name: آپلود فایل‌های docs به عنوان Artifact
+      - name: آپلود فایل‌های docs
         uses: actions/upload-pages-artifact@v3
         with:
           path: 'docs'
       
-      - name: Commit و Push تغییرات movies.json (اختیاری)
+      - name: Commit و Push
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
@@ -49,7 +46,6 @@ jobs:
           git diff --staged --quiet || git commit -m "به‌روزرسانی خودکار فیلم‌ها [skip ci]"
           git push
 
-  # Job 2: انتشار روی GitHub Pages
   deploy:
     runs-on: ubuntu-latest
     needs: update-data
