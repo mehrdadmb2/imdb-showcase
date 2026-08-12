@@ -11,10 +11,10 @@ jobs:
     permissions:
       contents: write
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       
       - name: نصب Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6
         with:
           python-version: '3.11'
       
@@ -22,7 +22,7 @@ jobs:
         run: |
           cd src
           pip install -r requirements.txt
-          pip install requests beautifulsoup4
+          pip install --upgrade requests beautifulsoup4
       
       - name: اجرای اسکریپت دریافت اطلاعات از IMDb
         env:
@@ -31,10 +31,8 @@ jobs:
         run: |
           cd src
           python fetch_imdb.py
-        continue-on-error: false
       
       - name: ارسال تغییرات به مخزن
-        if: success()
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
