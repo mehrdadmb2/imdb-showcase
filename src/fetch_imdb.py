@@ -64,7 +64,6 @@ def try_fetch_from_imdb():
     print("📡 تلاش برای دریافت اطلاعات از IMDb با کوکی...")
     
     try:
-        # ابتدا به صفحه اصلی می‌رویم
         print("   مرحله 1: اتصال به صفحه اصلی...")
         response = scraper.get('https://www.imdb.com/', headers=HEADERS, cookies=cookies, timeout=30)
         if response.status_code != 200:
@@ -72,7 +71,6 @@ def try_fetch_from_imdb():
             return None
         print("   ✅ صفحه اصلی بارگذاری شد.")
         
-        # تلاش با آدرس‌های مختلف برای Ratings
         urls = [
             'https://www.imdb.com/list/ratings',
             'https://www.imdb.com/user/ur0/ratings',
@@ -88,7 +86,6 @@ def try_fetch_from_imdb():
             
             soup = BeautifulSoup(response.text, 'html.parser')
             
-            # جستجوی آیتم‌های فیلم
             items = soup.select('.lister-item')
             if not items:
                 items = soup.select('[data-testid="list-item"]')
@@ -219,9 +216,9 @@ def fetch_omdb_details(imdb_id, api_key):
         print(f"⚠️ خطا در OMDb برای {imdb_id}: {e}")
     return None
 
-# ===== بخش ۴: ذخیره نهایی =====
+# ===== بخش ۴: ذخیره نهایی در پوشه docs =====
 def save_movies(movies):
-    """ذخیره فیلم‌ها در فایل JSON در پوشه public"""
+    """ذخیره فیلم‌ها در فایل JSON در پوشه docs"""
     print(f"🎬 دریافت جزئیات {len(movies)} فیلم از OMDb API...")
     
     output = []
@@ -263,29 +260,26 @@ def save_movies(movies):
                 'rated': 'N/A'
             })
     
-    # اطمینان از وجود پوشه public
-    os.makedirs('../public', exist_ok=True)
+    # اطمینان از وجود پوشه docs (مسیر جدید)
+    os.makedirs('../docs', exist_ok=True)
     
-    # ذخیره در فایل JSON
-    with open('../public/movies.json', 'w', encoding='utf-8') as f:
+    # ذخیره در فایل JSON در پوشه docs
+    with open('../docs/movies.json', 'w', encoding='utf-8') as f:
         json.dump(output, f, ensure_ascii=False, indent=2)
     
     print(f"✅ {len(output)} فیلم با موفقیت ذخیره شد.")
-    print(f"📁 مسیر: public/movies.json")
+    print(f"📁 مسیر: docs/movies.json")
     print(f"🕐 زمان به‌روزرسانی: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
 
 # ===== اجرای اصلی =====
 def main():
     try:
-        # تلاش برای دریافت از IMDb با کوکی
         movies = try_fetch_from_imdb()
         
-        # اگر از IMDb دریافت نشد، از CSV بخوان
         if not movies:
             print("🔄 تلاش برای دریافت از فایل CSV...")
             movies = try_fetch_from_csv()
         
-        # اگر هیچکدام کار نکرد، خطا بده
         if not movies:
             print("❌ هیچ فیلمی از هیچ منبعی دریافت نشد.")
             print("💡 لطفاً یکی از این کارها را انجام دهید:")
@@ -293,7 +287,6 @@ def main():
             print("   2. فایل ratings.csv را در پوشه src قرار دهید.")
             sys.exit(1)
         
-        # ذخیره در public/movies.json
         save_movies(movies)
         
     except Exception as e:
