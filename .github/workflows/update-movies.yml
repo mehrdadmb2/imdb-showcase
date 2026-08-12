@@ -1,0 +1,40 @@
+name: به‌روزرسانی خودکار فیلم‌ها
+
+on:
+  schedule:
+    - cron: '0 */12 * * *'   # هر 12 ساعت یکبار
+  workflow_dispatch:          # امکان اجرای دستی از گیت‌هاب
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: نصب Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      
+      - name: نصب وابستگی‌ها
+        run: |
+          cd src
+          pip install -r requirements.txt
+      
+      - name: اجرای اسکریپت دریافت اطلاعات از IMDb
+        env:
+          IMDB_COOKIES: ${{ secrets.IMDB_COOKIES }}
+          OMDB_API_KEY: ${{ secrets.OMDB_API_KEY }}
+        run: |
+          cd src
+          python fetch_imdb.py
+      
+      - name: ارسال تغییرات به مخزن
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add public/movies.json
+          git diff --staged --quiet || git commit -m "به‌روزرسانی خودکار فیلم‌ها [skip ci]"
+          git push
