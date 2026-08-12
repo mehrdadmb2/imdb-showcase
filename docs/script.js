@@ -1,27 +1,23 @@
-// ===== متغیرهای سراسری =====
+// ===== متغیرها =====
 let allMovies = [];
 let filteredMovies = [];
 let currentSort = 'date_rated-desc';
 let currentFilters = { minRating: 0, genre: 'all', year: 'all', type: 'all' };
 let viewMode = 'all';
 
-// ===== تابع کمکی برای اتصال رویداد با بررسی وجود المنت =====
+// ===== تابع کمکی برای رویداد =====
 function safeAddEventListener(id, event, handler) {
     const el = document.getElementById(id);
-    if (el) {
-        el.addEventListener(event, handler);
-    } else {
-        console.warn(`⚠️ المنت با id "${id}" پیدا نشد.`);
-    }
+    if (el) el.addEventListener(event, handler);
+    else console.warn(`⚠️ ${id} پیدا نشد.`);
 }
 
-// ===== بارگذاری داده‌ها =====
+// ===== بارگذاری =====
 async function loadMovies() {
     try {
-        console.log("📥 بارگذاری movies.json...");
-        const response = await fetch('movies.json');
-        if (!response.ok) throw new Error(`HTTP ${response.status}`);
-        allMovies = await response.json();
+        const res = await fetch('movies.json');
+        if (!res.ok) throw new Error('HTTP ' + res.status);
+        allMovies = await res.json();
         console.log(`✅ ${allMovies.length} فیلم بارگذاری شد.`);
 
         populateFilters();
@@ -30,18 +26,17 @@ async function loadMovies() {
         updateFirstLast();
         updateOmdbStatus();
 
-        const loading = document.getElementById('loading');
-        if (loading) loading.classList.remove('active');
         document.getElementById('lastUpdate').textContent =
             `آخرین به‌روزرسانی: ${new Date().toLocaleDateString('fa-IR')} - ${new Date().toLocaleTimeString('fa-IR')}`;
-    } catch (error) {
-        console.error('❌ خطا:', error);
         const loading = document.getElementById('loading');
-        if (loading) loading.textContent = '❌ خطا در بارگذاری داده‌ها. لطفاً دوباره تلاش کنید.';
+        if (loading) loading.classList.remove('active');
+    } catch (e) {
+        console.error(e);
+        document.getElementById('loading').textContent = '❌ خطا: ' + e.message;
     }
 }
 
-// ===== پاپوله کردن فیلترها =====
+// ===== فیلترها =====
 function populateFilters() {
     const genreSet = new Set(), yearSet = new Set();
     allMovies.forEach(m => {
@@ -53,21 +48,19 @@ function populateFilters() {
             if (y) yearSet.add(y);
         }
     });
-
-    const genreSelect = document.getElementById('genreFilter');
-    if (genreSelect) {
-        genreSelect.innerHTML = '<option value="all">همه</option>';
-        [...genreSet].sort().forEach(g => genreSelect.innerHTML += `<option value="${g}">${g}</option>`);
+    const gs = document.getElementById('genreFilter');
+    if (gs) {
+        gs.innerHTML = '<option value="all">همه</option>';
+        [...genreSet].sort().forEach(g => gs.innerHTML += `<option value="${g}">${g}</option>`);
     }
-
-    const yearSelect = document.getElementById('yearFilter');
-    if (yearSelect) {
-        yearSelect.innerHTML = '<option value="all">همه</option>';
-        [...yearSet].sort((a, b) => b - a).forEach(y => yearSelect.innerHTML += `<option value="${y}">${y}</option>`);
+    const ys = document.getElementById('yearFilter');
+    if (ys) {
+        ys.innerHTML = '<option value="all">همه</option>';
+        [...yearSet].sort((a, b) => b - a).forEach(y => ys.innerHTML += `<option value="${y}">${y}</option>`);
     }
 }
 
-// ===== اعمال فیلتر و مرتب‌سازی =====
+// ===== فیلتر و مرتب‌سازی =====
 function applyFiltersAndSort() {
     filteredMovies = allMovies.filter(m => {
         if ((m.user_rating || 0) < currentFilters.minRating) return false;
@@ -79,9 +72,7 @@ function applyFiltersAndSort() {
             const y = m.year.replace(/\D/g, '');
             if (y !== currentFilters.year) return false;
         }
-        if (currentFilters.type !== 'all') {
-            if (m.title_type !== currentFilters.type) return false;
-        }
+        if (currentFilters.type !== 'all' && m.title_type !== currentFilters.type) return false;
         if (viewMode === 'movie' && m.title_type !== 'Movie') return false;
         if (viewMode === 'series' && m.title_type !== 'TV Episode' && m.title_type !== 'TV Series') return false;
         return true;
@@ -116,16 +107,14 @@ function sortMovies() {
 function renderMovies() {
     const grid = document.getElementById('moviesGrid');
     if (!grid) return;
-
-    if (filteredMovies.length === 0) {
+    if (!filteredMovies.length) {
         grid.innerHTML = `<div style="grid-column:1/-1;text-align:center;padding:60px;color:var(--text-muted);">
             <span style="font-size:48px;">🎭</span><p style="margin-top:12px;">هیچ فیلمی پیدا نشد.</p></div>`;
         return;
     }
-
     grid.innerHTML = filteredMovies.map(m => {
         const genres = m.genres && m.genres !== 'N/A' ?
-            m.genres.split(',').slice(0, 3).map(g => `<span class="movie-genre-tag">${g.trim()}</span>`).join('') : '';
+            m.genres.split(',').slice(0,3).map(g => `<span class="movie-genre-tag">${g.trim()}</span>`).join('') : '';
         const posterHtml = m.poster ?
             `<img class="movie-poster" src="${m.poster}" alt="${m.title}" loading="lazy" onerror="this.className='movie-poster-placeholder'; this.textContent='🎬';" />` :
             `<div class="movie-poster-placeholder">🎬</div>`;
@@ -133,7 +122,6 @@ function renderMovies() {
                           m.title_type === 'TV Series' ? '<div class="movie-type-badge">📺 سریال</div>' : '';
         let ratingBadge = m.user_rating >= 8 ? '🔥 عالی' : m.user_rating >= 6 ? '👍 خوب' : m.user_rating > 0 ? '😐' : '';
         const ratedDate = m.date_rated ? new Date(m.date_rated).toLocaleDateString('fa-IR') : '';
-
         return `
         <div class="movie-card" onclick="openModal('${m.imdb_id}')">
             ${posterHtml}
@@ -153,6 +141,7 @@ function renderMovies() {
     }).join('');
 }
 
+// ===== آمار (رفع مشکل) =====
 function updateStats() {
     const total = allMovies.length;
     const series = allMovies.filter(m => m.title_type === 'TV Episode' || m.title_type === 'TV Series').length;
@@ -161,14 +150,24 @@ function updateStats() {
 
     let totalMinutes = 0, sumRating = 0, countRating = 0;
     const genreSet = new Set();
+
     allMovies.forEach(m => {
+        // ساعت: runtime را به عدد تبدیل می‌کنیم
         if (m.runtime && m.runtime !== 'N/A') {
-            const mins = parseInt(m.runtime.replace(/\D/g, ''));
+            const mins = parseInt(m.runtime.toString().replace(/\D/g, ''));
             if (!isNaN(mins)) totalMinutes += mins;
         }
-        if (m.user_rating > 0) { sumRating += m.user_rating; countRating++; }
-        if (m.genres && m.genres !== 'N/A') m.genres.split(',').forEach(g => genreSet.add(g.trim()));
+        // میانگین امتیاز
+        if (m.user_rating > 0) {
+            sumRating += m.user_rating;
+            countRating++;
+        }
+        // ژانرها
+        if (m.genres && m.genres !== 'N/A') {
+            m.genres.split(',').forEach(g => genreSet.add(g.trim()));
+        }
     });
+
     document.getElementById('totalHours').textContent = Math.round(totalMinutes / 60);
     document.getElementById('avgRating').textContent = countRating ? (sumRating / countRating).toFixed(1) : '0';
     document.getElementById('totalGenres').textContent = genreSet.size;
@@ -191,11 +190,11 @@ function updateOmdbStatus() {
 }
 
 // ===== مودال =====
-function openModal(imdbId) {
-    const m = allMovies.find(x => x.imdb_id === imdbId);
+function openModal(id) {
+    const m = allMovies.find(x => x.imdb_id === id);
     if (!m) return;
-    const overlay = document.getElementById('modalOverlay');
-    if (!overlay) return;
+    const ov = document.getElementById('modalOverlay');
+    if (!ov) return;
 
     document.getElementById('modalPoster').src = m.poster || '';
     document.getElementById('modalPoster').style.display = m.poster ? 'block' : 'none';
@@ -215,42 +214,37 @@ function openModal(imdbId) {
     document.getElementById('modalVotes').textContent = m.num_votes || 'N/A';
     document.getElementById('modalDateRated').textContent = m.date_rated || 'N/A';
 
-    overlay.classList.add('active');
+    ov.classList.add('active');
     document.body.style.overflow = 'hidden';
 }
 
 function closeModal() {
-    const overlay = document.getElementById('modalOverlay');
-    if (overlay) overlay.classList.remove('active');
+    const ov = document.getElementById('modalOverlay');
+    if (ov) ov.classList.remove('active');
     document.body.style.overflow = '';
 }
 
-// ===== رویدادها (با بررسی وجود المنت) =====
+// ===== رویدادها =====
 safeAddEventListener('filterBtn', 'click', () => {
     document.getElementById('filtersBar').classList.toggle('active');
 });
-
 safeAddEventListener('minRating', 'input', (e) => {
     currentFilters.minRating = parseFloat(e.target.value);
     document.getElementById('minRatingValue').textContent = currentFilters.minRating;
     applyFiltersAndSort();
 });
-
 safeAddEventListener('genreFilter', 'change', (e) => {
     currentFilters.genre = e.target.value;
     applyFiltersAndSort();
 });
-
 safeAddEventListener('yearFilter', 'change', (e) => {
     currentFilters.year = e.target.value;
     applyFiltersAndSort();
 });
-
 safeAddEventListener('typeFilter', 'change', (e) => {
     currentFilters.type = e.target.value;
     applyFiltersAndSort();
 });
-
 safeAddEventListener('resetFilters', 'click', () => {
     document.getElementById('minRating').value = 0;
     document.getElementById('minRatingValue').textContent = '0';
@@ -260,9 +254,8 @@ safeAddEventListener('resetFilters', 'click', () => {
     currentFilters = { minRating: 0, genre: 'all', year: 'all', type: 'all' };
     applyFiltersAndSort();
 });
-
 safeAddEventListener('sortBtn', 'click', () => {
-    const options = [
+    const opts = [
         { value: 'date_rated-desc', label: '📅 تاریخ (جدید به قدیم)' },
         { value: 'date_rated-asc', label: '📅 تاریخ (قدیم به جدید)' },
         { value: 'user_rating-desc', label: '⭐ امتیاز من (بالا به پایین)' },
@@ -271,16 +264,15 @@ safeAddEventListener('sortBtn', 'click', () => {
         { value: 'title-asc', label: '🔤 عنوان (الفبا)' },
         { value: 'year-desc', label: '📅 سال (جدید به قدیم)' },
     ];
-    const choice = prompt('مرتب‌سازی:\n' + options.map((o,i) => `${i+1}. ${o.label}`).join('\n'));
+    const choice = prompt('مرتب‌سازی:\n' + opts.map((o,i) => `${i+1}. ${o.label}`).join('\n'));
     if (choice) {
         const idx = parseInt(choice)-1;
-        if (idx >= 0 && idx < options.length) {
-            currentSort = options[idx].value;
+        if (idx>=0 && idx<opts.length) {
+            currentSort = opts[idx].value;
             applyFiltersAndSort();
         }
     }
 });
-
 safeAddEventListener('toggleView', 'click', () => {
     const modes = ['all', 'movie', 'series'];
     const labels = ['📽️ همه', '🎬 فیلم', '📺 سریال'];
@@ -291,13 +283,11 @@ safeAddEventListener('toggleView', 'click', () => {
     applyFiltersAndSort();
 });
 
-// بستن مودال با کلیک روی پس‌زمینه
 document.getElementById('modalOverlay')?.addEventListener('click', (e) => {
     if (e.target === document.getElementById('modalOverlay')) closeModal();
 });
 document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeModal(); });
 
-// ===== بارگذاری اولیه =====
 document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('loading')?.classList.add('active');
     loadMovies();
