@@ -56,34 +56,40 @@ HEADERS = {
 }
 
 def test_imdb_connection():
-    """تست اتصال به IMDb با cloudscraper"""
+    """تست اتصال به IMDb با آدرس‌های به‌روز"""
     try:
         print("📡 مرحله 1: اتصال به صفحه اصلی IMDb...")
         response = scraper.get('https://www.imdb.com/', headers=HEADERS, cookies=cookies, timeout=30)
         print(f"   وضعیت: {response.status_code}")
         
-        if response.status_code == 200:
-            print("✅ صفحه اصلی با موفقیت بارگذاری شد.")
-        elif response.status_code == 202:
-            print("⚠️ صفحه اصلی وضعیت 202 داد (احتمالاً صفحه چالش). اما ادامه می‌دهیم...")
-        else:
+        if response.status_code != 200:
             print(f"❌ خطا در صفحه اصلی: {response.status_code}")
             return False
         
-        print("📡 مرحله 2: اتصال به صفحه Ratings...")
-        ratings_url = 'https://www.imdb.com/user/ur0/ratings?sort=date_added&direction=desc'
-        response = scraper.get(ratings_url, headers=HEADERS, cookies=cookies, timeout=30)
-        print(f"   وضعیت: {response.status_code}")
+        print("✅ صفحه اصلی با موفقیت بارگذاری شد.")
         
-        if response.status_code == 200:
-            print("✅ صفحه Ratings با موفقیت بارگذاری شد.")
-            return True
-        elif response.status_code == 202:
-            print("⚠️ صفحه Ratings وضعیت 202 داد. ممکن است نیاز به کوکی‌های بیشتر باشد.")
-            return False
-        else:
-            print(f"❌ خطا در صفحه Ratings: {response.status_code}")
-            return False
+        # آدرس جدید صفحه Ratings (آزمایش با چند گزینه)
+        ratings_urls = [
+            'https://www.imdb.com/ratings',  # آدرس جدید اصلی
+            'https://www.imdb.com/user/ratings',  # آدرس جایگزین
+            'https://www.imdb.com/list/ratings',  # آدرس جایگزین دیگر
+        ]
+        
+        for url in ratings_urls:
+            print(f"📡 مرحله 2: تست آدرس {url}...")
+            response = scraper.get(url, headers=HEADERS, cookies=cookies, timeout=30)
+            print(f"   وضعیت: {response.status_code}")
+            
+            if response.status_code == 200:
+                print(f"✅ آدرس {url} با موفقیت بارگذاری شد.")
+                return True
+            elif response.status_code == 404:
+                print(f"⚠️ آدرس {url} موجود نیست (404).")
+            else:
+                print(f"⚠️ آدرس {url} وضعیت {response.status_code} داد.")
+        
+        print("❌ هیچ آدرسی برای صفحه Ratings کار نکرد.")
+        return False
             
     except Exception as e:
         print(f"❌ خطا در اتصال: {e}")
@@ -91,38 +97,50 @@ def test_imdb_connection():
         return False
 
 def get_imdb_ratings():
-    """دریافت لیست فیلم‌های امتیاز داده شده از IMDb"""
+    """دریافت لیست فیلم‌های امتیاز داده شده از IMDb با آدرس جدید"""
     all_movies = []
-    page = 1
-    max_pages = 10
     
-    while page <= max_pages:
+    # آدرس‌های احتمالی برای صفحه Ratings
+    base_urls = [
+        'https://www.imdb.com/ratings',
+        'https://www.imdb.com/user/ratings',
+    ]
+    
+    for base_url in base_urls:
+        print(f"📥 تلاش با آدرس: {base_url}")
         try:
-            url = f'https://www.imdb.com/user/ur0/ratings?sort=date_added&direction=desc&page={page}'
-            print(f"📥 دریافت صفحه {page}...")
-            
-            response = scraper.get(url, headers=HEADERS, cookies=cookies, timeout=30)
+            response = scraper.get(base_url, headers=HEADERS, cookies=cookies, timeout=30)
             
             if response.status_code != 200:
-                print(f"⚠️ خطا در دریافت صفحه {page}: {response.status_code}")
-                break
+                print(f"⚠️ آدرس {base_url} کار نکرد (وضعیت: {response.status_code})")
+                continue
             
             soup = BeautifulSoup(response.text, 'html.parser')
             
-            # پیدا کردن آیتم‌های فیلم
+            # بررسی وجود آیتم‌های فیلم در صفحه
+            # IMDb ممکن است از کلاس‌های مختلف استفاده کند
             items = soup.select('.lister-item')
             if not items:
-                print(f"❌ آیتمی در صفحه {page} پیدا نشد.")
-                # برای دیباگ
-                print("🔍 نمونه از HTML دریافت شده:")
-                print(response.text[:500])
-                break
+                # ممکن است ساختار صفحه تغییر کرده باشد
+                # برخی از کلاس‌های جایگزین را بررسی می‌کنیم
+                items = soup.select('[data-testid="list-item"]')
+                if not items:
+                    items = soup.select('.ipc-list-card')
+                    if not items:
+                        print(f"❌ هیچ آیتمی در {base_url} پیدا نشد.")
+                        # برای دیباگ، بخش کوچکی از HTML را چاپ می‌کنیم
+                        print("🔍 نمونه از HTML دریافت شده:")
+                        print(response.text[:500])
+                        continue
             
-            print(f"✅ {len(items)} فیلم در صفحه {page} پیدا شد.")
+            print(f"✅ {len(items)} فیلم در {base_url} پیدا شد.")
             
             for item in items:
                 try:
-                    title_link = item.select_one('.lister-item-header a')
+                    # روش‌های مختلف برای پیدا کردن لینک فیلم
+                    title_link = item.select_one('a[href*="/title/tt"]')
+                    if not title_link:
+                        title_link = item.select_one('.lister-item-header a')
                     if not title_link:
                         continue
                     
@@ -133,10 +151,16 @@ def get_imdb_ratings():
                     imdb_id = f"tt{imdb_id_match.group(1)}"
                     title = title_link.text.strip()
                     
+                    # پیدا کردن امتیاز کاربر
                     rating_elem = item.select_one('.ipl-rating-star .ipl-rating-star__rating')
+                    if not rating_elem:
+                        rating_elem = item.select_one('[data-testid="rating-star"]')
                     user_rating = rating_elem.text.strip() if rating_elem else "N/A"
                     
+                    # پیدا کردن سال
                     year_elem = item.select_one('.lister-item-year')
+                    if not year_elem:
+                        year_elem = item.select_one('[data-testid="release-date"]')
                     year = year_elem.text.strip().replace('(', '').replace(')', '') if year_elem else "N/A"
                     
                     all_movies.append({
@@ -149,26 +173,27 @@ def get_imdb_ratings():
                     print(f"⚠️ خطا در پردازش یک آیتم: {e}")
                     continue
             
-            # بررسی صفحه بعدی
-            next_button = soup.select_one('.next-page')
-            if not next_button:
-                print("📄 صفحه آخر رسید.")
+            # اگر فیلمی پیدا شد، از حلقه خارج می‌شویم
+            if all_movies:
+                print(f"✅ {len(all_movies)} فیلم از {base_url} دریافت شد.")
                 break
-            
-            page += 1
-            
+                
         except Exception as e:
-            print(f"❌ خطا در دریافت صفحه {page}: {e}")
+            print(f"❌ خطا در دریافت {base_url}: {e}")
             traceback.print_exc()
-            break
+            continue
     
-    print(f"✅ {len(all_movies)} فیلم دریافت شد.")
+    if not all_movies:
+        print("❌ هیچ فیلمی از هیچ آدرسی دریافت نشد.")
+        print("💡 نکته: ممکن است ساختار IMDb تغییر کرده باشد یا نیاز به بروزرسانی اسکریپت باشد.")
+    
     return all_movies
 
 def fetch_omdb_details(imdb_id, api_key):
     """دریافت جزئیات فیلم از OMDb API"""
     url = f"http://www.omdbapi.com/?i={imdb_id}&apikey={api_key}"
     try:
+        import requests
         response = requests.get(url, timeout=10)
         if response.status_code == 200:
             data = response.json()
@@ -198,9 +223,8 @@ def main():
         if not test_imdb_connection():
             print("❌ اتصال به IMDb ناموفق بود.")
             print("💡 نکات:")
-            print("   1. مطمئن شوید کوکی‌ها معتبر هستند (از مرورگر خارج و دوباره وارد شوید).")
-            print("   2. اگر از VPN استفاده می‌کنید، آن را غیرفعال کنید.")
-            print("   3. کوکی‌های جدید از مرورگر دریافت کنید.")
+            print("   1. مطمئن شوید کوکی‌ها معتبر هستند.")
+            print("   2. ممکن است IMDb ساختار صفحات را تغییر داده باشد.")
             sys.exit(1)
         
         # دریافت لیست فیلم‌ها
@@ -208,6 +232,10 @@ def main():
         
         if not movies:
             print("❌ هیچ فیلمی دریافت نشد.")
+            print("💡 راه‌حل جایگزین: از روش خروجی CSV استفاده کنید.")
+            print("   - به صفحه Ratings در IMDb بروید.")
+            print("   - روی دکمه 'Export' کلیک کنید و فایل CSV را دانلود کنید.")
+            print("   - سپس از آن فایل برای ساخت movies.json استفاده کنید.")
             sys.exit(1)
         
         print(f"🎬 دریافت جزئیات {len(movies)} فیلم از OMDb API...")
