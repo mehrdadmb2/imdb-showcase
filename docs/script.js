@@ -1,23 +1,32 @@
-// ===== متغیرها =====
+// ===== متغیرهای سراسری =====
 let allMovies = [];
 let filteredMovies = [];
 let currentSort = 'date_rated-desc';
 let currentFilters = { minRating: 0, genre: 'all', year: 'all', type: 'all' };
 let viewMode = 'all';
+let lastManualUpdate = '';
 
-// ===== تابع کمکی برای رویداد =====
+// ===== اتصال امن رویدادها =====
 function safeAddEventListener(id, event, handler) {
     const el = document.getElementById(id);
     if (el) el.addEventListener(event, handler);
     else console.warn(`⚠️ ${id} پیدا نشد.`);
 }
 
-// ===== بارگذاری =====
+// ===== بارگذاری داده‌ها =====
 async function loadMovies() {
     try {
         const res = await fetch('movies.json');
         if (!res.ok) throw new Error('HTTP ' + res.status);
-        allMovies = await res.json();
+        const data = await res.json();
+        
+        if (data.last_manual_update) {
+            lastManualUpdate = data.last_manual_update;
+            document.getElementById('lastUpdate').textContent = 
+                `آخرین به‌روزرسانی دستی: ${lastManualUpdate}`;
+        }
+        
+        allMovies = data.movies || data;
         console.log(`✅ ${allMovies.length} فیلم بارگذاری شد.`);
 
         populateFilters();
@@ -26,8 +35,6 @@ async function loadMovies() {
         updateFirstLast();
         updateOmdbStatus();
 
-        document.getElementById('lastUpdate').textContent =
-            `آخرین به‌روزرسانی: ${new Date().toLocaleDateString('fa-IR')} - ${new Date().toLocaleTimeString('fa-IR')}`;
         const loading = document.getElementById('loading');
         if (loading) loading.classList.remove('active');
     } catch (e) {
@@ -36,7 +43,7 @@ async function loadMovies() {
     }
 }
 
-// ===== فیلترها =====
+// ===== پر کردن فیلترها =====
 function populateFilters() {
     const genreSet = new Set(), yearSet = new Set();
     allMovies.forEach(m => {
@@ -60,7 +67,7 @@ function populateFilters() {
     }
 }
 
-// ===== فیلتر و مرتب‌سازی =====
+// ===== اعمال فیلتر و مرتب‌سازی =====
 function applyFiltersAndSort() {
     filteredMovies = allMovies.filter(m => {
         if ((m.user_rating || 0) < currentFilters.minRating) return false;
@@ -81,6 +88,7 @@ function applyFiltersAndSort() {
     renderMovies();
 }
 
+// ===== مرتب‌سازی =====
 function sortMovies() {
     const [field, order] = currentSort.split('-');
     const isDesc = order === 'desc';
@@ -104,6 +112,7 @@ function sortMovies() {
     });
 }
 
+// ===== رندر فیلم‌ها =====
 function renderMovies() {
     const grid = document.getElementById('moviesGrid');
     if (!grid) return;
@@ -141,7 +150,7 @@ function renderMovies() {
     }).join('');
 }
 
-// ===== آمار (رفع مشکل) =====
+// ===== آمار =====
 function updateStats() {
     const total = allMovies.length;
     const series = allMovies.filter(m => m.title_type === 'TV Episode' || m.title_type === 'TV Series').length;
@@ -152,17 +161,14 @@ function updateStats() {
     const genreSet = new Set();
 
     allMovies.forEach(m => {
-        // ساعت: runtime را به عدد تبدیل می‌کنیم
         if (m.runtime && m.runtime !== 'N/A') {
             const mins = parseInt(m.runtime.toString().replace(/\D/g, ''));
             if (!isNaN(mins)) totalMinutes += mins;
         }
-        // میانگین امتیاز
         if (m.user_rating > 0) {
             sumRating += m.user_rating;
             countRating++;
         }
-        // ژانرها
         if (m.genres && m.genres !== 'N/A') {
             m.genres.split(',').forEach(g => genreSet.add(g.trim()));
         }
@@ -173,6 +179,7 @@ function updateStats() {
     document.getElementById('totalGenres').textContent = genreSet.size;
 }
 
+// ===== اولین و آخرین =====
 function updateFirstLast() {
     const sorted = [...allMovies].filter(m => m.date_rated).sort((a, b) => new Date(a.date_rated) - new Date(b.date_rated));
     if (sorted.length) {
@@ -183,13 +190,14 @@ function updateFirstLast() {
     }
 }
 
+// ===== وضعیت OMDb =====
 function updateOmdbStatus() {
     const withPoster = allMovies.filter(m => m.poster).length;
     document.getElementById('omdbStatus').textContent =
         `وضعیت OMDb: ${withPoster} پوستر از ${allMovies.length} فیلم دریافت شد.`;
 }
 
-// ===== مودال =====
+// ===== باز کردن مودال با تمام اطلاعات =====
 function openModal(id) {
     const m = allMovies.find(x => x.imdb_id === id);
     if (!m) return;
@@ -213,11 +221,19 @@ function openModal(id) {
     document.getElementById('modalReleased').textContent = m.release_date || 'N/A';
     document.getElementById('modalVotes').textContent = m.num_votes || 'N/A';
     document.getElementById('modalDateRated').textContent = m.date_rated || 'N/A';
+    document.getElementById('modalOriginalTitle').textContent = m.original_title || m.title || 'N/A';
+    
+    const imdbLink = document.getElementById('modalImdbLink');
+    if (imdbLink) {
+        imdbLink.href = `https://www.imdb.com/title/${m.imdb_id}/`;
+        imdbLink.textContent = 'مشاهده در IMDb';
+    }
 
     ov.classList.add('active');
     document.body.style.overflow = 'hidden';
 }
 
+// ===== بستن مودال =====
 function closeModal() {
     const ov = document.getElementById('modalOverlay');
     if (ov) ov.classList.remove('active');
