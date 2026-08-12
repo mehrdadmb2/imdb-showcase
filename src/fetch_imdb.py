@@ -1,41 +1,45 @@
 import json
 import os
 import re
-import requests
+import cloudscraper
 from bs4 import BeautifulSoup
 from datetime import datetime
 import sys
 import traceback
 
-print("🚀 شروع فرآیند دریافت اطلاعات...")
+print("🚀 شروع فرآیند دریافت اطلاعات با cloudscraper...")
 
-# کوکی‌ها را از Environment Variable می‌خوانیم
+# دریافت کوکی‌ها از Environment Variable
 cookies_str = os.environ.get('IMDB_COOKIES', '')
-print(f"📋 کوکی دریافت شد (طول: {len(cookies_str)})")
-
 if not cookies_str:
     print("❌ خطا: کوکی‌ها در IMDB_COOKIES تنظیم نشده‌اند.")
     sys.exit(1)
 
-# تبدیل کوکی‌ها به دیکشنری - روش پیشرفته‌تر
+# دریافت کلید OMDb API
+OMDB_API_KEY = os.environ.get('OMDB_API_KEY', '')
+if not OMDB_API_KEY:
+    print("❌ خطا: کلید OMDb API تنظیم نشده است.")
+    sys.exit(1)
+
+# تبدیل کوکی‌ها به دیکشنری
 cookies = {}
-# ابتدا با ; کوکی‌ها را جدا می‌کنیم
 for item in cookies_str.split(';'):
     item = item.strip()
     if '=' in item:
         key, value = item.split('=', 1)
-        # بعضی کوکی‌ها ممکن است شامل = های اضافی باشند، بنابراین فقط اولی رو جدا می‌کنیم
         cookies[key.strip()] = value.strip()
 
 print(f"✅ {len(cookies)} کوکی شناسایی شد.")
 
-# دریافت کلید OMDb API
-OMDB_API_KEY = os.environ.get('OMDB_API_KEY', '')
-if not OMDB_API_KEY:
-    print("❌ خطا: کلید OMDb API در OMDB_API_KEY تنظیم نشده است.")
-    sys.exit(1)
+# ===== تنظیمات cloudscraper =====
+scraper = cloudscraper.create_scraper(
+    browser={
+        'browser': 'chrome',
+        'platform': 'windows',
+        'mobile': False
+    }
+)
 
-# ===== تنظیمات هدرهای مرورگر واقعی =====
 HEADERS = {
     'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
     'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8',
@@ -51,12 +55,11 @@ HEADERS = {
     'Cache-Control': 'max-age=0',
 }
 
-def test_imdb_connection(session, cookies):
-    """تست اتصال با رفتن به صفحه اصلی و سپس Ratings"""
+def test_imdb_connection():
+    """تست اتصال به IMDb با cloudscraper"""
     try:
-        # مرحله 1: رفتن به صفحه اصلی برای دریافت کوکی‌های جلسه
         print("📡 مرحله 1: اتصال به صفحه اصلی IMDb...")
-        response = session.get('https://www.imdb.com/', headers=HEADERS, timeout=15)
+        response = scraper.get('https://www.imdb.com/', headers=HEADERS, cookies=cookies, timeout=30)
         print(f"   وضعیت: {response.status_code}")
         
         if response.status_code == 200:
@@ -67,10 +70,9 @@ def test_imdb_connection(session, cookies):
             print(f"❌ خطا در صفحه اصلی: {response.status_code}")
             return False
         
-        # مرحله 2: رفتن به صفحه Ratings
         print("📡 مرحله 2: اتصال به صفحه Ratings...")
         ratings_url = 'https://www.imdb.com/user/ur0/ratings?sort=date_added&direction=desc'
-        response = session.get(ratings_url, headers=HEADERS, timeout=15)
+        response = scraper.get(ratings_url, headers=HEADERS, cookies=cookies, timeout=30)
         print(f"   وضعیت: {response.status_code}")
         
         if response.status_code == 200:
@@ -85,20 +87,21 @@ def test_imdb_connection(session, cookies):
             
     except Exception as e:
         print(f"❌ خطا در اتصال: {e}")
+        traceback.print_exc()
         return False
 
-def get_imdb_ratings(session):
+def get_imdb_ratings():
     """دریافت لیست فیلم‌های امتیاز داده شده از IMDb"""
     all_movies = []
     page = 1
-    max_pages = 10  # برای جلوگیری از درخواست زیاد
+    max_pages = 10
     
     while page <= max_pages:
         try:
             url = f'https://www.imdb.com/user/ur0/ratings?sort=date_added&direction=desc&page={page}'
             print(f"📥 دریافت صفحه {page}...")
             
-            response = session.get(url, headers=HEADERS, timeout=20)
+            response = scraper.get(url, headers=HEADERS, cookies=cookies, timeout=30)
             
             if response.status_code != 200:
                 print(f"⚠️ خطا در دریافت صفحه {page}: {response.status_code}")
@@ -109,9 +112,8 @@ def get_imdb_ratings(session):
             # پیدا کردن آیتم‌های فیلم
             items = soup.select('.lister-item')
             if not items:
-                # ممکن است صفحه خالی باشد یا ساختار تغییر کرده باشد
                 print(f"❌ آیتمی در صفحه {page} پیدا نشد.")
-                # برای دیباگ، بخش کوچکی از HTML را چاپ می‌کنیم
+                # برای دیباگ
                 print("🔍 نمونه از HTML دریافت شده:")
                 print(response.text[:500])
                 break
@@ -187,26 +189,25 @@ def fetch_omdb_details(imdb_id, api_key):
                     'imdb_votes': data.get('imdbVotes', 'N/A')
                 }
     except Exception as e:
-        print(f"⚠️ خطا در دریافت اطلاعات OMDb برای {imdb_id}: {e}")
+        print(f"⚠️ خطا در OMDb برای {imdb_id}: {e}")
     return None
 
 def main():
     try:
-        # ایجاد session
-        session = requests.Session()
-        session.cookies.update(cookies)
-        
         # تست اتصال
-        if not test_imdb_connection(session, cookies):
-            print("❌ اتصال به IMDb ناموفق بود. لطفاً کوکی‌ها را بررسی کنید.")
-            print("💡 نکته: ممکن است نیاز باشد کوکی‌های جدید از مرورگر دریافت کنید.")
+        if not test_imdb_connection():
+            print("❌ اتصال به IMDb ناموفق بود.")
+            print("💡 نکات:")
+            print("   1. مطمئن شوید کوکی‌ها معتبر هستند (از مرورگر خارج و دوباره وارد شوید).")
+            print("   2. اگر از VPN استفاده می‌کنید، آن را غیرفعال کنید.")
+            print("   3. کوکی‌های جدید از مرورگر دریافت کنید.")
             sys.exit(1)
         
         # دریافت لیست فیلم‌ها
-        movies = get_imdb_ratings(session)
+        movies = get_imdb_ratings()
         
         if not movies:
-            print("❌ هیچ فیلمی دریافت نشد. ممکن است صفحه Ratings خالی باشد یا نیاز به بروزرسانی کوکی داشته باشید.")
+            print("❌ هیچ فیلمی دریافت نشد.")
             sys.exit(1)
         
         print(f"🎬 دریافت جزئیات {len(movies)} فیلم از OMDb API...")
@@ -259,7 +260,7 @@ def main():
         print(f"🕐 زمان به‌روزرسانی: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
         
     except Exception as e:
-        print(f"❌ خطای کلی در اسکریپت: {e}")
+        print(f"❌ خطای کلی: {e}")
         traceback.print_exc()
         sys.exit(1)
 
