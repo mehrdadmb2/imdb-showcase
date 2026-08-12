@@ -8,7 +8,7 @@ let currentFilters = {
     year: 'all'
 };
 
-// ===== دریافت داده‌ها از فایل JSON =====
+// ===== دریافت داده‌ها =====
 async function loadMovies() {
     try {
         const response = await fetch('movies.json');
@@ -29,6 +29,7 @@ async function loadMovies() {
     }
 }
 
+// ===== پاپوله کردن فیلترها =====
 function populateFilters() {
     const genreSet = new Set();
     const yearSet = new Set();
@@ -56,6 +57,7 @@ function populateFilters() {
     });
 }
 
+// ===== اعمال فیلتر و مرتب‌سازی =====
 function applyFiltersAndSort() {
     filteredMovies = allMovies.filter(movie => {
         const userRating = movie.user_rating || 0;
@@ -79,6 +81,7 @@ function applyFiltersAndSort() {
     renderMovies();
 }
 
+// ===== مرتب‌سازی =====
 function sortMovies() {
     const [field, order] = currentSort.split('-');
     const isDesc = order === 'desc';
@@ -99,6 +102,7 @@ function sortMovies() {
     });
 }
 
+// ===== رندر فیلم‌ها =====
 function renderMovies() {
     const grid = document.getElementById('moviesGrid');
     
@@ -112,7 +116,13 @@ function renderMovies() {
         return;
     }
     
-    grid.innerHTML = filteredMovies.map(movie => `
+    grid.innerHTML = filteredMovies.map(movie => {
+        const genres = movie.genre && movie.genre !== 'N/A' ? 
+            movie.genre.split(',').slice(0, 3).map(g => 
+                `<span class="movie-genre-tag">${g.trim()}</span>`
+            ).join('') : '';
+        
+        return `
         <div class="movie-card" data-id="${movie.imdb_id}" onclick="openModal('${movie.imdb_id}')">
             ${movie.poster ? 
                 `<img class="movie-poster" src="${movie.poster}" alt="${movie.title}" loading="lazy" onerror="this.src=''; this.className='movie-poster-placeholder'; this.textContent='🎬';" />` :
@@ -121,17 +131,20 @@ function renderMovies() {
             <div class="movie-info">
                 <div class="movie-title">${movie.title}</div>
                 <div class="movie-year">${movie.year || 'N/A'}</div>
+                <div class="movie-genres">${genres}</div>
                 <div class="movie-rating">
                     <span class="user-rating">⭐ ${movie.user_rating || '?'}</span>
                     <span class="imdb-rating">IMDb: ${movie.imdb_rating || 'N/A'}</span>
                 </div>
             </div>
             ${movie.user_rating >= 8 ? `<div class="movie-badge">🔥 عالی</div>` : ''}
-            ${movie.user_rating <= 4 && movie.user_rating > 0 ? `<div class="movie-badge" style="background:#666;">😐 ضعیف</div>` : ''}
+            ${movie.user_rating >= 6 && movie.user_rating < 8 ? `<div class="movie-badge" style="background: linear-gradient(135deg, #f39c12, #e67e22);">👍 خوب</div>` : ''}
+            ${movie.user_rating <= 4 && movie.user_rating > 0 ? `<div class="movie-badge" style="background: linear-gradient(135deg, #666, #444);">😐 ضعیف</div>` : ''}
         </div>
-    `).join('');
+    `}).join('');
 }
 
+// ===== آمار =====
 function updateStats() {
     const total = allMovies.length;
     document.getElementById('totalMovies').textContent = total;
@@ -139,6 +152,7 @@ function updateStats() {
     let totalMinutes = 0;
     let ratingSum = 0;
     let ratingCount = 0;
+    const genreSet = new Set();
     
     allMovies.forEach(movie => {
         if (movie.runtime && movie.runtime !== 'N/A') {
@@ -149,12 +163,17 @@ function updateStats() {
             ratingSum += movie.user_rating;
             ratingCount++;
         }
+        if (movie.genre && movie.genre !== 'N/A') {
+            movie.genre.split(',').forEach(g => genreSet.add(g.trim()));
+        }
     });
     
     document.getElementById('totalHours').textContent = Math.round(totalMinutes / 60);
     document.getElementById('avgRating').textContent = ratingCount > 0 ? (ratingSum / ratingCount).toFixed(1) : '0';
+    document.getElementById('totalGenres').textContent = genreSet.size;
 }
 
+// ===== مودال =====
 function openModal(imdbId) {
     const movie = allMovies.find(m => m.imdb_id === imdbId);
     if (!movie) return;
@@ -166,13 +185,15 @@ function openModal(imdbId) {
     document.getElementById('modalYear').textContent = movie.year || 'N/A';
     document.getElementById('modalUserRating').textContent = movie.user_rating || '—';
     document.getElementById('modalImdbRating').textContent = movie.imdb_rating || 'N/A';
+    document.getElementById('modalRuntime').textContent = movie.runtime || 'N/A';
+    document.getElementById('modalRated').textContent = movie.rated || 'N/A';
     document.getElementById('modalPlot').textContent = movie.plot || 'اطلاعاتی در دسترس نیست.';
-    
     document.getElementById('modalGenre').textContent = movie.genre || 'N/A';
     document.getElementById('modalDirector').textContent = movie.director || 'N/A';
     document.getElementById('modalActors').textContent = movie.actors || 'N/A';
-    document.getElementById('modalRuntime').textContent = movie.runtime || 'N/A';
-    document.getElementById('modalRated').textContent = movie.rated || 'N/A';
+    document.getElementById('modalWriter').textContent = movie.writer || 'N/A';
+    document.getElementById('modalReleased').textContent = movie.released || 'N/A';
+    document.getElementById('modalVotes').textContent = movie.imdb_votes || 'N/A';
     
     overlay.classList.add('active');
     document.body.style.overflow = 'hidden';
@@ -215,11 +236,11 @@ document.getElementById('resetFilters').addEventListener('click', () => {
 
 document.getElementById('sortBtn').addEventListener('click', () => {
     const options = [
-        { value: 'user_rating-desc', label: 'امتیاز من (بالا به پایین)' },
-        { value: 'user_rating-asc', label: 'امتیاز من (پایین به بالا)' },
-        { value: 'imdb_rating-desc', label: 'امتیاز IMDb (بالا به پایین)' },
-        { value: 'title-asc', label: 'عنوان (الفبا)' },
-        { value: 'year-desc', label: 'سال (جدید به قدیم)' },
+        { value: 'user_rating-desc', label: '⭐ امتیاز من (بالا به پایین)' },
+        { value: 'user_rating-asc', label: '⭐ امتیاز من (پایین به بالا)' },
+        { value: 'imdb_rating-desc', label: '⭐ IMDb (بالا به پایین)' },
+        { value: 'title-asc', label: '🔤 عنوان (الفبا)' },
+        { value: 'year-desc', label: '📅 سال (جدید به قدیم)' },
     ];
     
     const choice = prompt('نوع مرتب‌سازی را انتخاب کنید:\n' + 
