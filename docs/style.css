@@ -30,51 +30,64 @@ body {
     background: linear-gradient(135deg, #0a0a1a 0%, #1a1a3e 30%, #0a0a2a 60%, #1a0a1a 100%);
 }
 
-/* ===== پس‌زمینه متحرک ستاره‌ها ===== */
-#stars, #stars2, #stars3 {
+/* ===== پس‌زمینه داینامیک جدید ===== */
+.cinema-bg {
     position: fixed;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
-    pointer-events: none;
     z-index: 0;
+    background: linear-gradient(135deg, #0a0a1a 0%, #1a0a2a 30%, #0a0a2a 60%, #1a0a1a 100%);
+    overflow: hidden;
 }
 
-#stars {
-    background: transparent;
-    box-shadow: 
-        0 0 2px #fff, 50px 100px 2px #fff, 150px 50px 2px #fff, 
-        300px 200px 2px #fff, 500px 80px 2px #fff, 700px 150px 2px #fff,
-        900px 60px 2px #fff, 1100px 180px 2px #fff, 1300px 100px 2px #fff,
-        200px 300px 2px #fff, 400px 350px 2px #fff, 600px 400px 2px #fff,
-        800px 320px 2px #fff, 1000px 380px 2px #fff, 1200px 420px 2px #fff;
-    animation: starsAnim 200s linear infinite;
+/* گرادینت متحرک */
+.cinema-bg::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle at 30% 40%, rgba(233,69,96,0.08) 0%, transparent 50%),
+                radial-gradient(circle at 70% 60%, rgba(108,92,231,0.08) 0%, transparent 50%),
+                radial-gradient(circle at 50% 80%, rgba(0,210,211,0.05) 0%, transparent 50%);
+    animation: rotateBg 30s linear infinite;
 }
 
-#stars2 {
-    background: transparent;
-    box-shadow: 
-        30px 40px 2px #fff, 180px 80px 2px #fff, 350px 120px 2px #fff,
-        550px 60px 2px #fff, 750px 200px 2px #fff, 950px 140px 2px #fff,
-        1150px 220px 2px #fff, 250px 280px 2px #fff, 450px 250px 2px #fff,
-        650px 350px 2px #fff, 850px 280px 2px #fff, 1050px 330px 2px #fff;
-    animation: starsAnim 300s linear infinite reverse;
+@keyframes rotateBg {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
 }
 
-#stars3 {
-    background: transparent;
-    box-shadow: 
-        10px 20px 1px #fff, 120px 150px 1px #fff, 280px 90px 1px #fff,
-        480px 180px 1px #fff, 680px 120px 1px #fff, 880px 250px 1px #fff,
-        1080px 160px 1px #fff, 1280px 300px 1px #fff, 180px 380px 1px #fff,
-        380px 420px 1px #fff, 580px 480px 1px #fff, 780px 400px 1px #fff;
-    animation: starsAnim 400s linear infinite alternate;
+/* ذرات کوچک */
+.particles {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    background-image: 
+        radial-gradient(2px 2px at 10% 20%, rgba(255,255,255,0.3), transparent),
+        radial-gradient(2px 2px at 30% 60%, rgba(255,255,255,0.2), transparent),
+        radial-gradient(2px 2px at 50% 30%, rgba(255,255,255,0.4), transparent),
+        radial-gradient(2px 2px at 70% 70%, rgba(255,255,255,0.2), transparent),
+        radial-gradient(2px 2px at 90% 10%, rgba(255,255,255,0.3), transparent),
+        radial-gradient(1px 1px at 20% 80%, rgba(255,255,255,0.2), transparent),
+        radial-gradient(1px 1px at 60% 40%, rgba(255,255,255,0.3), transparent),
+        radial-gradient(1px 1px at 80% 90%, rgba(255,255,255,0.2), transparent);
+    background-size: 100% 100%;
+    background-repeat: no-repeat;
+    opacity: 0.5;
+    animation: twinkle 4s ease-in-out infinite alternate;
+}
+@keyframes twinkle {
+    0% { opacity: 0.3; }
+    100% { opacity: 0.7; }
 }
 
-@keyframes starsAnim {
-    from { transform: translateY(0px); }
-    to { transform: translateY(-2000px); }
+/* حذف پرده‌ها */
+.curtain-left, .curtain-right {
+    display: none;
 }
 
 /* ===== کلاس شیشه‌ای (Glassmorphism) ===== */
