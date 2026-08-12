@@ -2,8 +2,8 @@ name: به‌روزرسانی خودکار فیلم‌ها
 
 on:
   schedule:
-    - cron: '0 */12 * * *'   # هر 12 ساعت یکبار
-  workflow_dispatch:          # امکان اجرای دستی از گیت‌هاب
+    - cron: '0 */12 * * *'
+  workflow_dispatch:
 
 jobs:
   update:
@@ -22,6 +22,7 @@ jobs:
         run: |
           cd src
           pip install -r requirements.txt
+          pip install requests beautifulsoup4
       
       - name: اجرای اسکریپت دریافت اطلاعات از IMDb
         env:
@@ -30,8 +31,10 @@ jobs:
         run: |
           cd src
           python fetch_imdb.py
+        continue-on-error: false
       
       - name: ارسال تغییرات به مخزن
+        if: success()
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
