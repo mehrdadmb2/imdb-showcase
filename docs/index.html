@@ -5,9 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>🎬 داشبورد سینمایی من</title>
 
-    <!-- ===== Open Graph (برای نمایش در تلگرام و شبکه‌های اجتماعی) ===== -->
+    <!-- Open Graph برای اشتراک‌گذاری در تلگرام و شبکه‌های اجتماعی -->
     <meta property="og:title" content="🎬 داشبورد سینمایی من - فیلم‌های دیده شده" />
-    <meta property="og:description" content="مجموعه‌ی کامل فیلم‌هایی که دیدم و امتیاز دادم. شامل ۱۶۸۸+ فیلم و سریال." />
+    <meta property="og:description" content="مجموعه‌ای کامل از فیلم‌ها و سریال‌هایی که دیدم و امتیاز دادم." />
     <meta property="og:image" content="https://mehrdadmb2.github.io/imdb-showcase/pic/logo.png" />
     <meta property="og:url" content="https://mehrdadmb2.github.io/imdb-showcase/" />
     <meta property="og:type" content="website" />
@@ -20,19 +20,13 @@
     <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;600;700;800;900&display=swap" rel="stylesheet" />
 </head>
 <body>
-    <!-- پس‌زمینه سینمایی -->
-    <div class="cinema-bg">
-        <div class="light-beam beam1"></div>
-        <div class="light-beam beam2"></div>
-        <div class="light-beam beam3"></div>
-        <div class="light-beam beam4"></div>
-        <div class="particles"></div>
-    </div>
+    <!-- پس‌زمینه کهکشانی -->
+    <div id="starfield"></div>
 
     <header>
         <div class="header-container glass">
             <div class="logo">
-                <img src="pic/logo.png" alt="Logo" style="height:40px; width:auto; border-radius:8px;" />
+                <img src="pic/logo.png" alt="Logo" />
                 <span class="logo-text">سینمای من</span>
             </div>
             <div class="header-stats" id="headerStats">
@@ -46,6 +40,8 @@
                 <button id="filterBtn" class="btn-glass">🔍 فیلتر</button>
                 <button id="sortBtn" class="btn-glass">📊 مرتب‌سازی</button>
                 <button id="toggleView" class="btn-glass">📽️ همه</button>
+                <!-- لینک پروفایل IMDb -->
+                <a href="https://www.imdb.com/user/p.if6bmsibrbg5dapfqbjrld4lhy" target="_blank" class="btn-glass">🎬 IMDb من</a>
             </div>
         </div>
     </header>
@@ -109,16 +105,19 @@
                 <div class="detail-item"><span class="label">📅 انتشار</span><span class="value" id="modalReleased"></span></div>
                 <div class="detail-item"><span class="label">🗳️ رای‌ها</span><span class="value" id="modalVotes"></span></div>
                 <div class="detail-item"><span class="label">📅 امتیاز داده</span><span class="value" id="modalDateRated"></span></div>
+                <div class="detail-item"><span class="label">📄 عنوان اصلی</span><span class="value" id="modalOriginalTitle"></span></div>
+                <div class="detail-item"><span class="label">🔗 لینک IMDb</span><span class="value"><a id="modalImdbLink" href="#" target="_blank">مشاهده در IMDb</a></span></div>
             </div>
         </div>
     </div>
 
     <footer class="glass">
         <p>ساخته شده با ❤️ | داده‌ها از <a href="https://www.imdb.com" target="_blank">IMDb</a> و <a href="http://www.omdbapi.com/" target="_blank">OMDb API</a></p>
-        <p id="lastUpdate">آخرین به‌روزرسانی: در حال دریافت...</p>
+        <p id="lastUpdate">آخرین به‌روزرسانی دستی: در حال دریافت...</p>
         <p style="font-size:11px; color:#666;" id="omdbStatus">وضعیت OMDb: در حال بررسی...</p>
     </footer>
 
+    <script src="starfield.js"></script>
     <script src="script.js"></script>
 </body>
 </html>
