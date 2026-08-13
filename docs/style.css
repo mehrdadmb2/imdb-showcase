@@ -22,7 +22,7 @@ body {
     position: relative;
 }
 
-/* ===== پس‌زمینه کهکشانی با ستاره‌ها ===== */
+/* ===== پس‌زمینه کهکشانی ===== */
 #starfield {
     position: fixed;
     top: 0;
@@ -34,20 +34,16 @@ body {
     overflow: hidden;
     background: radial-gradient(ellipse at 20% 50%, #0a0a2e 0%, #050510 50%, #000000 100%);
 }
-
 #starfield .star {
     position: absolute;
     background: white;
     border-radius: 50%;
     animation: twinkle var(--duration) ease-in-out infinite alternate;
 }
-
 @keyframes twinkle {
     0% { opacity: 0.2; transform: scale(0.8); }
     100% { opacity: 1; transform: scale(1.2); }
 }
-
-/* کهکشان (نورهای پس‌زمینه) */
 #starfield::after {
     content: '';
     position: absolute;
@@ -62,13 +58,12 @@ body {
         radial-gradient(circle at 10% 80%, rgba(253, 203, 110, 0.04) 0%, transparent 40%);
     animation: rotateBg 60s linear infinite;
 }
-
 @keyframes rotateBg {
     from { transform: rotate(0deg); }
     to { transform: rotate(360deg); }
 }
 
-/* ===== کلاس شیشه‌ای (Glassmorphism) ===== */
+/* ===== کلاس شیشه‌ای ===== */
 .glass {
     background: var(--glass-bg);
     backdrop-filter: blur(16px);
@@ -223,6 +218,139 @@ footer a { color: var(--accent); text-decoration: none; transition: var(--transi
 footer a:hover { color: var(--accent3); }
 footer p:last-child { font-size: 11px; margin-top: 4px; }
 
+/* ================================================================ */
+/* ===== بخش آمار ===== */
+/* ================================================================ */
+
+#statsSection {
+    max-width: 1400px;
+    margin: 24px auto 0;
+    padding: 0 24px;
+    animation: fadeIn 0.6s ease;
+}
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* کارت‌های آماری */
+.stats-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    gap: 16px;
+    margin-bottom: 24px;
+}
+.stat-card {
+    background: rgba(255,255,255,0.03);
+    border-radius: var(--radius);
+    padding: 20px 16px;
+    text-align: center;
+    border: 1px solid rgba(255,255,255,0.04);
+    transition: var(--transition);
+}
+.stat-card:hover {
+    transform: translateY(-4px);
+    border-color: var(--accent);
+    box-shadow: 0 8px 30px rgba(233,69,96,0.1);
+}
+.stat-card-icon {
+    font-size: 28px;
+    margin-bottom: 8px;
+}
+.stat-card-number {
+    font-size: 28px;
+    font-weight: 800;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+.stat-card-label {
+    font-size: 12px;
+    color: var(--text-muted);
+    margin-top: 4px;
+}
+
+/* شبکه نمودارها */
+.charts-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+    margin-bottom: 24px;
+}
+.chart-container {
+    padding: 20px;
+    border-radius: var(--radius);
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(255,255,255,0.04);
+}
+.chart-container.full-width {
+    grid-column: 1 / -1;
+}
+.chart-title {
+    font-size: 16px;
+    font-weight: 600;
+    margin-bottom: 16px;
+    color: var(--text);
+    text-align: center;
+}
+.chart-container canvas {
+    max-height: 250px;
+    max-width: 100%;
+}
+.chart-container.full-width canvas {
+    max-height: 280px;
+}
+
+/* جدول بهترین فیلم‌ها */
+.top-movies {
+    padding: 20px;
+    border-radius: var(--radius);
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(255,255,255,0.04);
+    margin-bottom: 24px;
+}
+.top-movies-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 12px;
+    margin-top: 12px;
+}
+.top-movie-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 14px;
+    background: rgba(255,255,255,0.03);
+    border-radius: 10px;
+    border: 1px solid rgba(255,255,255,0.04);
+    transition: var(--transition);
+}
+.top-movie-item:hover {
+    background: rgba(233,69,96,0.05);
+    border-color: var(--accent);
+}
+.top-movie-rank {
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--accent);
+    min-width: 30px;
+}
+.top-movie-info {
+    flex: 1;
+}
+.top-movie-info .title {
+    font-size: 14px;
+    font-weight: 600;
+}
+.top-movie-info .year {
+    font-size: 11px;
+    color: var(--text-muted);
+}
+.top-movie-rating {
+    font-weight: 700;
+    color: #ffd700;
+}
+
 /* ===== ریسپانسیو ===== */
 @media (max-width: 992px) {
     .header-container { flex-direction: column; align-items: stretch; gap: 8px; }
@@ -230,6 +358,8 @@ footer p:last-child { font-size: 11px; margin-top: 4px; }
     .header-actions { justify-content: center; }
     .movies-grid { grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 16px; }
     .first-last { flex-direction: column; align-items: center; text-align: center; }
+    .charts-grid { grid-template-columns: 1fr; }
+    .stats-cards { grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); }
 }
 @media (max-width: 768px) {
     .header-container { padding: 10px 16px; }
@@ -241,10 +371,14 @@ footer p:last-child { font-size: 11px; margin-top: 4px; }
     .modal-content { padding: 16px; margin: 12px; }
     .modal-title { font-size: 20px; }
     .modal-details { grid-template-columns: 1fr; }
+    #statsSection { padding: 0 12px; }
+    .stat-card-number { font-size: 22px; }
+    .top-movies-list { grid-template-columns: 1fr; }
 }
 @media (max-width: 480px) {
     .movies-grid { grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 10px; }
     .movie-title { font-size: 12px; }
     .header-stats { gap: 8px; padding: 4px 10px; }
     .btn-glass { font-size: 11px; padding: 5px 10px; }
+    .stats-cards { grid-template-columns: repeat(2, 1fr); }
 }
