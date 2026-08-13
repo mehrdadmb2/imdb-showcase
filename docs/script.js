@@ -5,6 +5,8 @@ let currentSort = 'date_rated-desc';
 let currentFilters = { minRating: 0, genre: 'all', year: 'all', type: 'all' };
 let viewMode = 'all';
 let lastManualUpdate = '';
+let statsVisible = false;
+let charts = {};
 
 // ===== اتصال امن رویدادها =====
 function safeAddEventListener(id, event, handler) {
@@ -34,6 +36,7 @@ async function loadMovies() {
         updateStats();
         updateFirstLast();
         updateOmdbStatus();
+        generateStats(); // تولید آمار
 
         const loading = document.getElementById('loading');
         if (loading) loading.classList.remove('active');
@@ -150,7 +153,7 @@ function renderMovies() {
     }).join('');
 }
 
-// ===== آمار =====
+// ===== آمار اصلی =====
 function updateStats() {
     const total = allMovies.length;
     const series = allMovies.filter(m => m.title_type === 'TV Episode' || m.title_type === 'TV Series').length;
@@ -197,7 +200,262 @@ function updateOmdbStatus() {
         `وضعیت OMDb: ${withPoster} پوستر از ${allMovies.length} فیلم دریافت شد.`;
 }
 
-// ===== باز کردن مودال با تمام اطلاعات =====
+// ================================================================
+// ===== بخش آمار پیشرفته =====
+// ================================================================
+
+function generateStats() {
+    if (allMovies.length === 0) return;
+    
+    // 1. کارت‌های آماری
+    const directors = new Set();
+    const years = new Set();
+    let maxRating = 0;
+    const episodes = allMovies.filter(m => m.title_type === 'TV Episode').length;
+    const genreCount = {};
+    let totalPerYear = 0;
+    const yearCount = {};
+
+    allMovies.forEach(m => {
+        if (m.directors && m.directors !== 'N/A') {
+            m.directors.split(',').forEach(d => directors.add(d.trim()));
+        }
+        if (m.year && m.year !== 'N/A') {
+            const y = m.year.replace(/\D/g, '');
+            if (y) {
+                years.add(y);
+                yearCount[y] = (yearCount[y] || 0) + 1;
+            }
+        }
+        if (m.user_rating > maxRating) maxRating = m.user_rating;
+        if (m.genres && m.genres !== 'N/A') {
+            m.genres.split(',').forEach(g => {
+                const key = g.trim();
+                genreCount[key] = (genreCount[key] || 0) + 1;
+            });
+        }
+    });
+
+    // محبوب‌ترین ژانر
+    let topGenre = '-';
+    let topCount = 0;
+    for (const [g, count] of Object.entries(genreCount)) {
+        if (count > topCount) {
+            topCount = count;
+            topGenre = g;
+        }
+    }
+
+    // میانگین فیلم در سال
+    const yearKeys = Object.keys(yearCount);
+    if (yearKeys.length > 0) {
+        const totalYears = yearKeys.length;
+        const totalMovies = allMovies.length;
+        totalPerYear = Math.round(totalMovies / totalYears);
+    }
+
+    document.getElementById('statDirectors').textContent = directors.size;
+    document.getElementById('statYears').textContent = years.size;
+    document.getElementById('statTopRating').textContent = maxRating > 0 ? maxRating : '0';
+    document.getElementById('statTotalEpisodes').textContent = episodes;
+    document.getElementById('statTopGenre').textContent = topGenre;
+    document.getElementById('statAvgPerYear').textContent = totalPerYear;
+
+    // 2. نمودار ژانرها
+    const sortedGenres = Object.entries(genreCount)
+        .sort((a, b) => b[1] - a[1])
+        .slice(0, 12);
+    
+    createChart('genreChart', 'bar', 
+        sortedGenres.map(g => g[0]),
+        sortedGenres.map(g => g[1]),
+        ['#e94560', '#6c5ce7', '#00d2d3', '#fdcb6e', '#e17055', '#00b894', '#0984e3', '#fd79a8', '#fdcb6e', '#55efc4', '#74b9ff', '#a29bfe']
+    );
+
+    // 3. توزیع امتیازات
+    const ratingDist = {};
+    allMovies.forEach(m => {
+        const r = Math.round(m.user_rating);
+        if (r > 0) {
+            ratingDist[r] = (ratingDist[r] || 0) + 1;
+        }
+    });
+    const ratingLabels = Object.keys(ratingDist).sort((a, b) => a - b);
+    createChart('ratingChart', 'bar',
+        ratingLabels.map(r => r + '⭐'),
+        ratingLabels.map(r => ratingDist[r]),
+        ['#ffd700', '#fdcb6e', '#f9ca24', '#f0932b', '#e94560', '#e17055', '#d63031', '#6c5ce7', '#0984e3', '#00d2d3']
+    );
+
+    // 4. فیلم‌ها بر اساس سال
+    const sortedYears = Object.entries(yearCount)
+        .sort((a, b) => parseInt(a[0]) - parseInt(b[0]))
+        .slice(-15); // ۱۵ سال اخیر
+    createChart('yearChart', 'line',
+        sortedYears.map(y => y[0]),
+        sortedYears.map(y => y[1]),
+        ['#e94560']
+    );
+
+    // 5. فعالیت بر اساس ماه
+    const monthCount = {};
+    allMovies.forEach(m => {
+        if (m.date_rated) {
+            try {
+                const date = new Date(m.date_rated);
+                const month = date.getMonth() + 1;
+                monthCount[month] = (monthCount[month] || 0) + 1;
+            } catch {}
+        }
+    });
+    const monthNames = ['فروردین', 'اردیبهشت', 'خرداد', 'تیر', 'مرداد', 'شهریور', 'مهر', 'آبان', 'آذر', 'دی', 'بهمن', 'اسفند'];
+    const monthData = [];
+    for (let i = 1; i <= 12; i++) {
+        monthData.push(monthCount[i] || 0);
+    }
+    createChart('monthChart', 'bar',
+        monthNames,
+        monthData,
+        ['#00d2d3', '#6c5ce7', '#e94560', '#fdcb6e', '#00b894', '#0984e3', '#e17055', '#fd79a8', '#55efc4', '#74b9ff', '#a29bfe', '#fdcb6e']
+    );
+
+    // 6. میانگین امتیاز به ازای ژانر
+    const genreAvg = {};
+    const genreCount2 = {};
+    allMovies.forEach(m => {
+        if (m.genres && m.genres !== 'N/A' && m.user_rating > 0) {
+            m.genres.split(',').forEach(g => {
+                const key = g.trim();
+                genreAvg[key] = (genreAvg[key] || 0) + m.user_rating;
+                genreCount2[key] = (genreCount2[key] || 0) + 1;
+            });
+        }
+    });
+    const genreAvgData = [];
+    const genreAvgLabels = [];
+    for (const [g, sum] of Object.entries(genreAvg)) {
+        if (genreCount2[g] >= 3) { // حداقل ۳ فیلم
+            genreAvgLabels.push(g);
+            genreAvgData.push(parseFloat((sum / genreCount2[g]).toFixed(1)));
+        }
+    }
+    const sortedAvg = genreAvgLabels.map((g, i) => ({ label: g, value: genreAvgData[i] }))
+        .sort((a, b) => b.value - a.value)
+        .slice(0, 15);
+    createChart('genreRatingChart', 'bar',
+        sortedAvg.map(d => d.label),
+        sortedAvg.map(d => d.value),
+        ['#ffd700', '#fdcb6e', '#f9ca24', '#f0932b', '#e94560', '#e17055', '#6c5ce7', '#0984e3', '#00d2d3', '#00b894', '#55efc4', '#74b9ff', '#a29bfe', '#fd79a8', '#fdcb6e']
+    );
+
+    // 7. مقایسه امتیاز من با IMDb
+    const compareData = allMovies
+        .filter(m => m.user_rating > 0 && m.imdb_rating !== 'N/A')
+        .slice(0, 30) // ۳۰ فیلم آخر
+        .reverse();
+    createChart('compareChart', 'bar',
+        compareData.map(m => m.title.length > 20 ? m.title.slice(0, 18) + '...' : m.title),
+        compareData.map(m => m.user_rating),
+        compareData.map(m => parseFloat(m.imdb_rating) || 0),
+        ['#ffd700', '#e94560']
+    );
+
+    // 8. بهترین فیلم‌ها
+    const topMovies = allMovies
+        .filter(m => m.user_rating === 10)
+        .sort((a, b) => new Date(b.date_rated) - new Date(a.date_rated))
+        .slice(0, 20);
+    
+    const list = document.getElementById('topMoviesList');
+    if (topMovies.length === 0) {
+        list.innerHTML = '<p style="color:var(--text-muted);text-align:center;">هیچ فیلمی با امتیاز ۱۰ وجود ندارد.</p>';
+    } else {
+        list.innerHTML = topMovies.map((m, i) => `
+            <div class="top-movie-item" onclick="openModal('${m.imdb_id}')">
+                <div class="top-movie-rank">#${i+1}</div>
+                <div class="top-movie-info">
+                    <div class="title">${m.title}</div>
+                    <div class="year">${m.year || 'N/A'} • ${m.genres ? m.genres.split(',').slice(0,2).map(g => g.trim()).join(', ') : ''}</div>
+                </div>
+                <div class="top-movie-rating">⭐ ${m.user_rating}</div>
+            </div>
+        `).join('');
+    }
+}
+
+// ===== ایجاد نمودار با Chart.js =====
+function createChart(id, type, labels, data, colors, datasets) {
+    const canvas = document.getElementById(id);
+    if (!canvas) return;
+    
+    // حذف نمودار قبلی
+    if (charts[id]) {
+        charts[id].destroy();
+        delete charts[id];
+    }
+
+    const ctx = canvas.getContext('2d');
+    
+    // اگر داده‌های دوگانه داریم (برای مقایسه)
+    let chartData;
+    if (datasets && Array.isArray(datasets) && datasets.length > 0) {
+        chartData = {
+            labels: labels,
+            datasets: datasets.map((d, i) => ({
+                label: i === 0 ? 'امتیاز من' : 'امتیاز IMDb',
+                data: d,
+                backgroundColor: colors[i] || '#e94560',
+                borderColor: colors[i] || '#e94560',
+                borderWidth: 2,
+                borderRadius: 4
+            }))
+        };
+    } else {
+        chartData = {
+            labels: labels,
+            datasets: [{
+                label: 'تعداد',
+                data: data,
+                backgroundColor: Array.isArray(colors) ? colors : ['#e94560'],
+                borderColor: Array.isArray(colors) ? colors : ['#e94560'],
+                borderWidth: 1,
+                borderRadius: 4
+            }]
+        };
+    }
+
+    charts[id] = new Chart(ctx, {
+        type: type,
+        data: chartData,
+        options: {
+            responsive: true,
+            plugins: {
+                legend: {
+                    labels: {
+                        color: '#a0a0b0',
+                        font: { family: 'Vazirmatn' }
+                    }
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: { color: '#a0a0b0' },
+                    grid: { color: 'rgba(255,255,255,0.05)' }
+                },
+                x: {
+                    ticks: { color: '#a0a0b0', maxRotation: 45 },
+                    grid: { color: 'rgba(255,255,255,0.05)' }
+                }
+            }
+        }
+    });
+}
+
+// ================================================================
+// ===== مودال =====
+// ================================================================
+
 function openModal(id) {
     const m = allMovies.find(x => x.imdb_id === id);
     if (!m) return;
@@ -233,14 +491,38 @@ function openModal(id) {
     document.body.style.overflow = 'hidden';
 }
 
-// ===== بستن مودال =====
 function closeModal() {
     const ov = document.getElementById('modalOverlay');
     if (ov) ov.classList.remove('active');
     document.body.style.overflow = '';
 }
 
+// ================================================================
 // ===== رویدادها =====
+// ================================================================
+
+// دکمه نمایش/مخفی کردن آمار
+safeAddEventListener('statsBtn', 'click', () => {
+    const section = document.getElementById('statsSection');
+    if (statsVisible) {
+        section.style.display = 'none';
+        document.getElementById('statsBtn').textContent = '📈 آمار';
+        document.getElementById('statsBtn').style.background = 'none';
+        document.getElementById('statsBtn').style.borderColor = 'rgba(255,255,255,0.08)';
+        statsVisible = false;
+    } else {
+        section.style.display = 'block';
+        document.getElementById('statsBtn').textContent = '❌ بستن آمار';
+        document.getElementById('statsBtn').style.background = 'rgba(233,69,96,0.15)';
+        document.getElementById('statsBtn').style.borderColor = 'var(--accent)';
+        statsVisible = true;
+        // اگر نمودارها ساخته نشده‌اند، دوباره بساز
+        if (Object.keys(charts).length === 0) {
+            setTimeout(generateStats, 300);
+        }
+    }
+});
+
 safeAddEventListener('filterBtn', 'click', () => {
     document.getElementById('filtersBar').classList.toggle('active');
 });
