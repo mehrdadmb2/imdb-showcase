@@ -52,7 +52,7 @@
     <div class="hero-side">
       <div class="eyebrow">YOUR CINEMA • LIVE LIBRARY</div>
       <div class="hero-title-row"><h1 id="heroCount">0</h1><div><span>Titles</span><small id="heroSub">Personal IMDb collection</small></div></div>
-      <div class="hero-progress"><div class="hero-progress-label"><span>Library pulse</span><b id="heroPulse">0%</b></div><div class="pulse-track"><i id="heroPulseBar"></i></div></div>
+      <div class="hero-progress"><div class="hero-progress-label"><span>Library pulse</span><b id="heroPulse">0%</b></div><div class="pulse-track"><i id="heroPulseBar"></i></div></div><div class="hero-mini-grid"><div class="hero-mini"><span>جدیدترین</span><strong id="lastTitle">—</strong><small id="lastDate">—</small></div><div class="hero-mini"><span>قدیمی‌ترین</span><strong id="firstTitle">—</strong><small id="firstDate">—</small></div><div class="hero-mini" id="dataHealthCard"><span>وضعیت Dataset</span><strong id="dataHealth">CHECKING</strong><small id="dataMeta">—</small></div></div>
       <div class="hero-actions"><a class="action-button accent" href="#library">Explore library</a><button id="heroStats" class="action-button" type="button">Analytics</button></div>
     </div>
   </section>
@@ -103,7 +103,7 @@
     <article class="ranking glass"><div class="section-heading compact"><h3>برترین‌های کتابخانه</h3><span>Tap a row for details</span></div><div id="topMoviesList"></div></article>
   </section>
 
-  <section class="content-heading library-heading"><div><span class="section-kicker">LIBRARY</span><h2>کتابخانه</h2></div><div class="heading-meta"><span id="resultsCount">0 نتیجه</span><span class="dot"></span><span id="sortLabel">جدیدترین</span></div></section>
+  <section class="content-heading library-heading" id="libraryHeading"><div><span class="section-kicker">LIBRARY</span><h2>کتابخانه</h2></div><div class="heading-meta"><span id="resultsCount">0 نتیجه</span><span class="dot"></span><span id="sortLabel">جدیدترین</span></div></section>
   <section class="library-section">
     <div id="skeletonGrid" class="skeleton-grid"></div>
     <div id="moviesGrid" class="movies-grid" aria-live="polite"></div>
