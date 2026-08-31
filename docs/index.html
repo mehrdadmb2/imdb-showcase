@@ -79,7 +79,9 @@
     </div>
   </section>
 
-  <section class="content-heading"><div><span class="section-kicker">SERIES HUB</span><h2>دنیای سریال‌ها</h2><small>فصل‌ها، قسمت‌ها و ارتباطات سریالی</small></div><div class="heading-meta"><span id="seriesCount">0 مجموعه</span><button id="collapseSeries" class="text-button" type="button">جمع‌کردن</button></div></section>
+  <section class="latest-section glass" id="latestSection"><div class="section-heading latest-heading"><div><span class="section-kicker">RECENTLY WATCHED</span><h3>جدیدترین عنوان‌هایی که دیدم</h3><small>بر اساس آخرین Date Rated در IMDb</small></div><a class="text-button profile-link" target="_blank" rel="noopener noreferrer" href="https://www.imdb.com/user/p.if6bmsibrbg5dapfqbjrld4lhy?ref_=ext_shr_lnk">IMDb من ↗</a></div><div class="latest-rail" id="latestRail"></div></section>
+
+<section class="content-heading"><div><span class="section-kicker">SERIES HUB</span><h2>دنیای سریال‌ها</h2><small>فصل‌ها، قسمت‌ها و ارتباطات سریالی</small></div><div class="heading-meta"><span id="seriesCount">0 مجموعه</span><button id="collapseSeries" class="text-button" type="button">جمع‌کردن</button></div></section>
   <section class="series-grid" id="seriesGrid"></section>
 
   <section id="statsSection" class="stats-section" hidden>
@@ -105,6 +107,10 @@
   <section class="library-section">
     <div id="skeletonGrid" class="skeleton-grid"></div>
     <div id="moviesGrid" class="movies-grid" aria-live="polite"></div>
+    <div class="pagination-bar glass" id="paginationBar">
+      <div class="pagination-info"><span id="paginationSummary">—</span><label class="page-size-label">نمایش<select id="pageSize"><option value="12">12</option><option value="24" selected>24</option><option value="36">36</option><option value="48">48</option></select>کارت</label></div>
+      <div class="pagination-controls"><button class="page-button" id="firstPage" type="button">اول</button><button class="page-button" id="prevPage" type="button">قبلی</button><div class="page-numbers" id="pageNumbers"></div><button class="page-button" id="nextPage" type="button">بعدی</button><button class="page-button" id="lastPage" type="button">آخر</button></div>
+    </div>
     <div id="emptyState" class="empty-state glass" hidden><div class="empty-icon">◌</div><h3>چیزی پیدا نشد</h3><p id="emptyText">فیلتر یا جستجو را تغییر بده.</p><button id="emptyReset" class="action-button accent" type="button">بازنشانی</button></div>
   </section>
 </main>
@@ -145,6 +151,7 @@
       <div class="detail-cell wide"><span>ژانر</span><b id="modalGenre">—</b></div><div class="detail-cell wide"><span>کارگردان</span><b id="modalDirector">—</b></div><div class="detail-cell wide"><span>نویسنده</span><b id="modalWriter">—</b></div>
       <div class="detail-cell wide"><span>بازیگران</span><b id="modalActors">—</b></div><div class="detail-cell"><span>کشور</span><b id="modalCountry">—</b></div><div class="detail-cell"><span>زبان</span><b id="modalLanguage">—</b></div><div class="detail-cell"><span>امتیاز داده‌شده</span><b id="modalDateRated">—</b></div><div class="detail-cell"><span>جوایز</span><b id="modalAwards">—</b></div><div class="detail-cell"><span>Box Office</span><b id="modalBoxOffice">—</b></div><div class="detail-cell"><span>تولید</span><b id="modalProduction">—</b></div>
     </div>
+    <section class="raw-data-section"><div class="section-heading compact"><div><span class="section-kicker">SOURCE DATA</span><h3>تمام فیلدهای Dataset</h3></div><span class="source-note-inline">CSV + OMDb</span></div><div id="modalRawData" class="raw-data-grid"></div></section>
     <div class="ratings-sources" id="modalRatingsSources"></div>
     <div class="source-note" id="modalSourceNote"></div>
   </article>

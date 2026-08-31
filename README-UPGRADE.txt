@@ -1,5 +1,17 @@
-IMDb Showcase v3
+IMDb Showcase V4
 
-Replace docs/index.html, docs/style.css, docs/script.js, docs/starfield.js and keep your existing docs/pic and src/ratings.csv. Backend/workflow are included and preserve old enriched data on API failure.
-IMDb profile link used by the UI:
-https://www.imdb.com/user/p.if6bmsibrbg5dapfqbjrld4lhy?ref_=ext_shr_lnk
+Replace the existing website/workflow files with these files.
+Keep your existing src/ratings.csv and docs/pic/ unchanged.
+Keep docs/movies.json initially; GitHub Actions will regenerate it.
+
+Important V4 improvements:
+- Pagination: only 12-48 cards are rendered at once.
+- Latest watched section based on Date Rated.
+- Full raw CSV row is preserved as raw_csv so extra export columns are not lost.
+- Full raw dataset fields are shown in the title details modal.
+- Offline/localStorage fallback remains available.
+- Previous enriched data is preserved if OMDb fails.
+- Per-title fallback posters are generated locally when no poster is available.
+- Series are grouped into series -> seasons -> episodes.
+- Runtime is displayed as hours and minutes.
+- IMDb profile link is included in the header and footer.
