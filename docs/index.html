@@ -44,7 +44,7 @@
                 <button id="toggleView" class="btn-glass">📽️ همه</button>
                 <button id="statsBtn" class="btn-glass" style="background:rgba(233,69,96,0.15);border-color:var(--accent);">📈 آمار</button>
                 <a href="advanced/" class="btn-glass advanced-btn">✨ حالت پیشرفته</a>
-                <a href="https://www.imdb.com/user/p.if6bmsibrbg5dapfqbjrld4lhy?ref_=ext_shr_lnk" target="_blank" rel="noopener noreferrer" class="btn-glass">🎬 IMDb من</a>
+                <a href="https://www.imdb.com/user/p.if6bmsibrbg5dapfqbjrld4lhy" target="_blank" class="btn-glass">🎬 IMDb من</a>
             </div>
         </div>
     </header>
@@ -159,27 +159,24 @@
 
         <div class="pagination glass" id="paginationBar" aria-label="صفحه‌بندی کتابخانه">
             <div class="pagination-info">
-                <span id="pageInfo">صفحه ۱ از ۱</span>
-                <span id="pageRange">۰ عنوان</span>
+                <span id="paginationSummary">—</span>
+                <label class="page-size-label">نمایش
+                    <select id="pageSize" aria-label="تعداد کارت در صفحه">
+                        <option value="12">12</option>
+                        <option value="24" selected>24</option>
+                        <option value="36">36</option>
+                        <option value="48">48</option>
+                    </select>
+                    کارت
+                </label>
             </div>
-
             <div class="pagination-controls">
-                <button type="button" class="page-btn" id="firstPage" aria-label="اولین صفحه">«</button>
-                <button type="button" class="page-btn" id="prevPage" aria-label="صفحه قبل">‹</button>
+                <button class="page-button" id="firstPage" type="button">اول</button>
+                <button class="page-button" id="prevPage" type="button">قبلی</button>
                 <div class="page-numbers" id="pageNumbers"></div>
-                <button type="button" class="page-btn" id="nextPage" aria-label="صفحه بعد">›</button>
-                <button type="button" class="page-btn" id="lastPage" aria-label="آخرین صفحه">»</button>
+                <button class="page-button" id="nextPage" type="button">بعدی</button>
+                <button class="page-button" id="lastPage" type="button">آخر</button>
             </div>
-
-            <label class="page-size-wrap">
-                <span>در هر صفحه</span>
-                <select id="pageSize" aria-label="تعداد کارت در هر صفحه">
-                    <option value="12">۱۲</option>
-                    <option value="24" selected>۲۴</option>
-                    <option value="36">۳۶</option>
-                    <option value="48">۴۸</option>
-                </select>
-            </label>
         </div>
 
         <div class="loading" id="loading">⏳ در حال بارگذاری...</div>

@@ -119,121 +119,6 @@ function sortMovies() {
 }
 
 // ===== رندر فیلم‌ها =====
-function getFallbackPoster(m) {
-    const title = String(m.title || 'Untitled').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c]));
-    const type = m.title_type === 'TV Episode' ? 'EPISODE' : m.title_type === 'TV Series' ? 'SERIES' : 'MOVIE';
-    const year = String(m.year || '').replace(/[^0-9-]/g, '').slice(0, 9);
-    const hue = Math.abs(hashCode(String(m.imdb_id || m.title))) % 360;
-    const svg = `
-    <svg xmlns="http://www.w3.org/2000/svg" width="600" height="900" viewBox="0 0 600 900">
-      <defs>
-        <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
-          <stop offset="0" stop-color="hsl(${hue},72%,26%)"/>
-          <stop offset="0.52" stop-color="hsl(${(hue+52)%360},68%,15%)"/>
-          <stop offset="1" stop-color="#090a12"/>
-        </linearGradient>
-        <radialGradient id="r"><stop offset="0" stop-color="white" stop-opacity=".18"/><stop offset="1" stop-color="white" stop-opacity="0"/></radialGradient>
-      </defs>
-      <rect width="600" height="900" fill="url(#g)"/>
-      <circle cx="110" cy="180" r="170" fill="url(#r)"/>
-      <circle cx="560" cy="720" r="220" fill="url(#r)" opacity=".55"/>
-      <path d="M0 700 C160 590 250 820 600 570 L600 900 L0 900 Z" fill="#05060d" opacity=".58"/>
-      <rect x="34" y="34" width="532" height="832" rx="28" fill="none" stroke="white" stroke-opacity=".16"/>
-      <text x="52" y="88" fill="white" fill-opacity=".72" font-size="20" font-family="Arial, sans-serif" font-weight="700" letter-spacing="4">IMDB SHOWCASE</text>
-      <text x="52" y="128" fill="white" fill-opacity=".42" font-size="15" font-family="Arial, sans-serif" letter-spacing="3">${type}</text>
-      <text x="52" y="690" fill="white" font-size="38" font-family="Arial, sans-serif" font-weight="700">${title.slice(0, 26)}</text>
-      <text x="52" y="736" fill="white" fill-opacity=".62" font-size="22" font-family="Arial, sans-serif">${year || '—'}</text>
-      <text x="52" y="810" fill="white" fill-opacity=".34" font-size="16" font-family="Arial, sans-serif">POSTER UNAVAILABLE</text>
-    </svg>`;
-    return 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(svg);
-}
-
-function hashCode(value) {
-    let hash = 0;
-    for (let i = 0; i < value.length; i++) {
-        hash = ((hash << 5) - hash) + value.charCodeAt(i);
-        hash |= 0;
-    }
-    return hash;
-}
-
-function normalizeMovie(m) {
-    const movie = {...m};
-    movie.imdb_id = movie.imdb_id || movie.Const || '';
-    movie.title = movie.title || movie.Title || 'بدون عنوان';
-    movie.original_title = movie.original_title || movie['Original Title'] || movie.title;
-    movie.poster = movie.poster || '';
-    movie.genres = movie.genres || movie.Genres || '';
-    movie.title_type = movie.title_type || movie['Title Type'] || 'Other';
-    movie.user_rating = Number(movie.user_rating ?? movie['Your Rating'] ?? 0) || 0;
-    movie.date_rated = movie.date_rated || movie['Date Rated'] || '';
-    movie.year = movie.year || movie.Year || '';
-    movie.imdb_rating = movie.imdb_rating || movie['IMDb Rating'] || '';
-    movie.runtime = movie.runtime || movie['Runtime (mins)'] || '';
-    return movie;
-}
-
-function buildMovieCard(m) {
-    const title = escapeHtml(m.title);
-    const year = escapeHtml(m.year || 'N/A');
-    const genres = m.genres && m.genres !== 'N/A'
-        ? String(m.genres).split(',').map(g => g.trim()).filter(Boolean).slice(0, 3)
-            .map(g => `<span class="movie-genre-tag">${escapeHtml(g)}</span>`).join('')
-        : '';
-
-    const fallback = getFallbackPoster(m);
-    const poster = m.poster ? escapeHtml(m.poster) : fallback;
-    const ratedDate = m.date_rated ? formatDate(m.date_rated) : '';
-
-    let typeBadge = '';
-    if (m.title_type === 'TV Episode') {
-        typeBadge = '<div class="movie-type-badge">📺 قسمت</div>';
-    } else if (m.title_type === 'TV Series') {
-        typeBadge = '<div class="movie-type-badge">📺 سریال</div>';
-    } else if (m.title_type === 'Short') {
-        typeBadge = '<div class="movie-type-badge">🎞️ کوتاه</div>';
-    }
-
-    const ratingBadge = m.user_rating >= 8
-        ? '🔥 عالی'
-        : m.user_rating >= 6
-            ? '👍 خوب'
-            : m.user_rating > 0
-                ? '😐'
-                : '';
-
-    return `
-    <article class="movie-card" data-id="${escapeHtml(m.imdb_id)}" tabindex="0" role="button" aria-label="نمایش جزئیات ${title}">
-        <div class="poster-wrap">
-            <img
-                class="movie-poster"
-                src="${poster}"
-                alt="${title}"
-                loading="lazy"
-                decoding="async"
-                referrerpolicy="no-referrer"
-                onerror="this.onerror=null; this.src='${fallback}';"
-            />
-            <div class="movie-glow"></div>
-            <div class="movie-top-meta">
-                <span class="movie-year-pill">${year}</span>
-                ${m.user_rating ? `<span class="movie-user-pill">⭐ ${m.user_rating}</span>` : ''}
-            </div>
-        </div>
-        <div class="movie-info">
-            <div class="movie-title">${title}</div>
-            <div class="movie-year">${year}${ratedDate ? ` • 📅 ${escapeHtml(ratedDate)}` : ''}</div>
-            <div class="movie-genres">${genres}</div>
-            <div class="movie-rating">
-                <span class="user-rating">⭐ ${m.user_rating || '?'}</span>
-                <span class="imdb-rating">IMDb: ${escapeHtml(m.imdb_rating || 'N/A')}</span>
-            </div>
-        </div>
-        ${ratingBadge ? `<div class="movie-badge">${ratingBadge}</div>` : ''}
-        ${typeBadge}
-    </article>`;
-}
-
 function renderMovies() {
     const grid = document.getElementById('moviesGrid');
     if (!grid) return;
@@ -241,16 +126,11 @@ function renderMovies() {
     const total = filteredMovies.length;
     const totalPages = Math.max(1, Math.ceil(total / pageSize));
 
-    if (currentPage > totalPages) currentPage = totalPages;
-    if (currentPage < 1) currentPage = 1;
+    currentPage = Math.min(Math.max(1, currentPage), totalPages);
 
     if (!total) {
-        grid.innerHTML = `
-            <div class="empty-library">
-                <span class="empty-library-icon">🎭</span>
-                <strong>هیچ عنوانی پیدا نشد</strong>
-                <span>فیلترها را تغییر بده یا همه فیلترها را پاک کن.</span>
-            </div>`;
+        grid.innerHTML = `<div style="grid-column:1/-1;text-align:center;padding:60px;color:var(--text-muted);">
+            <span style="font-size:48px;">🎭</span><p style="margin-top:12px;">هیچ فیلمی پیدا نشد.</p></div>`;
         renderPagination();
         return;
     }
@@ -258,133 +138,153 @@ function renderMovies() {
     const start = (currentPage - 1) * pageSize;
     const pageItems = filteredMovies.slice(start, start + pageSize);
 
-    grid.innerHTML = pageItems.map(m => buildMovieCard(normalizeMovie(m))).join('');
+    grid.innerHTML = pageItems.map(m => {
+        const safeId = String(m.imdb_id || '');
+        const title = escapeAttribute(String(m.title || 'بدون عنوان'));
+        const genres = m.genres && m.genres !== 'N/A' ?
+            String(m.genres).split(',').slice(0,3).map(g => `<span class="movie-genre-tag">${escapeHtml(g.trim())}</span>`).join('') : '';
+        const posterHtml = m.poster ?
+            `<img class="movie-poster" src="${escapeAttribute(m.poster)}" alt="${title}" loading="lazy" decoding="async" referrerpolicy="no-referrer" onerror="this.onerror=null;this.outerHTML='<div class=&quot;movie-poster-placeholder&quot;>🎬</div>' />` :
+            `<div class="movie-poster-placeholder">🎬</div>`;
+        const typeBadge = m.title_type === 'TV Episode' ? '<div class="movie-type-badge">📺 قسمت</div>' :
+                          m.title_type === 'TV Series' ? '<div class="movie-type-badge">📺 سریال</div>' :
+                          m.title_type === 'Short' ? '<div class="movie-type-badge">🎞️ کوتاه</div>' : '';
+        const ratingBadge = Number(m.user_rating) >= 8 ? '🔥 عالی' : Number(m.user_rating) >= 6 ? '👍 خوب' : Number(m.user_rating) > 0 ? '😐' : '';
+        const ratedDate = m.date_rated ? safeFormatDate(m.date_rated) : '';
+        return `
+        <div class="movie-card" data-id="${escapeAttribute(safeId)}" tabindex="0" role="button" aria-label="نمایش جزئیات ${title}">
+            ${posterHtml}
+            <div class="movie-info">
+                <div class="movie-title">${title}</div>
+                <div class="movie-year">${escapeHtml(m.year || 'N/A')}</div>
+                ${ratedDate ? `<div style="font-size:10px;color:var(--text-muted);margin-top:2px;">📅 ${escapeHtml(ratedDate)}</div>` : ''}
+                <div class="movie-genres">${genres}</div>
+                <div class="movie-rating">
+                    <span class="user-rating">⭐ ${escapeHtml(m.user_rating || '?')}</span>
+                    <span class="imdb-rating">IMDb: ${escapeHtml(m.imdb_rating || 'N/A')}</span>
+                </div>
+            </div>
+            ${ratingBadge ? `<div class="movie-badge">${ratingBadge}</div>` : ''}
+            ${typeBadge}
+        </div>`;
+    }).join('');
+
     renderPagination();
-}
-
-function renderPagination() {
-    const total = filteredMovies.length;
-    const totalPages = Math.max(1, Math.ceil(total / pageSize));
-    const start = total ? ((currentPage - 1) * pageSize) + 1 : 0;
-    const end = Math.min(currentPage * pageSize, total);
-
-    const info = document.getElementById('pageInfo');
-    const range = document.getElementById('pageRange');
-    const numbers = document.getElementById('pageNumbers');
-    const pagination = document.getElementById('paginationBar');
-
-    if (info) info.textContent = `صفحه ${toFa(currentPage)} از ${toFa(totalPages)}`;
-    if (range) range.textContent = `${toFa(start)}–${toFa(end)} از ${toFa(total)} عنوان`;
-
-    if (pagination) pagination.classList.toggle('hidden', total <= pageSize);
-
-    if (numbers) {
-        const pages = buildPageWindow(currentPage, totalPages, 5);
-        numbers.innerHTML = pages.map(page => {
-            if (page === '…') return '<span class="page-ellipsis">…</span>';
-            return `<button type="button" class="page-number ${page === currentPage ? 'active' : ''}" data-page="${page}">${toFa(page)}</button>`;
-        }).join('');
-    }
-
-    setDisabled('firstPage', currentPage <= 1);
-    setDisabled('prevPage', currentPage <= 1);
-    setDisabled('nextPage', currentPage >= totalPages);
-    setDisabled('lastPage', currentPage >= totalPages);
-}
-
-function buildPageWindow(current, total, maxVisible) {
-    if (total <= maxVisible) return Array.from({length: total}, (_, i) => i + 1);
-    const pages = [1];
-    const start = Math.max(2, current - 1);
-    const end = Math.min(total - 1, current + 1);
-    if (start > 2) pages.push('…');
-    for (let p = start; p <= end; p++) pages.push(p);
-    if (end < total - 1) pages.push('…');
-    pages.push(total);
-    return pages;
-}
-
-function setDisabled(id, value) {
-    const el = document.getElementById(id);
-    if (el) el.disabled = value;
-}
-
-function goToPage(page) {
-    const totalPages = Math.max(1, Math.ceil(filteredMovies.length / pageSize));
-    const target = Math.max(1, Math.min(Number(page) || 1, totalPages));
-    if (target === currentPage) return;
-    currentPage = target;
-    renderMovies();
-    document.getElementById('moviesGrid')?.scrollIntoView({behavior: 'smooth', block: 'start'});
-}
-
-function toFa(number) {
-    return String(number).replace(/\d/g, d => '۰۱۲۳۴۵۶۷۸۹'[d]);
 }
 
 function escapeHtml(value) {
     return String(value ?? '').replace(/[&<>"']/g, c => ({
         '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'
-    }[c]));
+    })[c]);
 }
 
-function formatDate(value) {
-    const date = new Date(value);
-    if (Number.isNaN(date.getTime())) return String(value);
-    return date.toLocaleDateString('fa-IR');
+function escapeAttribute(value) {
+    return escapeHtml(value);
+}
+
+function safeFormatDate(value) {
+    const d = new Date(value);
+    if (Number.isNaN(d.getTime())) return String(value || '');
+    return d.toLocaleDateString('fa-IR');
+}
+
+function latinDigits(value) {
+    return String(value ?? '').replace(/[۰-۹]/g, d => String('۰۱۲۳۴۵۶۷۸۹'.indexOf(d)));
+}
+
+function renderPagination() {
+    const bar = document.getElementById('paginationBar');
+    if (!bar) return;
+
+    const total = filteredMovies.length;
+    const pages = Math.max(1, Math.ceil(total / pageSize));
+    const start = total ? ((currentPage - 1) * pageSize) + 1 : 0;
+    const end = Math.min(currentPage * pageSize, total);
+
+    const summary = document.getElementById('paginationSummary');
+    if (summary) {
+        summary.textContent = total
+            ? `${latinDigits(start)} تا ${latinDigits(end)} از ${latinDigits(total)} عنوان`
+            : '۰ عنوان';
+    }
+
+    const first = document.getElementById('firstPage');
+    const prev = document.getElementById('prevPage');
+    const next = document.getElementById('nextPage');
+    const last = document.getElementById('lastPage');
+
+    if (first) first.disabled = currentPage <= 1;
+    if (prev) prev.disabled = currentPage <= 1;
+    if (next) next.disabled = currentPage >= pages;
+    if (last) last.disabled = currentPage >= pages;
+
+    const container = document.getElementById('pageNumbers');
+    if (!container) return;
+
+    const maxButtons = window.innerWidth <= 600 ? 5 : 7;
+    let from = Math.max(1, currentPage - Math.floor(maxButtons / 2));
+    let to = Math.min(pages, from + maxButtons - 1);
+    from = Math.max(1, to - maxButtons + 1);
+
+    const buttons = [];
+
+    if (from > 1) {
+        buttons.push('<button class="page-number" data-page="1" type="button">1</button>');
+        if (from > 2) buttons.push('<span class="page-ellipsis">…</span>');
+    }
+
+    for (let i = from; i <= to; i++) {
+        buttons.push(`<button class="page-number ${i === currentPage ? 'active' : ''}" data-page="${i}" type="button">${i}</button>`);
+    }
+
+    if (to < pages) {
+        if (to < pages - 1) buttons.push('<span class="page-ellipsis">…</span>');
+        buttons.push(`<button class="page-number" data-page="${pages}" type="button">${pages}</button>`);
+    }
+
+    container.innerHTML = buttons.join('');
+}
+
+function goToPage(page) {
+    const pages = Math.max(1, Math.ceil(filteredMovies.length / pageSize));
+    const requested = Number(page);
+    currentPage = Number.isFinite(requested) ? Math.min(Math.max(1, requested), pages) : 1;
+    renderMovies();
+    requestAnimationFrame(() => {
+        const heading = document.getElementById('moviesGrid');
+        if (!heading) return;
+        const top = heading.getBoundingClientRect().top + window.scrollY - 120;
+        window.scrollTo({ top: Math.max(0, top), behavior: 'smooth' });
+    });
 }
 
 // ===== آمار اصلی =====
 function updateStats() {
-    const totalMovies = allMovies.filter(m => m.title_type === 'Movie' || m.title_type === 'Short').length;
-    const totalSeries = allMovies.filter(m => m.title_type === 'TV Series').length;
-    const totalEpisodes = allMovies.filter(m => m.title_type === 'TV Episode').length;
+    const total = allMovies.length;
+    const series = allMovies.filter(m => m.title_type === 'TV Episode' || m.title_type === 'TV Series').length;
+    document.getElementById('totalMovies').textContent = total;
+    document.getElementById('totalSeries').textContent = series;
 
-    document.getElementById('totalMovies').textContent = totalMovies;
-    document.getElementById('totalSeries').textContent = totalSeries + totalEpisodes;
-
-    let totalMinutes = 0;
-    let sumRating = 0;
-    let countRating = 0;
+    let totalMinutes = 0, sumRating = 0, countRating = 0;
     const genreSet = new Set();
 
     allMovies.forEach(m => {
         if (m.runtime && m.runtime !== 'N/A') {
-            const match = String(m.runtime).match(/\d+/);
-            const mins = match ? parseInt(match[0], 10) : 0;
-            if (Number.isFinite(mins)) totalMinutes += mins;
+            const mins = parseInt(m.runtime.toString().replace(/\D/g, ''));
+            if (!isNaN(mins)) totalMinutes += mins;
         }
-
-        const userRating = Number(m.user_rating) || 0;
-        if (userRating > 0) {
-            sumRating += userRating;
+        if (m.user_rating > 0) {
+            sumRating += m.user_rating;
             countRating++;
         }
-
         if (m.genres && m.genres !== 'N/A') {
-            String(m.genres).split(',').forEach(g => {
-                const genre = g.trim();
-                if (genre) genreSet.add(genre);
-            });
+            m.genres.split(',').forEach(g => genreSet.add(g.trim()));
         }
     });
 
-    const hours = Math.floor(totalMinutes / 60);
-    const minutes = totalMinutes % 60;
-
-    document.getElementById('totalHours').textContent = hours;
-    const minutesNode = document.getElementById('totalMinutes');
-    if (minutesNode) minutesNode.textContent = `${minutes} دقیقه`;
-
-    document.getElementById('avgRating').textContent = countRating
-        ? (sumRating / countRating).toFixed(1)
-        : '0';
-
-    const genresNode = document.getElementById('totalGenres');
-    if (genresNode) genresNode.textContent = genreSet.size;
-
-    const episodeNode = document.getElementById('statTotalEpisodes');
-    if (episodeNode) episodeNode.textContent = totalEpisodes;
+    document.getElementById('totalHours').textContent = Math.round(totalMinutes / 60);
+    document.getElementById('avgRating').textContent = countRating ? (sumRating / countRating).toFixed(1) : '0';
+    document.getElementById('totalGenres').textContent = genreSet.size;
 }
 
 // ===== اولین و آخرین =====
@@ -560,12 +460,9 @@ function generateStats() {
         .reverse();
     createChart('compareChart', 'bar',
         compareData.map(m => m.title.length > 20 ? m.title.slice(0, 18) + '...' : m.title),
-        [],
-        ['#ffd700', '#e94560'],
-        [
-            compareData.map(m => Number(m.user_rating) || 0),
-            compareData.map(m => parseFloat(m.imdb_rating) || 0)
-        ]
+        compareData.map(m => m.user_rating),
+        compareData.map(m => parseFloat(m.imdb_rating) || 0),
+        ['#ffd700', '#e94560']
     );
 
     // 8. بهترین فیلم‌ها
@@ -665,7 +562,8 @@ function createChart(id, type, labels, data, colors, datasets) {
 // ================================================================
 
 function openModal(id) {
-    const m = allMovies.find(x => x.imdb_id === id);
+    const targetId = String(id || '');
+    const m = allMovies.find(x => String(x.imdb_id || '') === targetId);
     if (!m) return;
     const ov = document.getElementById('modalOverlay');
     if (!ov) return;
@@ -758,7 +656,6 @@ safeAddEventListener('resetFilters', 'click', () => {
     document.getElementById('yearFilter').value = 'all';
     document.getElementById('typeFilter').value = 'all';
     currentFilters = { minRating: 0, genre: 'all', year: 'all', type: 'all' };
-    currentPage = 1;
     applyFiltersAndSort();
 });
 safeAddEventListener('sortBtn', 'click', () => {
@@ -780,6 +677,17 @@ safeAddEventListener('sortBtn', 'click', () => {
         }
     }
 });
+safeAddEventListener('toggleView', 'click', () => {
+    const modes = ['all', 'movie', 'series'];
+    const labels = ['📽️ همه', '🎬 فیلم', '📺 سریال'];
+    let idx = modes.indexOf(viewMode);
+    idx = (idx + 1) % modes.length;
+    viewMode = modes[idx];
+    document.getElementById('toggleView').textContent = labels[idx];
+    applyFiltersAndSort();
+});
+
+
 safeAddEventListener('pageSize', 'change', (e) => {
     const value = parseInt(e.target.value, 10);
     pageSize = [12, 24, 36, 48].includes(value) ? value : 24;
@@ -797,16 +705,6 @@ document.getElementById('paginationBar')?.addEventListener('click', (e) => {
     if (e.target.closest('#prevPage')) goToPage(currentPage - 1);
     if (e.target.closest('#nextPage')) goToPage(currentPage + 1);
     if (e.target.closest('#lastPage')) goToPage(Math.ceil(filteredMovies.length / pageSize));
-});
-
-safeAddEventListener('toggleView', 'click', () => {
-    const modes = ['all', 'movie', 'series'];
-    const labels = ['📽️ همه', '🎬 فیلم', '📺 سریال'];
-    let idx = modes.indexOf(viewMode);
-    idx = (idx + 1) % modes.length;
-    viewMode = modes[idx];
-    document.getElementById('toggleView').textContent = labels[idx];
-    applyFiltersAndSort();
 });
 
 document.getElementById('modalOverlay')?.addEventListener('click', (e) => {
