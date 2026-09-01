@@ -43,8 +43,8 @@
                 <button id="sortBtn" class="btn-glass">📊 مرتب‌سازی</button>
                 <button id="toggleView" class="btn-glass">📽️ همه</button>
                 <button id="statsBtn" class="btn-glass" style="background:rgba(233,69,96,0.15);border-color:var(--accent);">📈 آمار</button>
+                <a href="https://www.imdb.com/user/p.if6bmsibrbg5dapfqbjrld4lhy?ref_=ext_shr_lnk" target="_blank" rel="noopener noreferrer" class="btn-glass">🎬 IMDb من</a>
                 <a href="advanced/" class="btn-glass advanced-btn">✨ حالت پیشرفته</a>
-                <a href="https://www.imdb.com/user/p.if6bmsibrbg5dapfqbjrld4lhy" target="_blank" class="btn-glass">🎬 IMDb من</a>
             </div>
         </div>
     </header>
@@ -156,29 +156,18 @@
 
         <!-- شبکه فیلم‌ها -->
         <div class="movies-grid" id="moviesGrid"></div>
-
-        <div class="pagination glass" id="paginationBar" aria-label="صفحه‌بندی کتابخانه">
-            <div class="pagination-info">
-                <span id="paginationSummary">—</span>
-                <label class="page-size-label">نمایش
-                    <select id="pageSize" aria-label="تعداد کارت در صفحه">
-                        <option value="12">12</option>
-                        <option value="24" selected>24</option>
-                        <option value="36">36</option>
-                        <option value="48">48</option>
-                    </select>
-                    کارت
-                </label>
+        <div class="pagination glass" id="pagination" aria-label="صفحه‌بندی">
+            <div class="pagination-size">
+                <label for="pageSize">تعداد در صفحه</label>
+                <select id="pageSize">
+                    <option value="12">12</option>
+                    <option value="24" selected>24</option>
+                    <option value="36">36</option>
+                    <option value="48">48</option>
+                </select>
             </div>
-            <div class="pagination-controls">
-                <button class="page-button" id="firstPage" type="button">اول</button>
-                <button class="page-button" id="prevPage" type="button">قبلی</button>
-                <div class="page-numbers" id="pageNumbers"></div>
-                <button class="page-button" id="nextPage" type="button">بعدی</button>
-                <button class="page-button" id="lastPage" type="button">آخر</button>
-            </div>
+            <div class="pagination-controls" id="paginationControls"></div>
         </div>
-
         <div class="loading" id="loading">⏳ در حال بارگذاری...</div>
     </main>
 

@@ -74,15 +74,14 @@
   const localDate = value => {
     const d = parseDate(value);
     if (!d) return '—';
-    return latinDigits(new Intl.DateTimeFormat('fa-IR', {
+    return new Intl.DateTimeFormat('fa-IR', {
       year: 'numeric',
       month: 'short',
       day: 'numeric'
-    }).format(d));
+    }).format(d);
   };
 
-  const formatNumber = value => Number(value || 0).toLocaleString('en-US');
-  const latinDigits = value => String(value ?? '').replace(/[۰-۹]/g, d => String('۰۱۲۳۴۵۶۷۸۹'.indexOf(d)));
+  const formatNumber = value => Number(value || 0).toLocaleString('fa-IR');
 
   function runtimeMinutes(value) {
     if (typeof value === 'number') return Math.max(0, Math.round(value));
@@ -556,7 +555,7 @@
     const start = total ? (state.page - 1) * state.pageSize + 1 : 0;
     const end = Math.min(state.page * state.pageSize, total);
 
-    $('paginationSummary').textContent = total ? `${formatNumber(start)} تا ${formatNumber(end)} از ${formatNumber(total)} عنوان` : '0 عنوان';
+    $('paginationSummary').textContent = total ? `${formatNumber(start)} تا ${formatNumber(end)} از ${formatNumber(total)} عنوان` : '۰ عنوان';
     $('firstPage').disabled = state.page <= 1;
     $('prevPage').disabled = state.page <= 1;
     $('nextPage').disabled = state.page >= pages;
@@ -572,10 +571,10 @@
       buttons.push('<button class="page-number" data-page="1">1</button>');
       if (from > 2) buttons.push('<span class="page-ellipsis">…</span>');
     }
-    for (let i = from; i <= to; i++) buttons.push(`<button class="page-number ${i === state.page ? 'active' : ''}" data-page="${i}">${i}</button>`);
+    for (let i = from; i <= to; i++) buttons.push(`<button class="page-number ${i === state.page ? 'active' : ''}" data-page="${i}">${i.toLocaleString('fa-IR')}</button>`);
     if (to < pages) {
       if (to < pages - 1) buttons.push('<span class="page-ellipsis">…</span>');
-      buttons.push(`<button class="page-number" data-page="${pages}">${pages}</button>`);
+      buttons.push(`<button class="page-number" data-page="${pages}">${pages.toLocaleString('fa-IR')}</button>`);
     }
     $('pageNumbers').innerHTML = buttons.join('');
   }
@@ -647,7 +646,7 @@
           <div class="series-title">${esc(group.title)}</div>
           <div class="series-meta">${eps.length ? `${eps.length} قسمت • ${esc(runtime)}` : 'اطلاعات قسمت محدود'}</div>
           <div class="series-badges"><span class="pill">${rated}/${eps.length || 0} امتیاز</span><span class="pill">${progress}% پوشش</span></div>
-          <div class="progress" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${progress}"><i style="width:${Math.min(100, Math.max(0, progress))}%"></i></div>
+          <div class="progress"><i style="width:${progress}%"></i></div>
         </div>
       </article>`;
     }).join('') : '<div class="source-note">مجموعه سریالی قابل گروه‌بندی در Dataset پیدا نشد.</div>';
@@ -684,12 +683,7 @@
 
     const progress = state.movies.length ? Math.round((rated.length / state.movies.length) * 100) : 0;
     setText('heroPulse', `${progress}%`);
-    if ($('heroPulseBar')) {
-      const bar = $('heroPulseBar');
-      const safeProgress = Math.min(100, Math.max(0, progress));
-      bar.style.width = `${safeProgress}%`;
-      bar.setAttribute('aria-valuenow', String(safeProgress));
-    }
+    if ($('heroPulseBar')) $('heroPulseBar').style.width = `${progress}%`;
   }
 
   function updateResultsCount() {

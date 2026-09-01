@@ -187,12 +187,3 @@
 .movie-card,.series-card,.latest-card,.episode-item,.rank-row{cursor:pointer}.movie-card:focus-visible,.series-card:focus-visible,.latest-card:focus-visible{outline:2px solid var(--cyan);outline-offset:3px}.movie-card,.series-card,.latest-card{user-select:none}.detail-modal{overscroll-behavior:contain}.detail-main,.detail-title-line,.raw-data-cell{min-width:0}.detail-title-line h2{overflow-wrap:anywhere}.detail-cell b{overflow-wrap:anywhere}.latest-card{contain:layout paint}.movies-grid{contain:layout style}.series-grid{contain:layout style}
 @media(max-width:760px){.hero-mini-grid{grid-template-columns:1fr 1fr}.hero-mini:last-child{grid-column:1/-1}}
 @media(max-width:430px){.hero-mini-grid{grid-template-columns:1fr}.hero-mini:last-child{grid-column:auto}.hero-title-row h1{font-size:58px}}
-
-
-:root{--font:'Vazirmatn','Segoe UI',Tahoma,Arial,sans-serif}
-html,body,button,input,select,textarea{font-family:var(--font);font-variant-numeric:tabular-nums}
-.progress,.pulse-track{position:relative;overflow:hidden;isolation:isolate}
-.progress i,.pulse-track i{display:block;position:relative;min-width:0;max-width:100%;height:100%;transition:width .8s cubic-bezier(.2,.75,.2,1);will-change:width}
-.progress i:after,.pulse-track i:after{content:'';position:absolute;inset:0;background:linear-gradient(90deg,transparent,rgba(255,255,255,.28),transparent);transform:translateX(-120%);animation:progressShine 2.4s linear infinite}
-@keyframes progressShine{to{transform:translateX(120%)}}
-.detail-cell,.raw-data-cell,.detail-main,.detail-title-line,.movie-title,.latest-copy,.series-title{min-width:0;overflow-wrap:anywhere}

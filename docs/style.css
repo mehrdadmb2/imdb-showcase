@@ -384,93 +384,94 @@ footer p:last-child { font-size: 11px; margin-top: 4px; }
 }
 
 
-/* ===== صفحه‌بندی امن و سبک، بدون تغییر ظاهر اصلی ===== */
-.pagination{
-    max-width:1400px;
-    margin:10px auto 28px;
-    padding:12px 18px;
-    border-radius:var(--radius);
-    display:flex;
-    align-items:center;
-    justify-content:space-between;
-    gap:14px;
-    background:rgba(10,10,26,.55);
-    position:relative;
-    z-index:2;
-}
-.pagination-info{
-    display:flex;
-    align-items:center;
-    gap:14px;
-    color:var(--text-muted);
-    font-size:12px;
-    flex-wrap:wrap;
-}
-.page-size-label{display:flex;align-items:center;gap:7px}
-.page-size-label select{
-    background:rgba(255,255,255,.06);
-    color:var(--text);
-    border:1px solid rgba(255,255,255,.08);
-    border-radius:8px;
-    padding:5px 8px;
-    font-family:var(--font);
-}
-.pagination-controls{
-    display:flex;
-    align-items:center;
-    gap:6px;
-    flex-wrap:wrap;
-    justify-content:center;
-}
-.page-button,.page-number{
-    min-width:36px;
-    height:36px;
-    padding:0 10px;
-    border-radius:10px;
-    border:1px solid rgba(255,255,255,.08);
-    background:rgba(255,255,255,.045);
-    color:var(--text);
-    font-family:var(--font);
-    cursor:pointer;
-    transition:var(--transition);
-}
-.page-number{min-width:34px;padding:0 8px}
-.page-button:hover,.page-number:hover{
-    transform:translateY(-2px);
-    background:rgba(233,69,96,.16);
-    border-color:var(--accent);
-}
-.page-number.active{
-    background:linear-gradient(135deg,var(--accent),var(--accent2));
-    border-color:transparent;
-    box-shadow:0 8px 25px rgba(233,69,96,.22);
-}
-.page-button:disabled{
-    opacity:.35;
-    cursor:not-allowed;
-    transform:none;
-    box-shadow:none;
-}
-.page-ellipsis{
-    color:var(--text-muted);
-    padding:0 2px;
+/* ===== Page navigation (added without changing the classic card design) ===== */
+.pagination {
+    margin: 18px 0 26px;
+    padding: 12px 14px;
+    border-radius: var(--radius);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px;
+    flex-wrap: wrap;
 }
 
-.movie-card:focus-visible{
-    outline:2px solid var(--accent3);
-    outline-offset:3px;
+.pagination-size {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--text-muted);
+    font-size: 11px;
 }
 
-@media(max-width:768px){
-    .pagination{margin-left:24px;margin-right:24px;flex-direction:column;align-items:stretch}
-    .pagination-info{justify-content:space-between}
-    .pagination-controls{justify-content:center}
+.pagination-size select {
+    background: rgba(255,255,255,.05);
+    color: var(--text);
+    border: 1px solid rgba(255,255,255,.10);
+    border-radius: 9px;
+    padding: 6px 10px;
+    outline: none;
 }
 
-@media(max-width:480px){
-    .pagination{margin-left:12px;margin-right:12px;padding:10px}
-    .page-button,.page-number{min-width:31px;height:33px;font-size:11px}
-    .pagination-controls{gap:4px}
+.pagination-controls {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    flex-wrap: wrap;
 }
 
-body,.movie-card,.modal-content,.stat-number,.pagination{font-variant-numeric:tabular-nums}
+.page-btn {
+    min-width: 34px;
+    height: 34px;
+    padding: 0 9px;
+    border-radius: 9px;
+    border: 1px solid rgba(255,255,255,.08);
+    background: rgba(255,255,255,.035);
+    color: var(--text);
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.page-btn:hover:not(:disabled) {
+    transform: translateY(-2px);
+    border-color: var(--accent);
+    background: rgba(233,69,96,.10);
+}
+
+.page-btn.active {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: #fff;
+    box-shadow: 0 8px 24px rgba(233,69,96,.22);
+}
+
+.page-btn:disabled {
+    opacity: .35;
+    cursor: not-allowed;
+}
+
+.page-ellipsis {
+    color: var(--text-muted);
+    padding: 0 3px;
+}
+
+.advanced-btn {
+    border-color: rgba(108,92,231,.55) !important;
+    background: linear-gradient(135deg, rgba(108,92,231,.15), rgba(233,69,96,.10));
+}
+
+.movie-card {
+    cursor: pointer;
+}
+
+.movie-card:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 3px;
+}
+
+@media (max-width: 768px) {
+    .pagination {
+        justify-content: center;
+    }
+}

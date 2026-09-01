@@ -118,49 +118,58 @@ function sortMovies() {
     });
 }
 
-// ===== رندر فیلم‌ها =====
+// ===== رندر فیلم‌ها + صفحه‌بندی =====
 function renderMovies() {
     const grid = document.getElementById('moviesGrid');
+    const pagination = document.getElementById('pagination');
+    const controls = document.getElementById('paginationControls');
     if (!grid) return;
 
     const total = filteredMovies.length;
-    const totalPages = Math.max(1, Math.ceil(total / pageSize));
-
-    currentPage = Math.min(Math.max(1, currentPage), totalPages);
 
     if (!total) {
         grid.innerHTML = `<div style="grid-column:1/-1;text-align:center;padding:60px;color:var(--text-muted);">
             <span style="font-size:48px;">🎭</span><p style="margin-top:12px;">هیچ فیلمی پیدا نشد.</p></div>`;
-        renderPagination();
+        if (pagination) pagination.style.display = 'none';
         return;
     }
 
-    const start = (currentPage - 1) * pageSize;
-    const pageItems = filteredMovies.slice(start, start + pageSize);
+    const totalPages = Math.max(1, Math.ceil(total / pageSize));
+    if (currentPage > totalPages) currentPage = totalPages;
+    if (currentPage < 1) currentPage = 1;
 
-    grid.innerHTML = pageItems.map(m => {
-        const safeId = String(m.imdb_id || '');
-        const title = escapeAttribute(String(m.title || 'بدون عنوان'));
+    const startIndex = (currentPage - 1) * pageSize;
+    const pageMovies = filteredMovies.slice(startIndex, startIndex + pageSize);
+
+    grid.innerHTML = pageMovies.map(m => {
+        const title = escapeHtml(m.title || 'بدون عنوان');
+        const year = escapeHtml(m.year || 'N/A');
+        const imdbId = escapeHtml(m.imdb_id || '');
         const genres = m.genres && m.genres !== 'N/A' ?
-            String(m.genres).split(',').slice(0,3).map(g => `<span class="movie-genre-tag">${escapeHtml(g.trim())}</span>`).join('') : '';
+            m.genres.toString().split(',').slice(0,3).map(g => `<span class="movie-genre-tag">${escapeHtml(g.trim())}</span>`).join('') : '';
+        const fallback = '<div class="movie-poster-placeholder">🎬</div>';
         const posterHtml = m.poster ?
-            `<img class="movie-poster" src="${escapeAttribute(m.poster)}" alt="${title}" loading="lazy" decoding="async" referrerpolicy="no-referrer" onerror="this.onerror=null;this.outerHTML='<div class=&quot;movie-poster-placeholder&quot;>🎬</div>' />` :
-            `<div class="movie-poster-placeholder">🎬</div>`;
+            `<img class="movie-poster" src="${escapeHtml(m.poster)}" alt="${title}" loading="lazy" onerror="this.className='movie-poster-placeholder'; this.removeAttribute('src'); this.textContent='🎬';" />` :
+            fallback;
         const typeBadge = m.title_type === 'TV Episode' ? '<div class="movie-type-badge">📺 قسمت</div>' :
-                          m.title_type === 'TV Series' ? '<div class="movie-type-badge">📺 سریال</div>' :
-                          m.title_type === 'Short' ? '<div class="movie-type-badge">🎞️ کوتاه</div>' : '';
-        const ratingBadge = Number(m.user_rating) >= 8 ? '🔥 عالی' : Number(m.user_rating) >= 6 ? '👍 خوب' : Number(m.user_rating) > 0 ? '😐' : '';
-        const ratedDate = m.date_rated ? safeFormatDate(m.date_rated) : '';
+                          m.title_type === 'TV Series' ? '<div class="movie-type-badge">📺 سریال</div>' : '';
+        const rating = Number(m.user_rating) || 0;
+        const ratingBadge = rating >= 8 ? '🔥 عالی' : rating >= 6 ? '👍 خوب' : rating > 0 ? '😐' : '';
+        let ratedDate = '';
+        if (m.date_rated) {
+            const d = new Date(m.date_rated);
+            ratedDate = Number.isNaN(d.getTime()) ? String(m.date_rated) : d.toLocaleDateString('fa-IR');
+        }
         return `
-        <div class="movie-card" data-id="${escapeAttribute(safeId)}" tabindex="0" role="button" aria-label="نمایش جزئیات ${title}">
+        <div class="movie-card" data-id="${imdbId}" onclick="openModal('${imdbId}')" tabindex="0" role="button" aria-label="نمایش جزئیات ${title}">
             ${posterHtml}
             <div class="movie-info">
                 <div class="movie-title">${title}</div>
-                <div class="movie-year">${escapeHtml(m.year || 'N/A')}</div>
+                <div class="movie-year">${year}</div>
                 ${ratedDate ? `<div style="font-size:10px;color:var(--text-muted);margin-top:2px;">📅 ${escapeHtml(ratedDate)}</div>` : ''}
                 <div class="movie-genres">${genres}</div>
                 <div class="movie-rating">
-                    <span class="user-rating">⭐ ${escapeHtml(m.user_rating || '?')}</span>
+                    <span class="user-rating">⭐ ${rating || '?'}</span>
                     <span class="imdb-rating">IMDb: ${escapeHtml(m.imdb_rating || 'N/A')}</span>
                 </div>
             </div>
@@ -169,93 +178,57 @@ function renderMovies() {
         </div>`;
     }).join('');
 
-    renderPagination();
+    renderPagination(total, totalPages);
+}
+
+function renderPagination(total, totalPages) {
+    const pagination = document.getElementById('pagination');
+    const controls = document.getElementById('paginationControls');
+    if (!pagination || !controls) return;
+
+    pagination.style.display = totalPages > 1 || total > 0 ? 'flex' : 'none';
+
+    const items = [];
+    const addButton = (page, label, disabled = false, active = false, title = '') => {
+        items.push(`<button type="button" class="page-btn${active ? ' active' : ''}" data-page="${page}" ${disabled ? 'disabled' : ''} ${title ? `title="${escapeHtml(title)}"` : ''}>${label}</button>`);
+    };
+
+    addButton(currentPage - 1, '‹', currentPage <= 1, false, 'صفحه قبل');
+
+    const pages = new Set([1, totalPages]);
+    for (let p = currentPage - 2; p <= currentPage + 2; p++) {
+        if (p > 0 && p <= totalPages) pages.add(p);
+    }
+
+    const ordered = [...pages].sort((a,b) => a-b);
+    let previous = 0;
+    for (const page of ordered) {
+        if (previous && page - previous > 1) {
+            items.push('<span class="page-ellipsis">…</span>');
+        }
+        addButton(page, String(page), false, page === currentPage);
+        previous = page;
+    }
+
+    addButton(currentPage + 1, '›', currentPage >= totalPages, false, 'صفحه بعد');
+
+    controls.innerHTML = items.join('');
+    controls.querySelectorAll('.page-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const page = Number(btn.dataset.page);
+            if (!Number.isFinite(page) || page < 1 || page > totalPages || page === currentPage) return;
+            currentPage = page;
+            renderMovies();
+            const grid = document.getElementById('moviesGrid');
+            if (grid) grid.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        });
+    });
 }
 
 function escapeHtml(value) {
     return String(value ?? '').replace(/[&<>"']/g, c => ({
-        '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'
-    })[c]);
-}
-
-function escapeAttribute(value) {
-    return escapeHtml(value);
-}
-
-function safeFormatDate(value) {
-    const d = new Date(value);
-    if (Number.isNaN(d.getTime())) return String(value || '');
-    return d.toLocaleDateString('fa-IR');
-}
-
-function latinDigits(value) {
-    return String(value ?? '').replace(/[۰-۹]/g, d => String('۰۱۲۳۴۵۶۷۸۹'.indexOf(d)));
-}
-
-function renderPagination() {
-    const bar = document.getElementById('paginationBar');
-    if (!bar) return;
-
-    const total = filteredMovies.length;
-    const pages = Math.max(1, Math.ceil(total / pageSize));
-    const start = total ? ((currentPage - 1) * pageSize) + 1 : 0;
-    const end = Math.min(currentPage * pageSize, total);
-
-    const summary = document.getElementById('paginationSummary');
-    if (summary) {
-        summary.textContent = total
-            ? `${latinDigits(start)} تا ${latinDigits(end)} از ${latinDigits(total)} عنوان`
-            : '۰ عنوان';
-    }
-
-    const first = document.getElementById('firstPage');
-    const prev = document.getElementById('prevPage');
-    const next = document.getElementById('nextPage');
-    const last = document.getElementById('lastPage');
-
-    if (first) first.disabled = currentPage <= 1;
-    if (prev) prev.disabled = currentPage <= 1;
-    if (next) next.disabled = currentPage >= pages;
-    if (last) last.disabled = currentPage >= pages;
-
-    const container = document.getElementById('pageNumbers');
-    if (!container) return;
-
-    const maxButtons = window.innerWidth <= 600 ? 5 : 7;
-    let from = Math.max(1, currentPage - Math.floor(maxButtons / 2));
-    let to = Math.min(pages, from + maxButtons - 1);
-    from = Math.max(1, to - maxButtons + 1);
-
-    const buttons = [];
-
-    if (from > 1) {
-        buttons.push('<button class="page-number" data-page="1" type="button">1</button>');
-        if (from > 2) buttons.push('<span class="page-ellipsis">…</span>');
-    }
-
-    for (let i = from; i <= to; i++) {
-        buttons.push(`<button class="page-number ${i === currentPage ? 'active' : ''}" data-page="${i}" type="button">${i}</button>`);
-    }
-
-    if (to < pages) {
-        if (to < pages - 1) buttons.push('<span class="page-ellipsis">…</span>');
-        buttons.push(`<button class="page-number" data-page="${pages}" type="button">${pages}</button>`);
-    }
-
-    container.innerHTML = buttons.join('');
-}
-
-function goToPage(page) {
-    const pages = Math.max(1, Math.ceil(filteredMovies.length / pageSize));
-    const requested = Number(page);
-    currentPage = Number.isFinite(requested) ? Math.min(Math.max(1, requested), pages) : 1;
-    renderMovies();
-    requestAnimationFrame(() => {
-        const heading = document.getElementById('moviesGrid');
-        if (!heading) return;
-        const top = heading.getBoundingClientRect().top + window.scrollY - 120;
-        window.scrollTo({ top: Math.max(0, top), behavior: 'smooth' });
-    });
+        '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#039;'
+    }[c]));
 }
 
 // ===== آمار اصلی =====
@@ -562,8 +535,7 @@ function createChart(id, type, labels, data, colors, datasets) {
 // ================================================================
 
 function openModal(id) {
-    const targetId = String(id || '');
-    const m = allMovies.find(x => String(x.imdb_id || '') === targetId);
+    const m = allMovies.find(x => x.imdb_id === id);
     if (!m) return;
     const ov = document.getElementById('modalOverlay');
     if (!ov) return;
@@ -687,24 +659,30 @@ safeAddEventListener('toggleView', 'click', () => {
     applyFiltersAndSort();
 });
 
+// پشتیبان کلیک کارت: حتی اگر inline handler توسط محیط دیگری مختل شود.
+document.addEventListener('click', (e) => {
+    const card = e.target.closest?.('.movie-card');
+    if (!card) return;
+    if (e.target.closest('a, button, select, input')) return;
+    const id = card.dataset.id;
+    if (id) openModal(id);
+});
+
+document.addEventListener('keydown', (e) => {
+    const card = document.activeElement?.closest?.('.movie-card');
+    if (!card) return;
+    if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        const id = card.dataset.id;
+        if (id) openModal(id);
+    }
+});
 
 safeAddEventListener('pageSize', 'change', (e) => {
-    const value = parseInt(e.target.value, 10);
+    const value = Number(e.target.value);
     pageSize = [12, 24, 36, 48].includes(value) ? value : 24;
     currentPage = 1;
     renderMovies();
-});
-
-document.getElementById('paginationBar')?.addEventListener('click', (e) => {
-    const pageButton = e.target.closest('[data-page]');
-    if (pageButton) {
-        goToPage(pageButton.dataset.page);
-        return;
-    }
-    if (e.target.closest('#firstPage')) goToPage(1);
-    if (e.target.closest('#prevPage')) goToPage(currentPage - 1);
-    if (e.target.closest('#nextPage')) goToPage(currentPage + 1);
-    if (e.target.closest('#lastPage')) goToPage(Math.ceil(filteredMovies.length / pageSize));
 });
 
 document.getElementById('modalOverlay')?.addEventListener('click', (e) => {
@@ -714,5 +692,7 @@ document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeModal
 
 document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('loading')?.classList.add('active');
+    const pageSizeEl = document.getElementById('pageSize');
+    if (pageSizeEl) pageSizeEl.value = String(pageSize);
     loadMovies();
 });
