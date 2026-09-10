@@ -29,6 +29,9 @@
     <div class="hero-copy"><span class="eyebrow">YOUR CINEMA • SHARED DATASET</span><h1 id="totalTitlesHero">0 <small>titles</small></h1><p>Advanced mode reads the exact same repository dataset as Classic mode. Posters are local-first, cache-aware, and never dependent on a second data file.</p><div class="hero-metrics"><div><span>Watch time</span><b id="watchTime">0h 00m</b></div><div><span>My average</span><b id="heroAvg">0.0</b></div><div><span>Series</span><b id="heroSeries">0</b></div><div><span>Episodes</span><b id="heroEpisodes">0</b></div></div><div class="health-line"><span>Dataset health</span><b id="healthStatus">CHECKING</b><i><em id="healthBar"></em></i></div></div>
   </section>
 
+
+
+
   <section class="latest glass">
     <div class="section-head"><div><span class="eyebrow">RECENTLY WATCHED</span><h2>Latest titles</h2><small>Most recently rated in IMDb</small></div><span class="counter" id="latestCount">0</span></div>
     <div class="latest-grid" id="latestGrid"></div>
@@ -48,70 +51,23 @@
   <section class="pagination glass"><div><span id="pageSummary">0 / 0</span><label>Page size <select id="pageSize"><option>12</option><option selected>24</option><option>36</option><option>48</option></select></label></div><div class="page-controls"><button class="page-btn" id="firstPage" type="button">«</button><button class="page-btn" id="prevPage" type="button">‹</button><div id="pageNumbers"></div><button class="page-btn" id="nextPage" type="button">›</button><button class="page-btn" id="lastPage" type="button">»</button></div></section>
 
   <section class="analytics" id="analytics" hidden><div class="library-head"><div><span class="eyebrow">ANALYTICS</span><h2>Deep library analysis</h2></div></div><div class="metric-grid"><article class="metric glass"><span>Total titles</span><b id="mTitles">0</b></article><article class="metric glass"><span>Movies</span><b id="mMovies">0</b></article><article class="metric glass"><span>Series</span><b id="mSeries">0</b></article><article class="metric glass"><span>Episodes</span><b id="mEpisodes">0</b></article><article class="metric glass"><span>Total runtime</span><b id="mRuntime">0h 00m</b></article><article class="metric glass"><span>Stale records</span><b id="mStale">0</b></article><article class="metric glass"><span>Cached records</span><b id="mCached">0</b></article><article class="metric glass"><span>Fresh records</span><b id="mFresh">0</b></article></div><div class="chart-grid"><article class="chart glass"><h3>Genres</h3><div><canvas id="genreChart"></canvas></div></article><article class="chart glass"><h3>My ratings</h3><div><canvas id="ratingChart"></canvas></div></article><article class="chart glass"><h3>Rated titles by year</h3><div><canvas id="yearChart"></canvas></div></article><article class="chart glass"><h3>My rating vs IMDb</h3><div><canvas id="compareChart"></canvas></div></article></div></section>
-        <!-- Page Insights intentionally lives at the bottom of the Classic page -->
-        <section class="page-insights-panel glass" id="pageInsightsPanel" aria-label="Site visitor analytics">
-            <div class="page-insights-head">
-                <div>
-                    <span class="insights-kicker">LIVE SITE ANALYTICS</span>
-                    <h2>آمار بازدید سایت</h2>
-                    <p id="insightRangeLabel">در حال بارگذاری…</p>
-                </div>
-                <span class="insights-status" id="insightConnectionStatus"><i></i> Connected</span>
-            </div>
-
-            <div class="page-insights-hero">
-                <div class="insight-hero-primary">
-                    <span>بازدید امروز</span>
-                    <strong id="insightTodayViews">—</strong>
-                    <small id="insightTodaySub">در حال محاسبه</small>
-                </div>
-                <div class="insight-sparkline-wrap">
-                    <div class="insight-chart-label">روند ۳۰ روز اخیر</div>
-                    <svg id="insightSparkline" class="insight-sparkline" viewBox="0 0 600 150" preserveAspectRatio="none" aria-label="Traffic trend">
-                        <defs><linearGradient id="insightAreaGradient" x1="0" x2="0" y1="0" y2="1"><stop offset="0%" stop-opacity=".28"/><stop offset="100%" stop-opacity="0"/></linearGradient></defs>
-                        <path id="insightArea" d="M0,150 L600,150 Z" fill="url(#insightAreaGradient)"></path>
-                        <polyline id="insightLine" points="0,150 600,150" fill="none" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"></polyline>
-                    </svg>
-                </div>
-            </div>
-
-            <div class="page-insights-grid page-insights-grid-large">
-                <article class="insight-stat-card accent-stat"><span>کل بازدید</span><b id="insightTotalViews">—</b><small>تمام بازه ثبت‌شده</small></article>
-                <article class="insight-stat-card"><span>بازدیدکننده یکتا</span><b id="insightVisitors">—</b><small>Visitor IDs</small></article>
-                <article class="insight-stat-card"><span>Session</span><b id="insightSessions">—</b><small>جلسه‌های ثبت‌شده</small></article>
-                <article class="insight-stat-card"><span>بازدید ۷ روز</span><b id="insight7d">—</b><small id="insight7dDelta">—</small></article>
-                <article class="insight-stat-card"><span>بازدید ۳۰ روز</span><b id="insight30d">—</b><small id="insight30dDelta">—</small></article>
-                <article class="insight-stat-card"><span>میانگین زمان بازدید</span><b id="insightAvgDuration">—</b><small>بر اساس Page Leave / Heartbeat</small></article>
-                <article class="insight-stat-card"><span>عمق اسکرول</span><b id="insightAvgScroll">—</b><small>میانگین بیشترین Scroll</small></article>
-                <article class="insight-stat-card"><span>کلیک متوسط</span><b id="insightAvgClicks">—</b><small>در هر بازدید</small></article>
-            </div>
-
-            <div class="page-insights-detail-grid">
-                <div class="insight-detail-card">
-                    <div class="insight-detail-title"><span>دستگاه‌ها</span><small id="insightDeviceTotal">—</small></div>
-                    <div id="insightDevices" class="insight-devices"></div>
-                </div>
-                <div class="insight-detail-card">
-                    <div class="insight-detail-title"><span>صفحات محبوب</span><small>Top paths</small></div>
-                    <div id="insightTopPages" class="insight-list"></div>
-                </div>
-                <div class="insight-detail-card">
-                    <div class="insight-detail-title"><span>آخرین بازدیدها</span><small id="insightLastSeen">—</small></div>
-                    <div id="insightRecentVisits" class="insight-list"></div>
-                </div>
-            </div>
-
-            <div class="page-insights-footer">
-                <span>منبع داده: <b>GitHub Page Insights Worker</b></span>
-                <span id="insightFreshness">در حال همگام‌سازی…</span>
-            </div>
-        </section>
+  <section class="site-analytics glass" id="pageInsightsPanel">
+    <div class="section-head"><div><span class="eyebrow">VISITOR INTELLIGENCE</span><h2>Site traffic</h2><small id="insightRangeLabel">Loading analytics…</small></div><span class="live-dot"><i></i> Connected</span></div>
+    <div class="site-analytics-grid">
+      <article class="traffic-metric"><span>Total views</span><b id="insightTotalViews">—</b></article>
+      <article class="traffic-metric"><span>Unique visitors</span><b id="insightVisitors">—</b></article>
+      <article class="traffic-metric"><span>Sessions</span><b id="insightSessions">—</b></article>
+      <article class="traffic-metric"><span>Today</span><b id="insightTodayViews">—</b></article>
+    </div>
+    <div class="analytics-footer">Last recorded visit: <b id="insightLastSeen">—</b></div>
+  </section>
 </main>
 
 <div class="modal" id="detailModal" hidden><div class="modal-card glass"><button class="close" id="detailClose" type="button">×</button><div class="detail-top"><div class="poster-box"><img id="detailPoster" alt=""><div id="posterFallback" class="poster-fallback">NO POSTER</div></div><div class="detail-copy"><div class="badge-row"><span id="detailType" class="badge">TITLE</span><span id="detailCache" class="badge">CACHE</span></div><h2 id="detailTitle">—</h2><p id="detailOriginal">—</p><div class="score-grid"><div class="score"><small>MY RATING</small><b id="detailMyRating">—</b></div><div class="score"><small>IMDb</small><b id="detailImdb">—</b></div><div class="score"><small>METASCORE</small><b id="detailMeta">—</b></div><div class="score"><small>VOTES</small><b id="detailVotes">—</b></div></div><div id="detailTags" class="tags"></div><p id="detailPlot" class="plot">—</p><div class="detail-actions"><a class="btn accent" id="detailImdbLink" target="_blank" rel="noopener noreferrer">Open IMDb ↗</a><button class="btn" id="detailCopy" type="button">Copy ID</button></div></div></div><div class="detail-section"><h3>Production & metadata</h3><div class="detail-grid" id="detailGrid"></div></div><div class="detail-section" id="seriesDetailSection" hidden><h3>Series breakdown</h3><div class="series-stats" id="seriesStats"></div><div id="seasonList" class="seasons"></div></div><div class="detail-section"><h3>Raw repository data</h3><details><summary>Show raw CSV + OMDb payload</summary><pre id="rawData"></pre></details></div></div></div>
 
+<script>window.PAGE_INSIGHTS_CONFIG={workerUrl:"https://github-page-insights-worker.game-developer-mb.workers.dev",siteId:"imdb-showcase",siteName:"IMDb Showcase",heartbeatMs:15000,refreshMs:60000};</script>
+<script src="../page-insights.js" defer></script>
+<script src="../page-insights-ui.js" defer></script>
 <script src="starfield.js" defer></script><script src="script.js" defer></script>
-    <script src="../page-insights.js"></script>
-    <script src="../page-insights-ui.js"></script>
 </body>
 </html>

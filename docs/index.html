@@ -43,8 +43,8 @@
                 <button id="sortBtn" class="btn-glass">📊 مرتب‌سازی</button>
                 <button id="toggleView" class="btn-glass">📽️ همه</button>
                 <button id="statsBtn" class="btn-glass" style="background:rgba(233,69,96,0.15);border-color:var(--accent);">📈 آمار</button>
-                <a href="https://www.imdb.com/user/p.if6bmsibrbg5dapfqbjrld4lhy?ref_=ext_shr_lnk" target="_blank" rel="noopener noreferrer" class="btn-glass">🎬 IMDb من</a>
-                <a href="advanced/" class="btn-glass advanced-link">✨ سایت پیشرفته</a>
+                <a href="https://www.imdb.com/user/p.if6bmsibrbg5dapfqbjrld4lhy" target="_blank" class="btn-glass">🎬 IMDb من</a>
+                <a href="advanced/" class="btn-glass">✨ حالت پیشرفته</a>
             </div>
         </div>
     </header>
@@ -156,19 +156,6 @@
 
         <!-- شبکه فیلم‌ها -->
         <div class="movies-grid" id="moviesGrid"></div>
-        <div class="pagination-bar glass" id="paginationBar">
-            <div class="pagination-info">
-                <span id="paginationSummary">—</span>
-                <label>نمایش <select id="pageSize"><option value="12">12</option><option value="24" selected>24</option><option value="36">36</option><option value="48">48</option></select> کارت</label>
-            </div>
-            <div class="pagination-controls">
-                <button class="page-btn" id="firstPage" type="button">«</button>
-                <button class="page-btn" id="prevPage" type="button">‹</button>
-                <div id="pageNumbers" class="page-numbers"></div>
-                <button class="page-btn" id="nextPage" type="button">›</button>
-                <button class="page-btn" id="lastPage" type="button">»</button>
-            </div>
-        </div>
         <div class="loading" id="loading">⏳ در حال بارگذاری...</div>
     </main>
 
@@ -201,64 +188,24 @@
         </div>
     </div>
 
-        <!-- Page Insights intentionally lives at the bottom of the Classic page -->
-        <section class="page-insights-panel glass" id="pageInsightsPanel" aria-label="Site visitor analytics">
-            <div class="page-insights-head">
-                <div>
-                    <span class="insights-kicker">LIVE SITE ANALYTICS</span>
-                    <h2>آمار بازدید سایت</h2>
-                    <p id="insightRangeLabel">در حال بارگذاری…</p>
-                </div>
-                <span class="insights-status" id="insightConnectionStatus"><i></i> Connected</span>
+    <!-- آمار بازدید سایت: تنها بخش افزوده‌شده به نسخه کلاسیک -->
+    <section class="page-insights-classic glass" id="pageInsightsPanel">
+        <div class="page-insights-head">
+            <div>
+                <span class="page-insights-kicker">SITE INSIGHTS</span>
+                <h2>آمار بازدید</h2>
+                <p id="insightRangeLabel">در حال دریافت آمار...</p>
             </div>
-
-            <div class="page-insights-hero">
-                <div class="insight-hero-primary">
-                    <span>بازدید امروز</span>
-                    <strong id="insightTodayViews">—</strong>
-                    <small id="insightTodaySub">در حال محاسبه</small>
-                </div>
-                <div class="insight-sparkline-wrap">
-                    <div class="insight-chart-label">روند ۳۰ روز اخیر</div>
-                    <svg id="insightSparkline" class="insight-sparkline" viewBox="0 0 600 150" preserveAspectRatio="none" aria-label="Traffic trend">
-                        <defs><linearGradient id="insightAreaGradient" x1="0" x2="0" y1="0" y2="1"><stop offset="0%" stop-opacity=".28"/><stop offset="100%" stop-opacity="0"/></linearGradient></defs>
-                        <path id="insightArea" d="M0,150 L600,150 Z" fill="url(#insightAreaGradient)"></path>
-                        <polyline id="insightLine" points="0,150 600,150" fill="none" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"></polyline>
-                    </svg>
-                </div>
-            </div>
-
-            <div class="page-insights-grid page-insights-grid-large">
-                <article class="insight-stat-card accent-stat"><span>کل بازدید</span><b id="insightTotalViews">—</b><small>تمام بازه ثبت‌شده</small></article>
-                <article class="insight-stat-card"><span>بازدیدکننده یکتا</span><b id="insightVisitors">—</b><small>Visitor IDs</small></article>
-                <article class="insight-stat-card"><span>Session</span><b id="insightSessions">—</b><small>جلسه‌های ثبت‌شده</small></article>
-                <article class="insight-stat-card"><span>بازدید ۷ روز</span><b id="insight7d">—</b><small id="insight7dDelta">—</small></article>
-                <article class="insight-stat-card"><span>بازدید ۳۰ روز</span><b id="insight30d">—</b><small id="insight30dDelta">—</small></article>
-                <article class="insight-stat-card"><span>میانگین زمان بازدید</span><b id="insightAvgDuration">—</b><small>بر اساس Page Leave / Heartbeat</small></article>
-                <article class="insight-stat-card"><span>عمق اسکرول</span><b id="insightAvgScroll">—</b><small>میانگین بیشترین Scroll</small></article>
-                <article class="insight-stat-card"><span>کلیک متوسط</span><b id="insightAvgClicks">—</b><small>در هر بازدید</small></article>
-            </div>
-
-            <div class="page-insights-detail-grid">
-                <div class="insight-detail-card">
-                    <div class="insight-detail-title"><span>دستگاه‌ها</span><small id="insightDeviceTotal">—</small></div>
-                    <div id="insightDevices" class="insight-devices"></div>
-                </div>
-                <div class="insight-detail-card">
-                    <div class="insight-detail-title"><span>صفحات محبوب</span><small>Top paths</small></div>
-                    <div id="insightTopPages" class="insight-list"></div>
-                </div>
-                <div class="insight-detail-card">
-                    <div class="insight-detail-title"><span>آخرین بازدیدها</span><small id="insightLastSeen">—</small></div>
-                    <div id="insightRecentVisits" class="insight-list"></div>
-                </div>
-            </div>
-
-            <div class="page-insights-footer">
-                <span>منبع داده: <b>GitHub Page Insights Worker</b></span>
-                <span id="insightFreshness">در حال همگام‌سازی…</span>
-            </div>
-        </section>
+            <div class="page-insights-status" id="insightStatus"><span></span> در حال اتصال</div>
+        </div>
+        <div class="page-insights-metrics">
+            <div class="insight-metric"><span>کل بازدیدها</span><strong id="insightTotalViews">—</strong></div>
+            <div class="insight-metric"><span>بازدیدکنندگان یکتا</span><strong id="insightVisitors">—</strong></div>
+            <div class="insight-metric"><span>امروز</span><strong id="insightTodayViews">—</strong></div>
+            <div class="insight-metric"><span>جلسات</span><strong id="insightSessions">—</strong></div>
+        </div>
+        <div class="page-insights-foot">آخرین بازدید ثبت‌شده: <b id="insightLastSeen">—</b></div>
+    </section>
 
     <footer class="glass">
         <p>ساخته شده با ❤️ | داده‌ها از <a href="https://www.imdb.com" target="_blank">IMDb</a> و <a href="http://www.omdbapi.com/" target="_blank">OMDb API</a></p>
@@ -266,9 +213,10 @@
         <p style="font-size:11px; color:#666;" id="omdbStatus">وضعیت OMDb: در حال بررسی...</p>
     </footer>
 
-    <script src="starfield.js"></script>
-    <script src="script.js"></script>
+    <script>window.PAGE_INSIGHTS_CONFIG={workerUrl:"https://github-page-insights-worker.game-developer-mb.workers.dev",siteId:"imdb-showcase",siteName:"IMDb Showcase",refreshMs:60000};</script>
     <script src="page-insights.js"></script>
     <script src="page-insights-ui.js"></script>
+    <script src="starfield.js"></script>
+    <script src="script.js"></script>
 </body>
 </html>
