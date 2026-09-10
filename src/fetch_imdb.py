@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import argparse
 import csv
 import json
 import mimetypes
@@ -110,8 +111,27 @@ HTTP = request_session()
 
 
 def load_keys() -> list[str]:
-    raw = os.getenv("OMDB_API_KEYS", "").strip() or os.getenv("OMDB_API_KEY", "").strip()
-    return [part.strip() for part in raw.split(",") if part.strip()]
+    keys: list[str] = []
+
+    combined = os.getenv("OMDB_API_KEYS", "").strip()
+    if combined:
+        keys.extend(part.strip() for part in combined.split(",") if part.strip())
+
+    for name in (
+        "OMDB_API_KEY_1",
+        "OMDB_API_KEY_2",
+        "OMDB_API_KEY_3",
+        "OMDB_API_KEY_4",
+    ):
+        value = os.getenv(name, "").strip()
+        if value:
+            keys.append(value)
+
+    legacy = os.getenv("OMDB_API_KEY", "").strip()
+    if legacy:
+        keys.append(legacy)
+
+    return list(dict.fromkeys(keys))
 
 
 class KeyPool:
@@ -324,6 +344,63 @@ def fetch_imdb_poster_url(imdb_id: str) -> str:
         return ""
 
 
+def local_poster_path(relative_path: str) -> Path:
+    relative = clean(relative_path).replace("\\", "/").lstrip("/")
+    return DOCS / relative
+
+
+def local_poster_exists(relative_path: str) -> bool:
+    return bool(relative_path) and local_poster_path(relative_path).is_file()
+
+
+def record_poster_url(record: dict[str, Any]) -> str:
+    raw = record.get("raw_omdb") or {}
+    if isinstance(raw, dict):
+        raw_url = clean(raw.get("Poster"))
+        if raw_url and raw_url.upper() != "N/A":
+            return raw_url
+    url = clean(record.get("poster"))
+    if url and url.upper() != "N/A":
+        return url
+    return ""
+
+
+def repair_missing_posters(records: list[dict[str, Any]]) -> int:
+    repaired = 0
+    POSTER_DIR.mkdir(parents=True, exist_ok=True)
+
+    for record in records:
+        iid = clean(record.get("imdb_id"))
+        if not iid:
+            continue
+
+        local = clean(record.get("poster_local"))
+        if local_poster_exists(local):
+            continue
+
+        url = record_poster_url(record)
+        if not url:
+            url = fetch_imdb_poster_url(iid)
+
+        downloaded_path, ok = download_poster(iid, url, preserve_existing="")
+
+        if ok:
+            record["poster_local"] = downloaded_path
+            record["poster_source"] = "local-cache"
+            record["poster_cached_at"] = iso()
+            repaired += 1
+        else:
+            # Never keep a broken local reference in JSON.
+            if local and not local_poster_exists(local):
+                record["poster_local"] = ""
+            if clean(record.get("poster")):
+                record["poster_source"] = "remote-fallback"
+            else:
+                record["poster_source"] = "fallback"
+
+    return repaired
+
+
 def fetch_omdb(imdb_id: str, pool: KeyPool) -> tuple[dict[str, Any] | None, str]:
     key = pool.next()
     if not key:
@@ -497,6 +574,26 @@ def safe_write(payload: dict[str, Any]) -> None:
 
 
 def main() -> int:
+    parser = argparse.ArgumentParser()
+    parser.add_argument(
+        "--repair-posters",
+        action="store_true",
+        help="Repair missing local poster files from cached poster URLs without querying OMDb."
+    )
+    args = parser.parse_args()
+
+    if args.repair_posters:
+        previous = load_previous()
+        movies = previous.get("movies", [])
+        if not isinstance(movies, list) or not movies:
+            log("⚠️ No existing dataset available for poster repair.")
+            return 0
+        repaired = repair_missing_posters(movies)
+        previous["movies"] = movies
+        safe_write(previous)
+        log(f"🖼️ Local poster repair complete: repaired={repaired}")
+        return 0
+
     log("🚀 IMDb Showcase resilient repository cache updater")
 
     try:

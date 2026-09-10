@@ -40,3 +40,6 @@ Advanced:
 `/docs/advanced/`
 
 The Classic header contains the **Advanced mode** button.
+
+
+Page Insights restored in both Classic and Advanced.

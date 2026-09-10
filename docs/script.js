@@ -88,9 +88,12 @@ function posterFallback(movie) {
 }
 
 function imageHtml(movie, className = "movie-poster") {
-    const src = localPoster(movie);
+    const local = String(movie?.poster_local || "").trim();
+    const remote = String(movie?.poster || "").trim();
+    const initial = local || (/^https?:\/\//i.test(remote) ? remote : "");
     const fallback = posterFallback(movie);
-    return `<img class="${className}" src="${escapeHtml(src || fallback)}" data-fallback="${escapeHtml(fallback)}" alt="${escapeHtml(movie.title || "Poster")}" loading="lazy" decoding="async" onerror="this.onerror=null;this.src=this.dataset.fallback">`;
+    const remoteAttr = /^https?:\/\//i.test(remote) ? escapeHtml(remote) : "";
+    return `<img class="${className}" src="${escapeHtml(initial || fallback)}" data-remote="${remoteAttr}" data-fallback="${escapeHtml(fallback)}" alt="${escapeHtml(movie.title || "Poster")}" loading="lazy" decoding="async" onerror="this.onerror=null;const r=this.dataset.remote;const f=this.dataset.fallback;if(r&&this.src!==r){this.src=r;}else{this.src=f;}`;
 }
 
 function showLoading(message = "⏳ در حال بارگذاری...") {
