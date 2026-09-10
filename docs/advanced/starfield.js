@@ -1,1 +1,5 @@
-(()=>{const host=document.getElementById('ambient');if(!host||matchMedia('(prefers-reduced-motion: reduce)').matches)return;let raf=0,t=0;const tick=()=>{t+=.0025;const a=host.querySelector('.orb-a'),b=host.querySelector('.orb-b'),c=host.querySelector('.orb-c');if(a)a.style.transform=`translate3d(${Math.sin(t)*18}px,${Math.cos(t*1.2)*11}px,0)`;if(b)b.style.transform=`translate3d(${Math.cos(t*.8)*15}px,${Math.sin(t)*18}px,0)`;if(c)c.style.transform=`translate3d(${Math.sin(t*1.3)*12}px,${Math.cos(t*.7)*14}px,0)`;raf=requestAnimationFrame(tick)};raf=requestAnimationFrame(tick);addEventListener('pagehide',()=>cancelAnimationFrame(raf),{once:true})})();
+(() => {
+  if (matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  const a=document.querySelector('.n1'),b=document.querySelector('.n2'),c=document.querySelector('.n3');let t=0,id;
+  const tick=()=>{t+=0.002;if(a)a.style.transform=`translate3d(${Math.sin(t)*22}px,${Math.cos(t*.8)*12}px,0)`;if(b)b.style.transform=`translate3d(${Math.cos(t)*16}px,${Math.sin(t*.7)*18}px,0)`;if(c)c.style.transform=`translate3d(${Math.sin(t*1.2)*13}px,${Math.cos(t)*11}px,0)`;id=requestAnimationFrame(tick)};id=requestAnimationFrame(tick);addEventListener('pagehide',()=>cancelAnimationFrame(id),{once:true});
+})();

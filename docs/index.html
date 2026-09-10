@@ -44,7 +44,7 @@
                 <button id="toggleView" class="btn-glass">📽️ همه</button>
                 <button id="statsBtn" class="btn-glass" style="background:rgba(233,69,96,0.15);border-color:var(--accent);">📈 آمار</button>
                 <a href="https://www.imdb.com/user/p.if6bmsibrbg5dapfqbjrld4lhy?ref_=ext_shr_lnk" target="_blank" rel="noopener noreferrer" class="btn-glass">🎬 IMDb من</a>
-                <a href="advanced/" class="btn-glass advanced-btn">✨ حالت پیشرفته</a>
+                <a href="advanced/" class="btn-glass advanced-link">✨ سایت پیشرفته</a>
             </div>
         </div>
     </header>
@@ -156,17 +156,18 @@
 
         <!-- شبکه فیلم‌ها -->
         <div class="movies-grid" id="moviesGrid"></div>
-        <div class="pagination glass" id="pagination" aria-label="صفحه‌بندی">
-            <div class="pagination-size">
-                <label for="pageSize">تعداد در صفحه</label>
-                <select id="pageSize">
-                    <option value="12">12</option>
-                    <option value="24" selected>24</option>
-                    <option value="36">36</option>
-                    <option value="48">48</option>
-                </select>
+        <div class="pagination-bar glass" id="paginationBar">
+            <div class="pagination-info">
+                <span id="paginationSummary">—</span>
+                <label>نمایش <select id="pageSize"><option value="12">12</option><option value="24" selected>24</option><option value="36">36</option><option value="48">48</option></select> کارت</label>
             </div>
-            <div class="pagination-controls" id="paginationControls"></div>
+            <div class="pagination-controls">
+                <button class="page-btn" id="firstPage" type="button">«</button>
+                <button class="page-btn" id="prevPage" type="button">‹</button>
+                <div id="pageNumbers" class="page-numbers"></div>
+                <button class="page-btn" id="nextPage" type="button">›</button>
+                <button class="page-btn" id="lastPage" type="button">»</button>
+            </div>
         </div>
         <div class="loading" id="loading">⏳ در حال بارگذاری...</div>
     </main>
