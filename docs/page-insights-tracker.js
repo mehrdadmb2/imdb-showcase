@@ -1,0 +1,35 @@
+(() => {
+  "use strict";
+  if (window.__IMDbShowcaseInsightsAttached) return;
+  window.__IMDbShowcaseInsightsAttached = true;
+  const cfg = window.PAGE_INSIGHTS_CONFIG || {};
+  const worker = String(cfg.workerUrl || "").replace(/\/+$/, "");
+  if (!worker) return;
+  const sample = Math.min(1, Math.max(0, Number(cfg.sampleRate ?? 1)));
+  if (Math.random() > sample) return;
+  const uid = () => crypto.randomUUID ? crypto.randomUUID() : `${Date.now()}-${Math.random().toString(36).slice(2)}`;
+  const lsGet = (k) => { try { return localStorage.getItem(k); } catch { return null; } };
+  const lsSet = (k,v) => { try { localStorage.setItem(k,v); } catch {} };
+  const ssGet = (k) => { try { return sessionStorage.getItem(k); } catch { return null; } };
+  const ssSet = (k,v) => { try { sessionStorage.setItem(k,v); } catch {} };
+  const key = `gpi:v5:visitor:${cfg.siteId}`;
+  let visitorId = lsGet(key) || uid(); lsSet(key, visitorId);
+  let session = null;
+  try { session = JSON.parse(ssGet(`gpi:v5:session:${cfg.siteId}`) || "null"); } catch {}
+  const now = Date.now();
+  if (!session || !session.id || now - Number(session.lastSeen || 0) > 30 * 60 * 1000) session = { id: uid(), lastSeen: now };
+  session.lastSeen = now;
+  ssSet(`gpi:v5:session:${cfg.siteId}`, JSON.stringify(session));
+  const state = { startedAt: now, maxScroll: 0, clicks: 0, outboundClicks: 0, ended: false };
+  const connection = () => { const c = navigator.connection || navigator.mozConnection || navigator.webkitConnection; return c ? { type: c.effectiveType || c.type || "", downlink: c.downlink ?? null, rtt: c.rtt ?? null, saveData: !!c.saveData } : null; };
+  const timezone = () => { try { return Intl.DateTimeFormat().resolvedOptions().timeZone || ""; } catch { return ""; } };
+  const payload = type => ({ siteId: cfg.siteId, siteName: cfg.siteName, eventId: uid(), type, sessionId: session.id, visitorId, timestamp: new Date().toISOString(), pageUrl: location.href, path: location.pathname + location.search, title: document.title, referrer: document.referrer || "", language: navigator.language || "", timezone: timezone(), screen: { width: screen.width || 0, height: screen.height || 0, devicePixelRatio: devicePixelRatio || 1, colorDepth: screen.colorDepth || 0 }, viewport: { width: innerWidth || 0, height: innerHeight || 0 }, connection: connection(), durationMs: Math.max(0, Date.now() - state.startedAt), maxScroll: state.maxScroll, clicks: state.clicks, outboundClicks: state.outboundClicks, metadata: { collector: "imdb-showcase-gpi-v5", visibility: document.visibilityState } });
+  const send = (type, keepalive=false) => { if (state.ended && type !== "pageleave") return; const body = JSON.stringify(payload(type)); const url = `${worker}/collect`; if (keepalive && navigator.sendBeacon) { try { if (navigator.sendBeacon(url, new Blob([body], {type:"application/json"}))) return; } catch {} } fetch(url,{method:"POST",headers:{"Content-Type":"application/json"},body,mode:"cors",credentials:"omit",keepalive}).catch(()=>{}); session.lastSeen=Date.now(); ssSet(`gpi:v5:session:${cfg.siteId}`,JSON.stringify(session)); };
+  const updateScroll = () => { const doc = document.documentElement; const max = Math.max(1, doc.scrollHeight - innerHeight); state.maxScroll = Math.max(state.maxScroll, Math.min(100, Math.round(scrollY / max * 100))); };
+  document.addEventListener("click", e => { state.clicks++; if (e.target.closest('a[href^="http"]')) state.outboundClicks++; });
+  addEventListener("scroll", updateScroll, {passive:true});
+  addEventListener("pagehide", () => { state.ended=true; updateScroll(); send("pageleave", true); }, {once:true});
+  addEventListener("visibilitychange", () => { if (document.visibilityState === "hidden") send("visibility", true); });
+  send("pageview");
+  setInterval(() => send("heartbeat"), 15000);
+})();

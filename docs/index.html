@@ -43,8 +43,8 @@
                 <button id="sortBtn" class="btn-glass">📊 مرتب‌سازی</button>
                 <button id="toggleView" class="btn-glass">📽️ همه</button>
                 <button id="statsBtn" class="btn-glass" style="background:rgba(233,69,96,0.15);border-color:var(--accent);">📈 آمار</button>
-                <a href="https://www.imdb.com/user/p.if6bmsibrbg5dapfqbjrld4lhy" target="_blank" class="btn-glass">🎬 IMDb من</a>
-                <a href="advanced/" class="btn-glass">✨ حالت پیشرفته</a>
+                <a href="https://www.imdb.com/user/p.if6bmsibrbg5dapfqbjrld4lhy?ref_=ext_shr_lnk" target="_blank" rel="noopener noreferrer" class="btn-glass">🎬 IMDb من</a>
+                <a href="advanced/" class="btn-glass advanced-link">✨ حالت پیشرفته</a>
             </div>
         </div>
     </header>
@@ -156,6 +156,26 @@
 
         <!-- شبکه فیلم‌ها -->
         <div class="movies-grid" id="moviesGrid"></div>
+        <div class="pagination-bar glass" id="paginationBar" aria-label="صفحه‌بندی">
+            <div class="pagination-info">
+                <span id="pageSummary">0–0 از 0</span>
+                <label>تعداد در صفحه
+                    <select id="pageSize" aria-label="تعداد کارت در صفحه">
+                        <option value="12">12</option>
+                        <option value="24" selected>24</option>
+                        <option value="36">36</option>
+                        <option value="48">48</option>
+                    </select>
+                </label>
+            </div>
+            <div class="pagination-controls">
+                <button class="page-btn" id="firstPage" type="button" aria-label="صفحه اول">«</button>
+                <button class="page-btn" id="prevPage" type="button" aria-label="صفحه قبل">‹</button>
+                <div id="pageNumbers" class="page-numbers"></div>
+                <button class="page-btn" id="nextPage" type="button" aria-label="صفحه بعد">›</button>
+                <button class="page-btn" id="lastPage" type="button" aria-label="آخرین صفحه">»</button>
+            </div>
+        </div>
         <div class="loading" id="loading">⏳ در حال بارگذاری...</div>
     </main>
 
@@ -188,23 +208,21 @@
         </div>
     </div>
 
-    <!-- آمار بازدید سایت: تنها بخش افزوده‌شده به نسخه کلاسیک -->
-    <section class="page-insights-classic glass" id="pageInsightsPanel">
+    <section id="pageInsights" class="page-insights glass" aria-label="آمار بازدید سایت">
         <div class="page-insights-head">
             <div>
                 <span class="page-insights-kicker">SITE INSIGHTS</span>
                 <h2>آمار بازدید</h2>
-                <p id="insightRangeLabel">در حال دریافت آمار...</p>
+                <p>آمار جمع‌بندی‌شده از بازدیدهای GitHub Pages</p>
             </div>
-            <div class="page-insights-status" id="insightStatus"><span></span> در حال اتصال</div>
+            <div class="insights-status" id="insightsStatus"><i></i><span>در حال دریافت...</span></div>
         </div>
-        <div class="page-insights-metrics">
-            <div class="insight-metric"><span>کل بازدیدها</span><strong id="insightTotalViews">—</strong></div>
-            <div class="insight-metric"><span>بازدیدکنندگان یکتا</span><strong id="insightVisitors">—</strong></div>
-            <div class="insight-metric"><span>امروز</span><strong id="insightTodayViews">—</strong></div>
-            <div class="insight-metric"><span>جلسات</span><strong id="insightSessions">—</strong></div>
+        <div class="insights-metrics">
+            <article class="insight-metric"><span>کل بازدیدها</span><strong id="piViews">—</strong></article>
+            <article class="insight-metric"><span>بازدیدکنندگان یکتا</span><strong id="piVisitors">—</strong></article>
+            <article class="insight-metric today"><span>امروز</span><strong id="piToday">—</strong><small id="piTodayMeta">—</small></article>
+            <article class="insight-metric"><span>جلسات</span><strong id="piSessions">—</strong></article>
         </div>
-        <div class="page-insights-foot">آخرین بازدید ثبت‌شده: <b id="insightLastSeen">—</b></div>
     </section>
 
     <footer class="glass">
@@ -213,10 +231,10 @@
         <p style="font-size:11px; color:#666;" id="omdbStatus">وضعیت OMDb: در حال بررسی...</p>
     </footer>
 
-    <script>window.PAGE_INSIGHTS_CONFIG={workerUrl:"https://github-page-insights-worker.game-developer-mb.workers.dev",siteId:"imdb-showcase",siteName:"IMDb Showcase",refreshMs:60000};</script>
-    <script src="page-insights.js"></script>
-    <script src="page-insights-ui.js"></script>
-    <script src="starfield.js"></script>
-    <script src="script.js"></script>
+    <script src="starfield.js" defer></script>
+    <script src="page-insights-config.js" defer></script>
+    <script src="page-insights-tracker.js" defer></script>
+    <script src="page-insights-widget.js" defer></script>
+    <script src="script.js" defer></script>
 </body>
 </html>

@@ -3,71 +3,84 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="theme-color" content="#05060b">
-<meta name="description" content="IMDb Showcase Advanced — deep personal cinema analytics">
+<meta name="theme-color" content="#171717">
+<meta name="description" content="IMDb Showcase Advanced — personal cinema intelligence">
 <title>IMDb Showcase · Advanced</title>
 <link rel="icon" href="../pic/logo.png" type="image/png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Manrope:wght@400;500;600;700;800&family=Vazirmatn:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Manrope:wght@500;600;700;800&family=Vazirmatn:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="../page-insights.css">
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.9/dist/chart.umd.min.js" defer></script>
 </head>
 <body>
-<div id="ambient" aria-hidden="true"><div class="nebula n1"></div><div class="nebula n2"></div><div class="nebula n3"></div><div class="stars"></div><div class="noise"></div></div>
-<header class="topbar glass">
-  <a class="brand" href="../"><span class="brand-mark"><img src="../pic/logo.png" alt=""></span><span><b>IMDb Showcase</b><small>ADVANCED CINEMA INTELLIGENCE</small></span></a>
-  <nav class="actions">
-    <a class="btn" href="../">↩ Classic</a>
-    <a class="btn" target="_blank" rel="noopener noreferrer" href="https://www.imdb.com/user/p.if6bmsibrbg5dapfqbjrld4lhy?ref_=ext_shr_lnk">IMDb ↗</a>
-  </nav>
+<div class="space-bg" aria-hidden="true"><div class="star-layer"></div><div class="nebula a"></div><div class="nebula b"></div><div class="nebula c"></div><div class="grain"></div></div>
+<header class="topbar">
+  <a class="brand" href="../"><img src="../pic/logo.png" alt=""><span><strong>IMDb Showcase</strong><small>ADVANCED CINEMA INTELLIGENCE</small></span></a>
+  <nav><a class="nav-btn" href="../">Classic</a><a class="nav-btn accent" href="https://www.imdb.com/user/p.if6bmsibrbg5dapfqbjrld4lhy?ref_=ext_shr_lnk" target="_blank" rel="noopener noreferrer">My IMDb ↗</a></nav>
 </header>
-
 <main class="shell">
-  <section class="hero glass">
-    <div class="hero-art"><div class="planet"></div><div class="ring ring1"></div><div class="ring ring2"></div><div class="orbit-dot d1"></div><div class="orbit-dot d2"></div><div class="orbit-dot d3"></div><span class="floating f1">LOCAL CACHE</span><span class="floating f2">DEEP DETAILS</span><span class="floating f3">SERIES MAP</span></div>
-    <div class="hero-copy"><span class="eyebrow">YOUR CINEMA • SHARED DATASET</span><h1 id="totalTitlesHero">0 <small>titles</small></h1><p>Advanced mode reads the exact same repository dataset as Classic mode. Posters are local-first, cache-aware, and never dependent on a second data file.</p><div class="hero-metrics"><div><span>Watch time</span><b id="watchTime">0h 00m</b></div><div><span>My average</span><b id="heroAvg">0.0</b></div><div><span>Series</span><b id="heroSeries">0</b></div><div><span>Episodes</span><b id="heroEpisodes">0</b></div></div><div class="health-line"><span>Dataset health</span><b id="healthStatus">CHECKING</b><i><em id="healthBar"></em></i></div></div>
+  <section class="hero panel">
+    <div class="hero-copy">
+      <div class="eyebrow">SHARED REPOSITORY DATASET · LOCAL-FIRST</div>
+      <h1>YOUR <span>CINEMA</span><br>IN ONE CONTROL ROOM.</h1>
+      <p>Deep metadata, resilient local cache, series intelligence and a fast paged library — all reading the same repository data as Classic mode.</p>
+      <div class="hero-pills"><span>LOCAL POSTERS</span><span>30-DAY CACHE</span><span>DEEP METADATA</span><span>SHARED DATA</span></div>
+    </div>
+    <div class="hero-core"><div class="core-glow"></div><div class="orbit o1"></div><div class="orbit o2"></div><div class="core"><span id="heroTitles">0</span><small>TITLES</small></div></div>
+    <div class="hero-stats">
+      <div><span>Total runtime</span><strong id="heroRuntime">0h 00m</strong></div>
+      <div><span>My average</span><strong id="heroAvg">0.0</strong></div>
+      <div><span>Series</span><strong id="heroSeries">0</strong></div>
+      <div><span>Episodes</span><strong id="heroEpisodes">0</strong></div>
+    </div>
+    <div class="health"><span>Dataset health</span><strong id="healthText">CHECKING</strong><div><i id="healthBar"></i></div></div>
   </section>
 
-
-
-
-  <section class="latest glass">
-    <div class="section-head"><div><span class="eyebrow">RECENTLY WATCHED</span><h2>Latest titles</h2><small>Most recently rated in IMDb</small></div><span class="counter" id="latestCount">0</span></div>
+  <section class="latest panel" id="latestSection">
+    <div class="section-head"><div><span class="eyebrow">RECENT ACTIVITY</span><h2>Latest watched</h2><small>Newest titles from your IMDb ratings</small></div><span class="section-count" id="latestCount">0</span></div>
     <div class="latest-grid" id="latestGrid"></div>
   </section>
 
-  <section class="toolbar glass" id="library">
-    <div class="search"><span>⌕</span><input id="searchInput" placeholder="Search title, actor, director, genre, IMDb ID…"><kbd>/</kbd></div>
-    <div class="tools"><button class="btn" id="filterBtn" type="button">Filters <b id="filterCount">0</b></button><button class="btn" id="sortBtn" type="button">Sort</button><button class="btn" id="viewBtn" type="button">Cards</button><button class="btn accent" id="statsBtn" type="button">Analytics</button></div>
+  <section class="command panel">
+    <div class="searchbox"><span>⌕</span><input id="searchInput" placeholder="Search title, actor, director, genre, IMDb ID…" autocomplete="off"><kbd>/</kbd></div>
+    <div class="toolbar"><button id="filterBtn">Filters <b id="filterCount">0</b></button><button id="sortBtn">Sort</button><button id="viewBtn">Cards</button><button id="statsBtn" class="accent">Analytics</button></div>
   </section>
 
-  <section class="filters glass" id="filterPanel" hidden><div class="filter-grid"><label>Type<select id="typeFilter"><option value="all">All</option><option value="Movie">Movie</option><option value="TV Series">Series</option><option value="TV Episode">Episode</option><option value="Short">Short</option></select></label><label>Genre<select id="genreFilter"><option value="all">All</option></select></label><label>Year<select id="yearFilter"><option value="all">All</option></select></label><label>Min rating<input id="minRating" type="range" min="0" max="10" step="0.5" value="0"><output id="minRatingValue">0.0</output></label><label>Cache<select id="cacheFilter"><option value="all">All</option><option value="fresh">Fresh</option><option value="cached">Cached</option><option value="stale">Stale</option><option value="partial">Partial</option></select></label><button class="btn danger" id="resetFilters" type="button">Reset</button></div></section>
+  <section id="filterPanel" class="filter-panel panel" hidden>
+    <label>Type<select id="typeFilter"><option value="all">All</option><option value="Movie">Movie</option><option value="TV Series">Series</option><option value="TV Episode">Episode</option><option value="Short">Short</option></select></label>
+    <label>Genre<select id="genreFilter"><option value="all">All</option></select></label>
+    <label>Year<select id="yearFilter"><option value="all">All</option></select></label>
+    <label>Min rating<input id="minRating" type="range" min="0" max="10" step="0.5" value="0"><output id="minRatingValue">0.0</output></label>
+    <button id="resetFilters" class="danger">Reset</button>
+  </section>
 
-  <section class="series glass"><div class="section-head"><div><span class="eyebrow">SERIES INTELLIGENCE</span><h2>Series universe</h2><small>Groups are built from series_id / series title / season / episode</small></div><button class="text-btn" id="collapseSeries" type="button">Collapse</button></div><div class="series-grid" id="seriesGrid"></div></section>
+  <section class="series panel">
+    <div class="section-head"><div><span class="eyebrow">SERIES INTELLIGENCE</span><h2>Universe view</h2><small>Series → season → episode grouping from shared metadata</small></div><button id="collapseSeries" class="text-btn">Collapse</button></div>
+    <div class="series-grid" id="seriesGrid"></div>
+  </section>
 
-  <section class="library-head"><div><span class="eyebrow">LIBRARY</span><h2>All titles</h2></div><div class="result-meta"><span id="resultsCount">0</span><span>•</span><span id="sortLabel">Recently rated</span></div></section>
+  <section class="library-head"><div><span class="eyebrow">LIBRARY</span><h2>All titles</h2></div><div class="result-meta"><span id="resultsCount">0</span><span>·</span><span id="sortLabel">Recently rated</span></div></section>
   <section id="moviesGrid" class="movies-grid"></section>
-  <section class="pagination glass"><div><span id="pageSummary">0 / 0</span><label>Page size <select id="pageSize"><option>12</option><option selected>24</option><option>36</option><option>48</option></select></label></div><div class="page-controls"><button class="page-btn" id="firstPage" type="button">«</button><button class="page-btn" id="prevPage" type="button">‹</button><div id="pageNumbers"></div><button class="page-btn" id="nextPage" type="button">›</button><button class="page-btn" id="lastPage" type="button">»</button></div></section>
+  <section class="pagination panel"><div><span id="pageSummary">0–0 of 0</span><label>Page size<select id="pageSize"><option>12</option><option selected>24</option><option>36</option><option>48</option></select></label></div><div class="page-controls"><button id="firstPage">«</button><button id="prevPage">‹</button><div id="pageNumbers"></div><button id="nextPage">›</button><button id="lastPage">»</button></div></section>
 
-  <section class="analytics" id="analytics" hidden><div class="library-head"><div><span class="eyebrow">ANALYTICS</span><h2>Deep library analysis</h2></div></div><div class="metric-grid"><article class="metric glass"><span>Total titles</span><b id="mTitles">0</b></article><article class="metric glass"><span>Movies</span><b id="mMovies">0</b></article><article class="metric glass"><span>Series</span><b id="mSeries">0</b></article><article class="metric glass"><span>Episodes</span><b id="mEpisodes">0</b></article><article class="metric glass"><span>Total runtime</span><b id="mRuntime">0h 00m</b></article><article class="metric glass"><span>Stale records</span><b id="mStale">0</b></article><article class="metric glass"><span>Cached records</span><b id="mCached">0</b></article><article class="metric glass"><span>Fresh records</span><b id="mFresh">0</b></article></div><div class="chart-grid"><article class="chart glass"><h3>Genres</h3><div><canvas id="genreChart"></canvas></div></article><article class="chart glass"><h3>My ratings</h3><div><canvas id="ratingChart"></canvas></div></article><article class="chart glass"><h3>Rated titles by year</h3><div><canvas id="yearChart"></canvas></div></article><article class="chart glass"><h3>My rating vs IMDb</h3><div><canvas id="compareChart"></canvas></div></article></div></section>
-  <section class="site-analytics glass" id="pageInsightsPanel">
-    <div class="section-head"><div><span class="eyebrow">VISITOR INTELLIGENCE</span><h2>Site traffic</h2><small id="insightRangeLabel">Loading analytics…</small></div><span class="live-dot"><i></i> Connected</span></div>
-    <div class="site-analytics-grid">
-      <article class="traffic-metric"><span>Total views</span><b id="insightTotalViews">—</b></article>
-      <article class="traffic-metric"><span>Unique visitors</span><b id="insightVisitors">—</b></article>
-      <article class="traffic-metric"><span>Sessions</span><b id="insightSessions">—</b></article>
-      <article class="traffic-metric"><span>Today</span><b id="insightTodayViews">—</b></article>
+  <section id="analytics" class="analytics" hidden>
+    <div class="section-head"><div><span class="eyebrow">ANALYTICS</span><h2>Library intelligence</h2><small>Derived entirely from the shared repository dataset</small></div></div>
+    <div class="metric-grid">
+      <article class="metric panel"><span>Total titles</span><b id="mTitles">0</b></article><article class="metric panel"><span>Movies</span><b id="mMovies">0</b></article><article class="metric panel"><span>Series</span><b id="mSeries">0</b></article><article class="metric panel"><span>Episodes</span><b id="mEpisodes">0</b></article><article class="metric panel"><span>Total runtime</span><b id="mRuntime">0h 00m</b></article><article class="metric panel"><span>Cached</span><b id="mCached">0</b></article><article class="metric panel"><span>Fresh</span><b id="mFresh">0</b></article><article class="metric panel"><span>Stale</span><b id="mStale">0</b></article>
     </div>
-    <div class="analytics-footer">Last recorded visit: <b id="insightLastSeen">—</b></div>
+    <div class="chart-grid"><article class="chart panel"><h3>Genres</h3><canvas id="genreChart"></canvas></article><article class="chart panel"><h3>My ratings</h3><canvas id="ratingChart"></canvas></article><article class="chart panel"><h3>Rated titles by year</h3><canvas id="yearChart"></canvas></article><article class="chart panel"><h3>My rating vs IMDb</h3><canvas id="compareChart"></canvas></article></div>
+  </section>
+
+  <section class="visitor-insights panel" aria-label="Site visitor analytics">
+    <div class="visitor-head"><div><span class="eyebrow">SITE INSIGHTS</span><h2>Visitor pulse</h2><small>Compact traffic snapshot from GitHub Page Insights</small></div><div id="insightsStatus" class="insights-status"><i></i><span>Loading</span></div></div>
+    <div class="visitor-metrics"><article><span>Total views</span><strong id="piViews">—</strong></article><article><span>Unique visitors</span><strong id="piVisitors">—</strong></article><article class="today"><span>Today</span><strong id="piToday">—</strong><small id="piTodayMeta">—</small></article><article><span>Sessions</span><strong id="piSessions">—</strong></article></div>
   </section>
 </main>
 
-<div class="modal" id="detailModal" hidden><div class="modal-card glass"><button class="close" id="detailClose" type="button">×</button><div class="detail-top"><div class="poster-box"><img id="detailPoster" alt=""><div id="posterFallback" class="poster-fallback">NO POSTER</div></div><div class="detail-copy"><div class="badge-row"><span id="detailType" class="badge">TITLE</span><span id="detailCache" class="badge">CACHE</span></div><h2 id="detailTitle">—</h2><p id="detailOriginal">—</p><div class="score-grid"><div class="score"><small>MY RATING</small><b id="detailMyRating">—</b></div><div class="score"><small>IMDb</small><b id="detailImdb">—</b></div><div class="score"><small>METASCORE</small><b id="detailMeta">—</b></div><div class="score"><small>VOTES</small><b id="detailVotes">—</b></div></div><div id="detailTags" class="tags"></div><p id="detailPlot" class="plot">—</p><div class="detail-actions"><a class="btn accent" id="detailImdbLink" target="_blank" rel="noopener noreferrer">Open IMDb ↗</a><button class="btn" id="detailCopy" type="button">Copy ID</button></div></div></div><div class="detail-section"><h3>Production & metadata</h3><div class="detail-grid" id="detailGrid"></div></div><div class="detail-section" id="seriesDetailSection" hidden><h3>Series breakdown</h3><div class="series-stats" id="seriesStats"></div><div id="seasonList" class="seasons"></div></div><div class="detail-section"><h3>Raw repository data</h3><details><summary>Show raw CSV + OMDb payload</summary><pre id="rawData"></pre></details></div></div></div>
+<div class="detail-modal" id="detailModal" hidden><div class="detail-card panel"><button class="detail-close" id="detailClose">×</button><div class="detail-layout"><div class="poster-stage"><img id="detailPoster" alt=""><div id="posterFallback" class="poster-fallback">NO POSTER</div></div><div class="detail-main"><div class="badge-row"><span id="detailType" class="badge">TITLE</span><span id="detailCache" class="badge">CACHE</span></div><h2 id="detailTitle">—</h2><p id="detailOriginal">—</p><div class="scores"><div><span>MY RATING</span><b id="detailMyRating">—</b></div><div><span>IMDb</span><b id="detailImdb">—</b></div><div><span>METASCORE</span><b id="detailMeta">—</b></div><div><span>VOTES</span><b id="detailVotes">—</b></div></div><div id="detailTags" class="tags"></div><p id="detailPlot" class="plot">—</p><div class="detail-actions"><a id="detailImdbLink" class="action accent" target="_blank" rel="noopener noreferrer">Open IMDb ↗</a><button id="detailCopy" class="action">Copy ID</button></div></div></div><div class="detail-section"><h3>Production & metadata</h3><div id="detailGrid" class="detail-grid"></div></div><div id="seriesDetailSection" class="detail-section" hidden><h3>Series breakdown</h3><div id="seriesStats" class="series-stats"></div><div id="seasonList" class="season-list"></div></div><div class="detail-section"><h3>Raw repository data</h3><pre id="rawData" class="raw-data"></pre></div></div></div>
 
-<script>window.PAGE_INSIGHTS_CONFIG={workerUrl:"https://github-page-insights-worker.game-developer-mb.workers.dev",siteId:"imdb-showcase",siteName:"IMDb Showcase",heartbeatMs:15000,refreshMs:60000};</script>
-<script src="../page-insights.js" defer></script>
-<script src="../page-insights-ui.js" defer></script>
-<script src="starfield.js" defer></script><script src="script.js" defer></script>
+<script src="../page-insights-config.js" defer></script><script src="../page-insights-tracker.js" defer></script><script src="../page-insights-widget.js" defer></script><script src="script.js" defer></script>
 </body>
 </html>
