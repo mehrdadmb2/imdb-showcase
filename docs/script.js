@@ -792,7 +792,66 @@ safeAddEventListener('toggleView', 'click', () => {
 document.getElementById('modalOverlay')?.addEventListener('click', (e) => {
     if (e.target === document.getElementById('modalOverlay')) closeModal();
 });
-document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeModal(); });
+document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+        closeModal();
+        return;
+    }
+
+    const active = document.activeElement;
+    if (active?.classList?.contains('movie-card') && (e.key === 'Enter' || e.key === ' ')) {
+        e.preventDefault();
+        const id = active.getAttribute('data-imdb-id');
+        if (id) openModal(id);
+    }
+});
+
+// کارت‌ها: Event Delegation تا بعد از هر Filter / Sort / Pagination هم فعال بمانند.
+document.getElementById('moviesGrid')?.addEventListener('click', (e) => {
+    const card = e.target.closest('.movie-card');
+    if (!card) return;
+    const id = card.getAttribute('data-imdb-id');
+    if (id) openModal(id);
+});
+
+// صفحه‌بندی: listener روی container ثابت قرار می‌گیرد، چون شماره صفحه‌ها
+// بعد از هر render دوباره ساخته می‌شوند.
+document.getElementById('paginationBar')?.addEventListener('click', (e) => {
+    const pageButton = e.target.closest('[data-page]');
+    if (pageButton) {
+        e.preventDefault();
+        goToPage(pageButton.getAttribute('data-page'));
+        return;
+    }
+
+    const button = e.target.closest('.page-btn');
+    if (!button || button.disabled) return;
+
+    const totalPages = Math.max(1, Math.ceil(filteredMovies.length / pageSize));
+
+    switch (button.id) {
+        case 'firstPageBtn':
+            goToPage(1);
+            break;
+        case 'prevPageBtn':
+            goToPage(currentPage - 1);
+            break;
+        case 'nextPageBtn':
+            goToPage(currentPage + 1);
+            break;
+        case 'lastPageBtn':
+            goToPage(totalPages);
+            break;
+    }
+});
+
+document.getElementById('pageSizeSelect')?.addEventListener('change', (e) => {
+    const value = Number.parseInt(e.target.value, 10);
+    if (![12, 24, 36, 48].includes(value)) return;
+    pageSize = value;
+    currentPage = 1;
+    renderMovies();
+});
 
 document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('loading')?.classList.add('active');

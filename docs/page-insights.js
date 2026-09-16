@@ -89,7 +89,7 @@
   }
 
   function send(type, extra = {}, keepalive = true) {
-    const url = `${CONFIG.workerUrl.replace(/\/$/, '')}/collect`;
+    const url = `${CONFIG.workerUrl.replace(/\\/$/, '')}/collect`;
     const body = safeJson(payload(type, extra));
     try {
       if (navigator.sendBeacon && keepalive) {
@@ -167,7 +167,7 @@
 
   async function refresh() {
     try {
-      const url = `${CONFIG.workerUrl.replace(/\/$/, '')}/api/site/${encodeURIComponent(CONFIG.siteId)}?days=30`;
+      const url = `${CONFIG.workerUrl.replace(/\\/$/, '')}/api/site/${encodeURIComponent(CONFIG.siteId)}?days=30`;
       const response = await fetch(url, { cache: 'no-store' });
       if (!response.ok) throw new Error(`HTTP ${response.status}`);
       render(await response.json());

@@ -565,3 +565,26 @@ footer p:last-child { font-size: 11px; margin-top: 4px; }
     .page-size-wrap { margin-right: auto; }
     .insights-metrics { grid-template-columns: 1fr 1fr; gap: 7px; }
 }
+
+/* Pagination interaction safety */
+.pagination-bar,
+.pagination-bar * {
+    pointer-events: auto;
+}
+.pagination-bar {
+    position: relative;
+    z-index: 20;
+}
+.pagination-controls {
+    position: relative;
+    z-index: 21;
+}
+.page-btn,
+.page-number {
+    cursor: pointer;
+    user-select: none;
+}
+.page-btn:disabled {
+    cursor: not-allowed;
+    opacity: .45;
+}
