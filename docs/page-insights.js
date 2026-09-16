@@ -1,189 +1,228 @@
-(function () {
-  "use strict";
+/* Shared GitHub Page Insights client for Classic + Advanced */
+(() => {
+  'use strict';
 
-  const CONFIG = Object.assign({
-    workerUrl: "https://github-page-insights-worker.game-developer-mb.workers.dev",
-    siteId: "imdb-showcase",
-    siteName: "IMDb Showcase",
-    heartbeatMs: 15000,
-    refreshMs: 60000
-  }, window.PAGE_INSIGHTS_CONFIG || {});
+  const CONFIG = {
+    workerUrl: 'https://github-page-insights-worker.game-developer-mb.workers.dev',
+    siteId: 'imdb-showcase',
+    siteName: 'IMDb Showcase',
+    autoRefreshMs: 60000
+  };
 
-  const WORKER = String(CONFIG.workerUrl || "").replace(/\/+$/, "");
-  if (!WORKER) return;
+  const get = (id) => document.getElementById(id);
+  const nowIso = () => new Date().toISOString();
+  const safeJson = (v) => { try { return JSON.stringify(v); } catch { return '{}'; } };
 
-  const SITE_ID = String(CONFIG.siteId || "imdb-showcase");
-  const SITE_NAME = String(CONFIG.siteName || "IMDb Showcase");
-  const VISITOR_KEY = `gpi:v4:visitor:${SITE_ID}`;
-  const SESSION_KEY = `gpi:v4:session:${SITE_ID}`;
-
-  const uuid = () => {
+  function randomId(prefix) {
     try {
-      if (crypto.randomUUID) return crypto.randomUUID();
-    } catch (_) {}
-    return `${Date.now()}-${Math.random().toString(36).slice(2)}-${Math.random().toString(36).slice(2)}`;
-  };
-
-  const storageGet = (storage, key) => {
-    try { return storage.getItem(key); } catch (_) { return null; }
-  };
-
-  const storageSet = (storage, key, value) => {
-    try { storage.setItem(key, value); } catch (_) {}
-  };
-
-  let visitorId = storageGet(localStorage, VISITOR_KEY);
-  if (!visitorId) {
-    visitorId = uuid();
-    storageSet(localStorage, VISITOR_KEY, visitorId);
+      if (crypto.randomUUID) return `${prefix}-${crypto.randomUUID()}`;
+    } catch {}
+    return `${prefix}-${Date.now()}-${Math.random().toString(36).slice(2)}`;
   }
 
-  let session;
-  try {
-    session = JSON.parse(storageGet(sessionStorage, SESSION_KEY) || "null");
-  } catch (_) {
-    session = null;
+  function visitorId() {
+    const key = 'imdb-showcase-visitor-id-v2';
+    try {
+      let id = localStorage.getItem(key);
+      if (!id) {
+        id = randomId('visitor');
+        localStorage.setItem(key, id);
+      }
+      return id;
+    } catch {
+      return randomId('visitor');
+    }
   }
 
-  const now = Date.now();
-  if (!session || !session.id || now - Number(session.lastSeen || 0) > 30 * 60 * 1000) {
-    session = { id: uuid(), lastSeen: now };
+  function sessionId() {
+    const key = 'imdb-showcase-session-id-v2';
+    try {
+      let id = sessionStorage.getItem(key);
+      if (!id) {
+        id = randomId('session');
+        sessionStorage.setItem(key, id);
+      }
+      return id;
+    } catch {
+      return randomId('session');
+    }
   }
-  storageSet(sessionStorage, SESSION_KEY, JSON.stringify(session));
 
-  const state = {
-    startedAt: now,
-    maxScroll: 0,
-    clicks: 0,
-    outboundClicks: 0,
-    ended: false
-  };
+  const ids = { visitorId: visitorId(), sessionId: sessionId() };
+  let lastPageview = 0;
+  let heartbeatTimer = 0;
+  let refreshTimer = 0;
 
-  function connectionHints() {
-    const connection = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
-    if (!connection) return null;
+  function payload(type, extra = {}) {
     return {
-      type: connection.effectiveType || connection.type || "",
-      downlink: connection.downlink ?? null,
-      rtt: connection.rtt ?? null,
-      saveData: !!connection.saveData
-    };
-  }
-
-  function payload(type) {
-    return {
-      siteId: SITE_ID,
-      siteName: SITE_NAME,
       type,
-      sessionId: session.id,
-      visitorId,
+      siteId: CONFIG.siteId,
+      siteName: CONFIG.siteName,
+      eventId: randomId('event'),
+      visitorId: ids.visitorId,
+      sessionId: ids.sessionId,
       pageUrl: location.href,
-      path: location.pathname + location.search,
-      title: document.title || "",
-      referrer: document.referrer || "",
-      language: navigator.language || "",
-      timezone: (() => {
-        try { return Intl.DateTimeFormat().resolvedOptions().timeZone || ""; } catch (_) { return ""; }
-      })(),
+      path: location.pathname,
+      title: document.title,
+      referrer: document.referrer || '',
+      language: navigator.language || '',
+      timezone: Intl.DateTimeFormat().resolvedOptions().timeZone || '',
       screen: {
-        width: screen.width || 0,
-        height: screen.height || 0
+        width: screen.width,
+        height: screen.height,
+        devicePixelRatio: window.devicePixelRatio || 1,
+        colorDepth: screen.colorDepth || 0
       },
       viewport: {
-        width: innerWidth || 0,
-        height: innerHeight || 0
+        width: innerWidth,
+        height: innerHeight
       },
-      connection: connectionHints(),
-      durationMs: Math.max(0, Date.now() - state.startedAt),
-      maxScroll: state.maxScroll,
-      clicks: state.clicks,
-      outboundClicks: state.outboundClicks
+      connection: navigator.connection ? {
+        type: navigator.connection.effectiveType || '',
+        downlink: navigator.connection.downlink || 0,
+        rtt: navigator.connection.rtt || 0,
+        saveData: Boolean(navigator.connection.saveData)
+      } : {},
+      timestamp: nowIso(),
+      ...extra
     };
   }
 
-  function send(type, beacon) {
-    if (state.ended && type !== "pageleave") return;
-
-    const body = JSON.stringify(payload(type));
-    const url = `${WORKER}/collect`;
-
-    if (beacon && navigator.sendBeacon) {
-      try {
-        const ok = navigator.sendBeacon(
-          url,
-          new Blob([body], { type: "application/json" })
-        );
-        if (ok) {
-          session.lastSeen = Date.now();
-          storageSet(sessionStorage, SESSION_KEY, JSON.stringify(session));
-          return;
-        }
-      } catch (_) {}
-    }
-
-    fetch(url, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body,
-      mode: "cors",
-      credentials: "omit",
-      keepalive: !!beacon
-    }).catch(() => {});
-
-    session.lastSeen = Date.now();
-    storageSet(sessionStorage, SESSION_KEY, JSON.stringify(session));
-  }
-
-  function onScroll() {
-    const documentElement = document.documentElement;
-    const total = Math.max(1, documentElement.scrollHeight - innerHeight);
-    const percent = Math.round((scrollY / total) * 100);
-    state.maxScroll = Math.max(0, Math.min(100, percent));
-  }
-
-  function onClick(event) {
-    state.clicks += 1;
-    const anchor = event.target && event.target.closest
-      ? event.target.closest("a[href]")
-      : null;
-
-    if (!anchor) return;
-
+  function send(type, extra = {}, keepalive = true) {
+    const url = `${CONFIG.workerUrl.replace(/\/$/, '')}/collect`;
+    const body = safeJson(payload(type, extra));
     try {
-      if (new URL(anchor.href, location.href).origin !== location.origin) {
-        state.outboundClicks += 1;
+      if (navigator.sendBeacon && keepalive) {
+        const blob = new Blob([body], { type: 'application/json' });
+        if (navigator.sendBeacon(url, blob)) return Promise.resolve(true);
       }
-    } catch (_) {}
+    } catch {}
+    return fetch(url, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body,
+      keepalive,
+      mode: 'cors'
+    }).then(r => r.ok).catch(() => false);
   }
 
-  function finish() {
-    if (state.ended) return;
-    state.ended = true;
-    send("pageleave", true);
+  function formatInt(value) {
+    const n = Number(value);
+    if (!Number.isFinite(n)) return '—';
+    return n.toLocaleString('en-US');
   }
 
-  send("pageview", false);
+  function setText(id, value) {
+    const node = get(id);
+    if (node) node.textContent = value;
+  }
 
-  const heartbeatMs = Math.max(
-    15000,
-    Number(CONFIG.heartbeatMs || 15000)
-  );
+  function setStatus(text, ok = false) {
+    const node = document.querySelector('#insightsStatus, #advInsightsStatus');
+    if (!node) return;
+    node.textContent = text;
+    node.dataset.ok = ok ? 'true' : 'false';
+  }
 
-  const heartbeatTimer = setInterval(() => {
-    if (!document.hidden && !state.ended) {
-      send("heartbeat", false);
+  function render(data) {
+    if (!data || data.ok === false) {
+      setStatus('داده بازدید در دسترس نیست');
+      return;
     }
-  }, heartbeatMs);
+    setStatus('● متصل به Page Insights', true);
 
-  window.addEventListener("scroll", onScroll, { passive: true });
-  window.addEventListener("click", onClick, { passive: true, capture: true });
-  window.addEventListener("pagehide", finish, { capture: true });
-  window.addEventListener("beforeunload", finish, { capture: true });
-  window.addEventListener("pagehide", () => clearInterval(heartbeatTimer), { once: true });
+    setText('insightTotalViews', formatInt(data.views));
+    setText('insightUniqueVisitors', formatInt(data.uniqueVisitors));
+    setText('insightTodayViews', formatInt(data.today?.views));
+    setText('insightSessions', formatInt(data.sessions));
 
-  window.PAGE_INSIGHTS = {
-    workerUrl: WORKER,
-    siteId: SITE_ID,
-    siteName: SITE_NAME
+    setText('advTotalViews', formatInt(data.views));
+    setText('advUniqueVisitors', formatInt(data.uniqueVisitors));
+    setText('advTodayViews', formatInt(data.today?.views));
+    setText('advSessions', formatInt(data.sessions));
+
+    const latest = data.series?.length ? data.series[data.series.length - 1] : null;
+    const latestLabel = latest?.day || data.today?.date || '—';
+    setText('insightLastEvent', `آخرین روز ثبت‌شده: ${latestLabel}`);
+    setText('advLastEvent', `آخرین روز ثبت‌شده: ${latestLabel}`);
+
+    renderAdvancedMiniTrend(data.series || data.last7Days || []);
+  }
+
+  function renderAdvancedMiniTrend(rows) {
+    const host = get('advTrendBars');
+    if (!host) return;
+    const safeRows = Array.isArray(rows) ? rows.slice(-14) : [];
+    if (!safeRows.length) {
+      host.innerHTML = '<span class="trend-empty">هنوز داده کافی ثبت نشده است.</span>';
+      return;
+    }
+    const max = Math.max(1, ...safeRows.map(x => Number(x.views) || 0));
+    host.innerHTML = safeRows.map(row => {
+      const value = Number(row.views) || 0;
+      const height = Math.max(8, Math.round(value / max * 100));
+      return `<div class="trend-bar" style="--h:${height}%" title="${row.day || ''}: ${value}"><i></i></div>`;
+    }).join('');
+  }
+
+  async function refresh() {
+    try {
+      const url = `${CONFIG.workerUrl.replace(/\/$/, '')}/api/site/${encodeURIComponent(CONFIG.siteId)}?days=30`;
+      const response = await fetch(url, { cache: 'no-store' });
+      if (!response.ok) throw new Error(`HTTP ${response.status}`);
+      render(await response.json());
+    } catch (error) {
+      setStatus('اتصال به آمار بازدید موقتاً در دسترس نیست');
+      console.warn('Page Insights:', error);
+    }
+  }
+
+  function start() {
+    const firstDelay = lastPageview ? 0 : 200;
+    setTimeout(() => {
+      send('pageview');
+      lastPageview = Date.now();
+
+      heartbeatTimer = window.setInterval(() => {
+        const durationMs = Date.now() - lastPageview;
+        send('heartbeat', {
+          durationMs,
+          maxScroll: Math.round(((scrollY + innerHeight) / Math.max(1, document.documentElement.scrollHeight)) * 100)
+        });
+      }, 30000);
+    }, firstDelay);
+
+    const leave = () => {
+      const durationMs = lastPageview ? Date.now() - lastPageview : 0;
+      send('pageleave', {
+        durationMs,
+        maxScroll: Math.round(((scrollY + innerHeight) / Math.max(1, document.documentElement.scrollHeight)) * 100)
+      });
+    };
+
+    window.addEventListener('pagehide', leave, { once: true });
+    document.addEventListener('visibilitychange', () => {
+      if (document.visibilityState === 'hidden') leave();
+    });
+
+    refresh();
+    refreshTimer = window.setInterval(refresh, CONFIG.autoRefreshMs);
+
+    const refreshButton = get('insightsRefresh');
+    if (refreshButton) refreshButton.addEventListener('click', refresh);
+    const advancedRefresh = get('advInsightsRefresh');
+    if (advancedRefresh) advancedRefresh.addEventListener('click', refresh);
+  }
+
+  window.IMDBPageInsights = {
+    refresh,
+    send,
+    config: CONFIG
   };
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', start, { once: true });
+  } else {
+    start();
+  }
 })();
