@@ -1,44 +1,128 @@
-# IMDb Showcase — Classic + Advanced (Production Cache Build)
+# IMDb Showcase — Classic + Advanced / V10 Production Build
 
-## Classic
-`docs/index.html` preserves the original classic visual structure. Additive changes only:
-- real pagination (12/24/36/48)
-- Advanced-mode button
-- bottom-only Site Insights module
-- safer click handling and missing-data guards
-- local poster path support
+This build keeps the Classic visual baseline from the original project and adds only functional layers:
 
-## Advanced
-`docs/advanced/` is a separate interactive UI using the same `docs/movies.json` dataset.
-It has a neon-mint `#21F1A8` + dark-gray `#171717` design system, responsive layouts, hover motion,
-series/season/episode grouping, analytics, detailed modal, raw Dataset inspection and bottom Page Insights.
+- working pagination (12 / 24 / 36 / 48 cards per page)
+- reliable card-to-detail-modal interaction
+- bottom-only Page Insights
+- Advanced-mode link
+- hardened missing/null data handling
 
-## Shared data
-There is intentionally one data source:
-`docs/movies.json`
+The Advanced site is a separate UI at `docs/advanced/` and reads the exact same `docs/movies.json` and `docs/posters/` used by Classic.
 
-Advanced reads it using `../movies.json`. There is no second Dataset in `docs/advanced/`.
+## Data architecture
 
-## API/cache policy
-The Action runs every 12 hours, but OMDb is not queried for every record every run.
-- New records: query OMDb.
-- Incomplete records: retry until enriched.
-- Complete cached records younger than 30 days: use repository cache; no OMDb call.
-- Records at least 30 days old: refresh from OMDb.
-- If refresh fails, previous successful enrichment and poster are retained.
-- Local posters are stored in `docs/posters/` and referenced by `poster_local`.
-- The full CSV row is preserved under `raw_csv`; successful OMDb responses are preserved under `raw_omdb`.
+There is one canonical browser dataset:
+
+```text
+docs/movies.json
+      ├── docs/index.html
+      └── docs/advanced/index.html
+```
+
+Local posters are stored at:
+
+```text
+docs/posters/<imdb-id>.webp
+```
+
+Successful CSV and OMDb payloads are preserved in each record using `raw_csv` and `raw_omdb`.
+
+## OMDb cache policy
+
+The GitHub Action runs every 12 hours so new/missing items can be discovered without requiring a manual run.
+
+A complete record younger than 30 days is reused from repository cache and does not call OMDb.
+
+New or incomplete records are retried with a cooldown.
+
+A complete record is refreshed when it is at least 30 days old, or when the `force_refresh` workflow input is intentionally enabled.
+
+A failed refresh never intentionally replaces the last known good snapshot with empty data.
+
+The built-in daily request budget is 980 calls per discovered key, leaving a safety margin below OMDb's published 1,000-request daily free limit.
 
 ## Secrets
-Preferred:
-`OMDB_API_KEYS` — comma/space/newline separated list of all keys.
 
-Also accepted for compatibility:
-`OMDB_API_KEY`, `OMDB_API_KEY_1` ... `OMDB_API_KEY_4`, `IMDB_COOKIES`.
+Preferred repository secret:
 
-Secrets are read only by GitHub Actions and are never written to `movies.json`.
+```text
+OMDB_API_KEYS
+```
 
-## Page Insights
-Classic and Advanced load `docs/page-insights.js` and use the current worker endpoint:
-`https://github-page-insights-worker.game-developer-mb.workers.dev`
-with site id `imdb-showcase`.
+It may contain all keys separated by commas, spaces, semicolons or newlines, or as a JSON array.
+
+Compatibility names are also accepted:
+
+```text
+OMDB_API_KEY
+OMDB_API_KEY_1
+OMDB_API_KEY_2
+OMDB_API_KEY_3
+OMDB_API_KEY_4
+IMDB_COOKIES
+```
+
+Secret values are never written to repository files. Diagnostics use short SHA-256 fingerprints instead.
+
+## Health check
+
+Open GitHub Actions and run the workflow manually with:
+
+```text
+health_check = true
+```
+
+The health check makes exactly one OMDb test request per discovered key and writes sanitized diagnostics to:
+
+```text
+docs/system-status.json
+docs/omdb-key-state.json
+docs/update-log.json
+```
+
+The Advanced page displays these diagnostics, including:
+
+- detected key count
+- per-key fingerprint
+- last status
+- daily and cumulative request counts
+- success/error counts
+- rate-limit / invalid states
+- cache and poster statistics
+- latest errors
+
+No raw API key is displayed.
+
+## Poster recovery
+
+The pipeline first reuses an existing local poster.
+
+When a poster is missing, it uses the saved remote poster URL or attempts an IMDb poster lookup (when available). The recovered image is converted to WebP and stored in `docs/posters/`.
+
+Poster retry is independent from OMDb enrichment, so a missing poster does not cause an already-enriched title to consume OMDb requests again.
+
+## GitHub Pages
+
+The default page is:
+
+```text
+/docs/index.html
+```
+
+Advanced mode:
+
+```text
+/docs/advanced/index.html
+```
+
+Page Insights are loaded from the shared `github-page-insights` Worker configured inside `docs/page-insights.js`.
+
+## Deployment recommendation
+
+1. Keep your existing `src/ratings.csv` and `docs/pic/`.
+2. Merge the files from this build.
+3. Run the workflow once manually.
+4. First use `health_check = true` to inspect the key diagnostics.
+5. Then run the normal update.
+6. Inspect the Advanced → Diagnostics section after the run.

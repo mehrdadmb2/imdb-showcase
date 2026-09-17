@@ -1,228 +1,213 @@
-/* Shared GitHub Page Insights client for Classic + Advanced */
+/*
+ * Shared Page Insights client.
+ * Compatible with the current github-page-insights Worker API:
+ *   POST /collect
+ *   GET  /api/site/:siteId?days=30
+ *
+ * This file intentionally fails soft: analytics outage must never stop
+ * the IMDb Showcase application.
+ */
 (() => {
-  'use strict';
+    'use strict';
 
-  const CONFIG = {
-    workerUrl: 'https://github-page-insights-worker.game-developer-mb.workers.dev',
-    siteId: 'imdb-showcase',
-    siteName: 'IMDb Showcase',
-    autoRefreshMs: 60000
-  };
-
-  const get = (id) => document.getElementById(id);
-  const nowIso = () => new Date().toISOString();
-  const safeJson = (v) => { try { return JSON.stringify(v); } catch { return '{}'; } };
-
-  function randomId(prefix) {
-    try {
-      if (crypto.randomUUID) return `${prefix}-${crypto.randomUUID()}`;
-    } catch {}
-    return `${prefix}-${Date.now()}-${Math.random().toString(36).slice(2)}`;
-  }
-
-  function visitorId() {
-    const key = 'imdb-showcase-visitor-id-v2';
-    try {
-      let id = localStorage.getItem(key);
-      if (!id) {
-        id = randomId('visitor');
-        localStorage.setItem(key, id);
-      }
-      return id;
-    } catch {
-      return randomId('visitor');
-    }
-  }
-
-  function sessionId() {
-    const key = 'imdb-showcase-session-id-v2';
-    try {
-      let id = sessionStorage.getItem(key);
-      if (!id) {
-        id = randomId('session');
-        sessionStorage.setItem(key, id);
-      }
-      return id;
-    } catch {
-      return randomId('session');
-    }
-  }
-
-  const ids = { visitorId: visitorId(), sessionId: sessionId() };
-  let lastPageview = 0;
-  let heartbeatTimer = 0;
-  let refreshTimer = 0;
-
-  function payload(type, extra = {}) {
-    return {
-      type,
-      siteId: CONFIG.siteId,
-      siteName: CONFIG.siteName,
-      eventId: randomId('event'),
-      visitorId: ids.visitorId,
-      sessionId: ids.sessionId,
-      pageUrl: location.href,
-      path: location.pathname,
-      title: document.title,
-      referrer: document.referrer || '',
-      language: navigator.language || '',
-      timezone: Intl.DateTimeFormat().resolvedOptions().timeZone || '',
-      screen: {
-        width: screen.width,
-        height: screen.height,
-        devicePixelRatio: window.devicePixelRatio || 1,
-        colorDepth: screen.colorDepth || 0
-      },
-      viewport: {
-        width: innerWidth,
-        height: innerHeight
-      },
-      connection: navigator.connection ? {
-        type: navigator.connection.effectiveType || '',
-        downlink: navigator.connection.downlink || 0,
-        rtt: navigator.connection.rtt || 0,
-        saveData: Boolean(navigator.connection.saveData)
-      } : {},
-      timestamp: nowIso(),
-      ...extra
-    };
-  }
-
-  function send(type, extra = {}, keepalive = true) {
-    const url = `${CONFIG.workerUrl.replace(/\\/$/, '')}/collect`;
-    const body = safeJson(payload(type, extra));
-    try {
-      if (navigator.sendBeacon && keepalive) {
-        const blob = new Blob([body], { type: 'application/json' });
-        if (navigator.sendBeacon(url, blob)) return Promise.resolve(true);
-      }
-    } catch {}
-    return fetch(url, {
-      method: 'POST',
-      headers: { 'content-type': 'application/json' },
-      body,
-      keepalive,
-      mode: 'cors'
-    }).then(r => r.ok).catch(() => false);
-  }
-
-  function formatInt(value) {
-    const n = Number(value);
-    if (!Number.isFinite(n)) return '—';
-    return n.toLocaleString('en-US');
-  }
-
-  function setText(id, value) {
-    const node = get(id);
-    if (node) node.textContent = value;
-  }
-
-  function setStatus(text, ok = false) {
-    const node = document.querySelector('#insightsStatus, #advInsightsStatus');
-    if (!node) return;
-    node.textContent = text;
-    node.dataset.ok = ok ? 'true' : 'false';
-  }
-
-  function render(data) {
-    if (!data || data.ok === false) {
-      setStatus('داده بازدید در دسترس نیست');
-      return;
-    }
-    setStatus('● متصل به Page Insights', true);
-
-    setText('insightTotalViews', formatInt(data.views));
-    setText('insightUniqueVisitors', formatInt(data.uniqueVisitors));
-    setText('insightTodayViews', formatInt(data.today?.views));
-    setText('insightSessions', formatInt(data.sessions));
-
-    setText('advTotalViews', formatInt(data.views));
-    setText('advUniqueVisitors', formatInt(data.uniqueVisitors));
-    setText('advTodayViews', formatInt(data.today?.views));
-    setText('advSessions', formatInt(data.sessions));
-
-    const latest = data.series?.length ? data.series[data.series.length - 1] : null;
-    const latestLabel = latest?.day || data.today?.date || '—';
-    setText('insightLastEvent', `آخرین روز ثبت‌شده: ${latestLabel}`);
-    setText('advLastEvent', `آخرین روز ثبت‌شده: ${latestLabel}`);
-
-    renderAdvancedMiniTrend(data.series || data.last7Days || []);
-  }
-
-  function renderAdvancedMiniTrend(rows) {
-    const host = get('advTrendBars');
-    if (!host) return;
-    const safeRows = Array.isArray(rows) ? rows.slice(-14) : [];
-    if (!safeRows.length) {
-      host.innerHTML = '<span class="trend-empty">هنوز داده کافی ثبت نشده است.</span>';
-      return;
-    }
-    const max = Math.max(1, ...safeRows.map(x => Number(x.views) || 0));
-    host.innerHTML = safeRows.map(row => {
-      const value = Number(row.views) || 0;
-      const height = Math.max(8, Math.round(value / max * 100));
-      return `<div class="trend-bar" style="--h:${height}%" title="${row.day || ''}: ${value}"><i></i></div>`;
-    }).join('');
-  }
-
-  async function refresh() {
-    try {
-      const url = `${CONFIG.workerUrl.replace(/\\/$/, '')}/api/site/${encodeURIComponent(CONFIG.siteId)}?days=30`;
-      const response = await fetch(url, { cache: 'no-store' });
-      if (!response.ok) throw new Error(`HTTP ${response.status}`);
-      render(await response.json());
-    } catch (error) {
-      setStatus('اتصال به آمار بازدید موقتاً در دسترس نیست');
-      console.warn('Page Insights:', error);
-    }
-  }
-
-  function start() {
-    const firstDelay = lastPageview ? 0 : 200;
-    setTimeout(() => {
-      send('pageview');
-      lastPageview = Date.now();
-
-      heartbeatTimer = window.setInterval(() => {
-        const durationMs = Date.now() - lastPageview;
-        send('heartbeat', {
-          durationMs,
-          maxScroll: Math.round(((scrollY + innerHeight) / Math.max(1, document.documentElement.scrollHeight)) * 100)
-        });
-      }, 30000);
-    }, firstDelay);
-
-    const leave = () => {
-      const durationMs = lastPageview ? Date.now() - lastPageview : 0;
-      send('pageleave', {
-        durationMs,
-        maxScroll: Math.round(((scrollY + innerHeight) / Math.max(1, document.documentElement.scrollHeight)) * 100)
-      });
-    };
-
-    window.addEventListener('pagehide', leave, { once: true });
-    document.addEventListener('visibilitychange', () => {
-      if (document.visibilityState === 'hidden') leave();
+    const CONFIG = Object.freeze({
+        workerUrl: 'https://github-page-insights-worker.game-developer-mb.workers.dev',
+        siteId: 'imdb-showcase',
+        siteName: 'IMDb Showcase',
+        refreshMs: 60000
     });
 
-    refresh();
-    refreshTimer = window.setInterval(refresh, CONFIG.autoRefreshMs);
+    const $ = (id) => document.getElementById(id);
+    const KEY_VISITOR = 'imdb-showcase-page-insights-visitor-v3';
+    const KEY_SESSION = 'imdb-showcase-page-insights-session-v3';
+    const endpoint = `${CONFIG.workerUrl.replace(/\/$/, '')}`;
 
-    const refreshButton = get('insightsRefresh');
-    if (refreshButton) refreshButton.addEventListener('click', refresh);
-    const advancedRefresh = get('advInsightsRefresh');
-    if (advancedRefresh) advancedRefresh.addEventListener('click', refresh);
-  }
+    let sentPageleave = false;
+    let heartbeatTimer = 0;
+    let refreshTimer = 0;
+    let visibleSince = Date.now();
+    let maxScroll = 0;
 
-  window.IMDBPageInsights = {
-    refresh,
-    send,
-    config: CONFIG
-  };
+    function id(prefix) {
+        try { if (crypto.randomUUID) return `${prefix}-${crypto.randomUUID()}`; } catch {}
+        return `${prefix}-${Date.now()}-${Math.random().toString(36).slice(2)}`;
+    }
 
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', start, { once: true });
-  } else {
-    start();
-  }
+    function storageId(storage, key, prefix) {
+        try {
+            let value = storage.getItem(key);
+            if (!value) { value = id(prefix); storage.setItem(key, value); }
+            return value;
+        } catch { return id(prefix); }
+    }
+
+    const visitorId = storageId(localStorage, KEY_VISITOR, 'visitor');
+    const sessionId = storageId(sessionStorage, KEY_SESSION, 'session');
+
+    function number(value) {
+        const n = Number(value);
+        return Number.isFinite(n) ? n : 0;
+    }
+
+    function formatInt(value) {
+        return number(value).toLocaleString('en-US');
+    }
+
+    function set(idName, value) {
+        const node = $(idName);
+        if (node) node.textContent = value;
+    }
+
+    function updateStatus(text, connected) {
+        document.querySelectorAll('#insightsStatus, #advInsightsStatus').forEach(node => {
+            node.textContent = text;
+            node.dataset.connected = connected ? 'true' : 'false';
+        });
+    }
+
+    function basePayload(eventType, extra = {}) {
+        return {
+            eventType,
+            siteId: CONFIG.siteId,
+            siteName: CONFIG.siteName,
+            eventId: id('event'),
+            visitorId,
+            sessionId,
+            pageUrl: location.href,
+            path: location.pathname,
+            title: document.title,
+            referrer: document.referrer || '',
+            language: navigator.language || '',
+            timezone: Intl.DateTimeFormat().resolvedOptions().timeZone || '',
+            screenWidth: screen.width || 0,
+            screenHeight: screen.height || 0,
+            viewportWidth: innerWidth || 0,
+            viewportHeight: innerHeight || 0,
+            timestamp: new Date().toISOString(),
+            ...extra
+        };
+    }
+
+    async function send(eventType, extra = {}, keepalive = true) {
+        const url = `${endpoint}/collect`;
+        const body = JSON.stringify(basePayload(eventType, extra));
+        try {
+            if (navigator.sendBeacon && keepalive) {
+                const blob = new Blob([body], { type: 'application/json' });
+                if (navigator.sendBeacon(url, blob)) return true;
+            }
+        } catch {}
+
+        try {
+            const response = await fetch(url, {
+                method: 'POST',
+                headers: { 'content-type': 'application/json' },
+                body,
+                keepalive,
+                mode: 'cors'
+            });
+            return response.ok;
+        } catch {
+            return false;
+        }
+    }
+
+    function render(data) {
+        if (!data || data.ok === false) {
+            updateStatus('آمار فعلاً در دسترس نیست', false);
+            return;
+        }
+
+        updateStatus('● متصل به Page Insights', true);
+        set('insightTotalViews', formatInt(data.views));
+        set('insightUniqueVisitors', formatInt(data.uniqueVisitors));
+        set('insightTodayViews', formatInt(data.today?.views));
+        set('insightSessions', formatInt(data.sessions));
+        set('advTotalViews', formatInt(data.views));
+        set('advUniqueVisitors', formatInt(data.uniqueVisitors));
+        set('advTodayViews', formatInt(data.today?.views));
+        set('advSessions', formatInt(data.sessions));
+
+        const last = Array.isArray(data.series) && data.series.length ? data.series[data.series.length - 1] : null;
+        const lastText = last?.day ? `آخرین روز ثبت‌شده: ${last.day}` : `امروز: ${data.today?.date || '—'}`;
+        set('insightLastEvent', lastText);
+        set('advLastEvent', lastText);
+
+        const bars = $('advTrendBars');
+        if (bars) {
+            const rows = Array.isArray(data.series) ? data.series.slice(-14) : [];
+            const max = Math.max(1, ...rows.map(x => number(x.views)));
+            bars.innerHTML = rows.length
+                ? rows.map(x => `<i title="${String(x.day || '')}: ${formatInt(x.views)}" style="height:${Math.max(7, Math.round(number(x.views) / max * 100))}%"></i>`).join('')
+                : '<span class="trend-empty">هنوز داده‌ای ثبت نشده است.</span>';
+        }
+    }
+
+    async function refresh() {
+        try {
+            const response = await fetch(
+                `${endpoint}/api/site/${encodeURIComponent(CONFIG.siteId)}?days=30`,
+                { cache: 'no-store' }
+            );
+            if (!response.ok) throw new Error(`HTTP ${response.status}`);
+            render(await response.json());
+        } catch (error) {
+            updateStatus('اتصال به آمار موقتاً در دسترس نیست', false);
+            console.debug('[Page Insights]', error?.message || error);
+        }
+    }
+
+    function scrollWatcher() {
+        const doc = document.documentElement;
+        const total = Math.max(1, doc.scrollHeight - innerHeight);
+        maxScroll = Math.max(maxScroll, Math.min(100, Math.round((scrollY / total) * 100)));
+    }
+
+    function sendLeaveOnce() {
+        if (sentPageleave) return;
+        sentPageleave = true;
+        const durationMs = Math.max(0, Date.now() - visibleSince);
+        send('pageleave', { durationMs, maxScroll }, true);
+    }
+
+    function start() {
+        document.addEventListener('scroll', scrollWatcher, { passive: true });
+
+        setTimeout(() => {
+            send('pageview', { maxScroll: 0 });
+        }, 250);
+
+        heartbeatTimer = window.setInterval(() => {
+            send('heartbeat', {
+                durationMs: Math.max(0, Date.now() - visibleSince),
+                maxScroll
+            });
+        }, 30000);
+
+        window.addEventListener('pagehide', sendLeaveOnce, { once: true });
+        document.addEventListener('visibilitychange', () => {
+            if (document.visibilityState === 'hidden') sendLeaveOnce();
+        });
+
+        refresh();
+        refreshTimer = window.setInterval(refresh, CONFIG.refreshMs);
+
+        ['insightsRefresh', 'advInsightsRefresh'].forEach(idName => {
+            const button = $(idName);
+            if (button) button.addEventListener('click', refresh);
+        });
+    }
+
+    window.IMDBPageInsights = { refresh, send, config: CONFIG };
+
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', start, { once: true });
+    } else {
+        start();
+    }
+
+    window.addEventListener('pagehide', () => {
+        if (heartbeatTimer) clearInterval(heartbeatTimer);
+        if (refreshTimer) clearInterval(refreshTimer);
+    }, { once: true });
 })();
