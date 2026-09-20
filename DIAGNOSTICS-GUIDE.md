@@ -1,33 +1,38 @@
 # Diagnostics guide
 
-When the Action has a problem, do not send API keys.
+When a GitHub Action or poster update looks wrong:
 
-Open:
+1. Open **GitHub → Actions → IMDb Showcase — resilient data, posters and diagnostics**.
+2. Run the workflow manually with `health_check=true`.
+3. Open the Advanced site.
+4. Scroll to **PIPELINE OBSERVABILITY**.
+5. Click **📋 کپی گزارش**.
+6. Send that sanitized report without sending any Secret values.
 
-1. GitHub → Actions → IMDb Showcase — resilient data pipeline
-2. Run the workflow manually with `health_check=true`
-3. Open the Advanced site
-4. Scroll to `PIPELINE OBSERVABILITY`
-5. Use `📋 کپی گزارش`
+The report can show:
 
-The report contains only sanitized fingerprints and counters.
+- how many OMDb keys were detected;
+- safe key fingerprints;
+- per-key status (`active`, `invalid`, `rate_limited`, `daily_budget_exhausted`, etc.);
+- requests this run and today;
+- cumulative success/error counters;
+- records that used cache;
+- records due for the monthly refresh;
+- records waiting for the 24-hour retry window;
+- posters downloaded/reused/missing;
+- recent pipeline errors.
 
-Useful fields include:
+### Poster 404 diagnosis
 
-- `keys_detected`
-- per-key fingerprint
-- per-key status
-- `daily_requests`
-- `total_requests`
-- `total_success`
-- `total_errors`
-- `api_attempts`
-- `omdb_success`
-- `omdb_errors`
-- `records_missing_enrichment`
-- `records_in_retry_cooldown`
-- `posters_downloaded`
-- `posters_missing`
-- latest error list
+If the browser requests `docs/posters/<id>.webp` and receives 404, the most important check is whether the GitHub Action committed the `docs/posters/` directory. The production workflow explicitly stages that directory.
 
-Never paste the contents of `OMDB_API_KEYS` or `OMDB_API_KEY`.
+The browser also tries the saved remote poster URL before showing the placeholder, so a missing local file does not permanently hide a usable remote poster.
+
+### Secret safety
+
+Never paste:
+
+- `OMDB_API_KEYS`
+- `OMDB_API_KEY`
+- `OMDB_API_KEY_1..4`
+- the raw `IMDB_COOKIES` value

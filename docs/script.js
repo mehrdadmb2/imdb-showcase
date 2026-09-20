@@ -154,12 +154,21 @@
     }
 
     function getLocalPosterUrl(movie) {
-        const candidate = getSafeString(movie?.poster_local, '');
+        let candidate = getSafeString(movie?.poster_local, '').replace(/\\/g, '/').trim();
         if (!candidate) return '';
         if (/^https?:\/\//i.test(candidate)) return candidate;
-        if (candidate.startsWith('/')) return candidate;
-        if (candidate.startsWith('../')) return candidate;
-        return candidate.startsWith('posters/') ? candidate : `posters/${candidate.replace(/^\//, '')}`;
+        candidate = candidate.replace(/^\.\//, '').replace(/^\//, '');
+        if (candidate.startsWith('docs/')) candidate = candidate.slice(5);
+        if (candidate.startsWith('posters/')) return candidate;
+        if (candidate.includes('/posters/')) return candidate.slice(candidate.indexOf('posters/'));
+        return `posters/${candidate}`;
+    }
+
+    function getRemotePosterUrl(movie) {
+        const direct = getSafeString(movie?.poster, '');
+        if (/^https?:\/\//i.test(direct)) return direct;
+        const raw = movie?.raw_omdb && typeof movie.raw_omdb === 'object' ? getSafeString(movie.raw_omdb.Poster, '') : '';
+        return /^https?:\/\//i.test(raw) ? raw : '';
     }
 
     function normalizeMovieRecord(movie) {
@@ -395,10 +404,12 @@
     function movieCardHtml(movie) {
         const genres = splitValues(movie.genres).slice(0, 3)
             .map(g => `<span class="movie-genre-tag">${escapeHtml(g)}</span>`).join('');
-        const poster = getLocalPosterUrl(movie) || getSafeString(movie.poster, '');
+        const localPoster = getLocalPosterUrl(movie);
+        const remotePoster = getRemotePosterUrl(movie);
+        const initialPoster = localPoster || remotePoster;
         const safeTitle = escapeHtml(movie.title);
-        const posterHtml = poster
-            ? `<img class="movie-poster" src="${escapeHtml(poster)}" alt="${safeTitle}" loading="lazy" decoding="async" data-poster-id="${escapeHtml(movie.imdb_id)}"><div class="movie-poster-placeholder" data-fallback-for="${escapeHtml(movie.imdb_id)}" style="display:none">🎬</div>`
+        const posterHtml = initialPoster
+            ? `<img class="movie-poster" src="${escapeHtml(initialPoster)}" alt="${safeTitle}" loading="lazy" decoding="async" data-poster-id="${escapeHtml(movie.imdb_id)}" data-local-poster="${escapeHtml(localPoster)}" data-remote-poster="${escapeHtml(remotePoster)}"><div class="movie-poster-placeholder" data-fallback-for="${escapeHtml(movie.imdb_id)}" style="display:none">🎬</div>`
             : `<div class="movie-poster-placeholder">🎬</div>`;
         const typeBadge = movie.title_type === 'TV Episode'
             ? '<div class="movie-type-badge">📺 قسمت</div>'
@@ -603,11 +614,24 @@
 
         const image = $('modalPoster');
         const placeholder = $('modalPosterPlaceholder');
-        const poster = getLocalPosterUrl(movie) || getSafeString(movie.poster, '');
+        const localPoster = getLocalPosterUrl(movie);
+        const remotePoster = getRemotePosterUrl(movie);
         if (image) {
-            image.onerror = () => { image.style.display = 'none'; if (placeholder) placeholder.style.display = 'flex'; };
-            if (poster) { image.src = poster; image.alt = movie.title; image.style.display = 'block'; if (placeholder) placeholder.style.display = 'none'; }
-            else { image.removeAttribute('src'); image.style.display = 'none'; if (placeholder) placeholder.style.display = 'flex'; }
+            const sources = [localPoster, remotePoster].filter(Boolean).filter((v, i, a) => a.indexOf(v) === i);
+            let sourceIndex = 0;
+            const useSource = () => {
+                if (sourceIndex >= sources.length) {
+                    image.style.display = 'none';
+                    if (placeholder) placeholder.style.display = 'flex';
+                    return;
+                }
+                image.src = sources[sourceIndex++];
+                image.alt = movie.title;
+                image.style.display = 'block';
+                if (placeholder) placeholder.style.display = 'none';
+            };
+            image.onerror = () => useSource();
+            useSource();
         }
 
         const setText = (id2, value, fallback = 'N/A') => { const el = $(id2); if (el) el.textContent = getSafeString(value, fallback); };
@@ -788,6 +812,13 @@
             const img = e.target;
             if (!(img instanceof HTMLImageElement)) return;
             if (!img.classList.contains('movie-poster')) return;
+            const remote = img.dataset.remotePoster || '';
+            const triedRemote = img.dataset.triedRemote === '1';
+            if (remote && !triedRemote && img.currentSrc !== remote) {
+                img.dataset.triedRemote = '1';
+                img.src = remote;
+                return;
+            }
             const fallback = img.parentElement?.querySelector('[data-fallback-for]');
             if (fallback) fallback.style.display = 'flex';
             img.style.display = 'none';

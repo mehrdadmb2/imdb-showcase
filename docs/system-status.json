@@ -1,7 +1,7 @@
 {
-  "schema_version": 2,
+  "schema_version": 3,
   "status": "not_run",
-  "message": "No GitHub Actions pipeline run has produced diagnostics yet.",
+  "message": "No Action run has produced diagnostics yet.",
   "generated_at": "",
   "run": {},
   "keys": [],
