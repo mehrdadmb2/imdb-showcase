@@ -1,9 +1,14 @@
 (() => {
   'use strict';
 
-  const DATA_URL = '../movies.json';
-  const CACHE_KEY = 'imdb-advanced-data-v12';
-  const PAGE_SIZE_KEY = 'imdb-advanced-page-size-v12';
+  const DATA_URLS = [
+    new URL('../movies.json', document.baseURI).href,
+    new URL('movies.json', new URL('../', document.baseURI).href).href,
+    `${location.origin}/imdb-showcase/movies.json`,
+    'https://raw.githubusercontent.com/mehrdadmb2/imdb-showcase/main/docs/movies.json'
+  ];
+  const CACHE_KEY = 'imdb-advanced-data-v13';
+  const PAGE_SIZE_KEY = 'imdb-advanced-page-size-v13';
 
   const state = {
     movies: [],
@@ -25,6 +30,31 @@
   };
 
   const $ = (id) => document.getElementById(id);
+
+  const THEME_KEY = 'imdb-showcase-advanced-theme-v2';
+  const THEMES = ['obsidian', 'aurora', 'ember', 'ocean'];
+
+  function applyTheme(theme) {
+    const selected = THEMES.includes(theme) ? theme : 'obsidian';
+    document.documentElement.dataset.theme = selected;
+    try { localStorage.setItem(THEME_KEY, selected); } catch {}
+    document.querySelectorAll('#themeMenu [data-theme]').forEach(btn => {
+      btn.classList.toggle('active', btn.dataset.theme === selected);
+    });
+  }
+
+  function restoreTheme() {
+    let theme = 'obsidian';
+    try { theme = localStorage.getItem(THEME_KEY) || 'obsidian'; } catch {}
+    applyTheme(theme);
+  }
+
+  function setBoot(textValue, tone = '') {
+    const textNode = $('bootText');
+    const line = $('bootLine');
+    if (textNode) textNode.textContent = textValue;
+    if (line) line.dataset.tone = tone;
+  }
 
   const log = (...args) => console.info('[IMDb Advanced]', ...args);
   const warn = (...args) => console.warn('[IMDb Advanced]', ...args);
@@ -208,7 +238,8 @@
     const controller = new AbortController();
     const timer = setTimeout(() => controller.abort(), timeoutMs);
     try {
-      const response = await fetch(`${url}${url.includes('?') ? '&' : '?'}v=${Date.now()}`, {
+      const separator = url.includes('?') ? '&' : '?';
+      const response = await fetch(`${url}${separator}v=${Date.now()}`, {
         cache: 'no-store',
         signal: controller.signal,
         headers: { Accept: 'application/json' }
@@ -222,6 +253,21 @@
     } finally {
       clearTimeout(timer);
     }
+  }
+
+  async function fetchSharedDataset() {
+    let lastError = null;
+    for (const url of DATA_URLS) {
+      try {
+        const data = await fetchJson(url, 12000);
+        log('Dataset source OK:', url);
+        return data;
+      } catch (err) {
+        lastError = err;
+        warn('Dataset source failed:', url, err?.message || err);
+      }
+    }
+    throw lastError || new Error('هیچ منبع Dataset در دسترس نیست.');
   }
 
   function loadCachedDataset() {
@@ -246,31 +292,55 @@
 
   async function loadData() {
     setHeroHealth('LOADING');
+    setBoot('در حال بارگذاری Dataset مشترک…');
+
+    // Render cached data immediately so the advanced UI never looks blank
+    // while the network request is in progress.
+    const cached = loadCachedDataset();
+    if (cached?.movies?.length) {
+      state.movies = cached.movies.map(normalizeMovie).filter((m) => m.imdb_id);
+      renderGlobal({ data_meta: { cache_fallback: true } });
+      populateFilterOptions();
+      applyFilters();
+      renderLatest();
+      renderSeriesUniverse();
+      setHeroHealth('CACHED');
+      setBoot(`${formatInt(state.movies.length)} عنوان از Cache محلی آماده است`, 'cached');
+      log(`Rendered ${state.movies.length} cached records before network refresh.`);
+    }
+
     try {
-      const data = await fetchJson(DATA_URL);
-      state.movies = (Array.isArray(data.movies) ? data.movies : data).map(normalizeMovie).filter((m) => m.imdb_id);
+      const data = await fetchSharedDataset();
+      state.movies = (Array.isArray(data.movies) ? data.movies : data)
+        .map(normalizeMovie)
+        .filter((m) => m.imdb_id);
+
+      if (!state.movies.length) throw new Error('Dataset خالی است.');
+
       saveCachedDataset({ movies: state.movies, data_meta: data.data_meta });
       renderGlobal(data);
+      populateFilterOptions();
+      applyFilters();
+      renderLatest();
+      renderSeriesUniverse();
+      setHeroHealth('READY');
+      setBoot(`${formatInt(state.movies.length)} عنوان آماده نمایش است`, 'ok');
       log(`Loaded ${state.movies.length} records from shared Repository dataset.`);
     } catch (err) {
       error('Shared dataset load failed', err);
-      const cached = loadCachedDataset();
-      if (cached?.movies?.length) {
-        state.movies = cached.movies.map(normalizeMovie).filter((m) => m.imdb_id);
-        renderGlobal({ data_meta: { cache_fallback: true } });
-        notify('Dataset زنده در دسترس نبود؛ آخرین نسخه سالم محلی نمایش داده شد.', 'warn');
+      if (state.movies.length) {
+        setHeroHealth('CACHED');
+        setBoot('شبکه در دسترس نبود؛ آخرین Dataset سالم نمایش داده شد', 'cached');
+        notify('داده آنلاین در دسترس نبود؛ نسخه سالم Cache نمایش داده شد.', 'warn');
       } else {
         state.movies = [];
         renderEmptyAll('Dataset در دسترس نیست. ابتدا اجرای GitHub Action را بررسی کن.');
+        setHeroHealth('ERROR');
+        setBoot('Dataset قابل بارگذاری نیست؛ Diagnostics را بررسی کن', 'error');
       }
     }
 
-    populateFilterOptions();
-    applyFilters();
-    renderLatest();
-    renderSeriesUniverse();
     loadDiagnostics();
-    setHeroHealth(state.movies.length ? 'READY' : 'EMPTY');
   }
 
   function setHeroHealth(value) {
@@ -656,6 +726,39 @@
     return JSON.stringify({ exported_at: new Date().toISOString(), page: location.href, dataset: { records: state.movies.length, local_posters: state.movies.filter((m) => normalizeLocalPoster(m.poster_local)).length, omdb_enriched: state.movies.filter((m) => m.raw_omdb?.imdbID || m.omdb_found).length }, diagnostics: state.diagnostics }, null, 2);
   }
 
+  let chartPromise = null;
+
+  function ensureChartJs() {
+    if (window.Chart) return Promise.resolve(window.Chart);
+    if (chartPromise) return chartPromise;
+    chartPromise = new Promise((resolve, reject) => {
+      const existing = document.querySelector('script[data-chartjs]');
+      if (existing) {
+        existing.addEventListener('load', () => resolve(window.Chart), { once: true });
+        existing.addEventListener('error', () => reject(new Error('Chart.js load failed')), { once: true });
+        return;
+      }
+      const script = document.createElement('script');
+      script.src = 'https://cdn.jsdelivr.net/npm/chart.js@4.4.9/dist/chart.umd.min.js';
+      script.async = true;
+      script.dataset.chartjs = '1';
+      script.onload = () => window.Chart ? resolve(window.Chart) : reject(new Error('Chart.js unavailable'));
+      script.onerror = () => reject(new Error('Chart.js CDN unavailable'));
+      document.head.appendChild(script);
+    });
+    return chartPromise;
+  }
+
+  async function generateChartsSafe() {
+    try {
+      await ensureChartJs();
+      generateCharts();
+    } catch (err) {
+      warn('Analytics charts unavailable; rest of app remains functional.', err);
+      notify('Chart.js در دسترس نیست؛ بقیه بخش‌های سایت همچنان فعال هستند.', 'warn');
+    }
+  }
+
   function generateCharts() {
     if (typeof Chart === 'undefined') {
       notify('Chart.js در دسترس نیست؛ بخش نمودارها فعلاً نمایش داده نمی‌شود.', 'warn');
@@ -741,10 +844,32 @@
     $('goLibrary')?.addEventListener('click', () => $('library')?.scrollIntoView({ behavior: 'smooth' }));
     $('recentToLibrary')?.addEventListener('click', () => $('library')?.scrollIntoView({ behavior: 'smooth' }));
     $('goDiagnostics')?.addEventListener('click', () => $('diagnostics')?.scrollIntoView({ behavior: 'smooth' }));
-    $('openAnalytics')?.addEventListener('click', () => { const section = $('analytics'); if (!section) return; section.hidden = !section.hidden; if (!section.hidden) generateCharts(); });
+    $('openAnalytics')?.addEventListener('click', () => { const section = $('analytics'); if (!section) return; section.hidden = !section.hidden; if (!section.hidden) generateChartsSafe(); });
     $('refreshDiagnostics')?.addEventListener('click', loadDiagnostics);
     $('copyDiagnostics')?.addEventListener('click', async () => { try { await navigator.clipboard.writeText(diagnosticsExport()); notify('گزارش Diagnostics کپی شد.'); } catch { notify('کپی گزارش ناموفق بود.', 'warn'); } });
     $('advInsightsRefresh')?.addEventListener('click', () => window.IMDBPageInsights?.refresh?.());
+    $('themeToggle')?.addEventListener('click', () => {
+      const menu = $('themeMenu');
+      if (!menu) return;
+      menu.hidden = !menu.hidden;
+      $('themeToggle')?.setAttribute('aria-expanded', String(!menu.hidden));
+    });
+    $('themeMenu')?.addEventListener('click', (e) => {
+      const btn = e.target.closest('[data-theme]');
+      if (!btn) return;
+      applyTheme(btn.dataset.theme);
+      $('themeMenu').hidden = true;
+      $('themeToggle')?.setAttribute('aria-expanded', 'false');
+    });
+    document.addEventListener('click', (e) => {
+      if (!e.target.closest('#themeMenu') && !e.target.closest('#themeToggle')) {
+        const menu = $('themeMenu');
+        if (menu && !menu.hidden) {
+          menu.hidden = true;
+          $('themeToggle')?.setAttribute('aria-expanded', 'false');
+        }
+      }
+    });
     $('effectToggle')?.addEventListener('click', () => document.body.classList.toggle('focus-glow'));
 
     document.addEventListener('keydown', (e) => {
@@ -771,6 +896,7 @@
     window.addEventListener('unhandledrejection', (e) => error('Advanced promise rejection', e.reason));
   }
 
+  restoreTheme();
   if ($('pageSize')) $('pageSize').value = String(state.pageSize);
   bindEvents();
   loadData();

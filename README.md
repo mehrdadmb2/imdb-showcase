@@ -52,3 +52,6 @@ Manual inputs:
 Advanced mode exposes a production diagnostics panel showing key fingerprints, status, daily/total request counters, cache reuse, monthly refresh counts, poster attempts/downloads/misses, and recent errors.
 
 Use the `Copy report` button and send that report for troubleshooting. Never send the actual API keys or raw cookie value.
+
+
+V13 fixes: classic runtime wording; Advanced boot/cached rendering; resilient dataset source fallback; lazy Chart.js loading; multi-theme advanced UI.

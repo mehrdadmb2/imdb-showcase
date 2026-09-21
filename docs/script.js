@@ -503,9 +503,9 @@
         const n = Number(minutes) || 0;
         const hours = Math.floor(n / 60);
         const mins = n % 60;
-        if (hours && mins) return `${hours}س ${mins}د`;
-        if (hours) return `${hours}س`;
-        return `${mins}د`;
+        if (hours && mins) return `${hours} ساعت و ${mins} دقیقه`;
+        if (hours) return `${hours} ساعت`;
+        return `${mins} دقیقه`;
     }
 
     function updateFirstLast() {

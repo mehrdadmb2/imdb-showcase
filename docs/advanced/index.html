@@ -10,7 +10,6 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Vazirmatn:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.9/dist/chart.umd.min.js" defer></script>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -39,7 +38,14 @@
       <a class="nav-chip" href="../">↩ کلاسیک</a>
       <a class="nav-chip" href="https://www.imdb.com/user/p.if6bmsibrbg5dapfqbjrld4lhy?ref_=ext_shr_lnk" target="_blank" rel="noopener noreferrer">🎬 IMDb من</a>
       <a class="nav-chip" href="https://github.com/mehrdadmb2/imdb-showcase/actions/workflows/update-movies.yml" target="_blank" rel="noopener noreferrer">⚙️ Actions</a>
+      <button class="icon-chip" id="themeToggle" type="button" title="تغییر تم" aria-expanded="false">🎨</button>
       <button class="icon-chip" id="effectToggle" type="button" title="جلوه‌های حرکتی">✦</button>
+      <div class="theme-menu glass" id="themeMenu" hidden role="menu" aria-label="تم سایت">
+        <button data-theme="obsidian" role="menuitem"><i class="swatch obsidian"></i><span>Obsidian</span></button>
+        <button data-theme="aurora" role="menuitem"><i class="swatch aurora"></i><span>Aurora</span></button>
+        <button data-theme="ember" role="menuitem"><i class="swatch ember"></i><span>Ember</span></button>
+        <button data-theme="ocean" role="menuitem"><i class="swatch ocean"></i><span>Ocean</span></button>
+      </div>
     </div>
   </header>
 
@@ -58,6 +64,7 @@
         <div class="hero-tags">
           <span>⚡ Local-first</span><span>🖼️ Local Posters</span><span>🧠 OMDb Cache</span><span>📺 Series Aware</span>
         </div>
+        <div class="boot-line" id="bootLine"><span class="boot-dot"></span><span id="bootText">در حال آماده‌سازی کتابخانه…</span></div>
       </div>
 
       <div class="hero-stage" aria-hidden="true">
