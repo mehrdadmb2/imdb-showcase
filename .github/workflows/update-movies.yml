@@ -1,58 +1,186 @@
-name: به‌روزرسانی و انتشار سایت
+name: IMDb Showcase — resilient data, posters and diagnostics
 
 on:
   schedule:
-    - cron: '0 */12 * * *'
+    - cron: '15 */12 * * *'
   workflow_dispatch:
+    inputs:
+      health_check:
+        description: 'Test every configured OMDb key once and write diagnostics only'
+        required: false
+        default: false
+        type: boolean
+      force_refresh:
+        description: 'Refresh all existing records now, subject to the daily per-key safety budget'
+        required: false
+        default: false
+        type: boolean
 
 permissions:
   contents: write
   pages: write
   id-token: write
 
+concurrency:
+  group: imdb-showcase-production
+  cancel-in-progress: false
+
 jobs:
   update-data:
     runs-on: ubuntu-latest
+    timeout-minutes: 60
+    env:
+      PYTHONUNBUFFERED: '1'
+      FORCE_REFRESH: ${{ github.event.inputs.force_refresh || 'false' }}
+      CACHE_TTL_DAYS: '30'
+
     steps:
-      - uses: actions/checkout@v5
-      
-      - name: نصب Python
+      - name: Checkout repository
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 2
+
+      - name: Setup Python
         uses: actions/setup-python@v6
         with:
-          python-version: '3.11'
-      
-      - name: نصب وابستگی‌ها
-        run: |
-          cd src
-          pip install -r requirements.txt
-      
-      - name: اجرای اسکریپت دریافت اطلاعات
+          python-version: '3.12'
+          cache: 'pip'
+          cache-dependency-path: src/requirements.txt
+
+      - name: Install dependencies
+        run: python -m pip install -r src/requirements.txt
+
+      - name: Detect OMDb keys safely
         env:
+          OMDB_API_KEYS: ${{ secrets.OMDB_API_KEYS }}
           OMDB_API_KEY: ${{ secrets.OMDB_API_KEY }}
+          OMDB_API_KEY_1: ${{ secrets.OMDB_API_KEY_1 }}
+          OMDB_API_KEY_2: ${{ secrets.OMDB_API_KEY_2 }}
+          OMDB_API_KEY_3: ${{ secrets.OMDB_API_KEY_3 }}
+          OMDB_API_KEY_4: ${{ secrets.OMDB_API_KEY_4 }}
         run: |
-          cd src
-          python fetch_imdb.py
-      
-      - name: آپلود فایل‌های docs
+          python - <<'PY'
+          import hashlib, json, os, re
+          raw = os.getenv('OMDB_API_KEYS', '').strip()
+          keys = []
+          if raw.startswith('[') and raw.endswith(']'):
+              try:
+                  data = json.loads(raw)
+                  if isinstance(data, list):
+                      keys.extend(str(x).strip() for x in data if str(x).strip())
+              except Exception:
+                  pass
+          if not keys:
+              keys.extend(x for x in re.split(r'[;,\s]+', raw) if x)
+          for name in ('OMDB_API_KEY_1','OMDB_API_KEY_2','OMDB_API_KEY_3','OMDB_API_KEY_4','OMDB_API_KEY'):
+              value = os.getenv(name, '').strip()
+              if value: keys.append(value)
+          keys = list(dict.fromkeys(keys))
+          print('OMDb keys detected:', len(keys))
+          for i, key in enumerate(keys, 1):
+              print(f'  key-{i}: sha256={hashlib.sha256(key.encode()).hexdigest()[:12]}')
+          if not keys:
+              raise SystemExit('No OMDb key discovered. Check Repository secrets -> OMDB_API_KEYS.')
+          PY
+
+      - name: Run optional key health check
+        if: ${{ github.event_name == 'workflow_dispatch' && inputs.health_check }}
+        env:
+          OMDB_API_KEYS: ${{ secrets.OMDB_API_KEYS }}
+          OMDB_API_KEY: ${{ secrets.OMDB_API_KEY }}
+          OMDB_API_KEY_1: ${{ secrets.OMDB_API_KEY_1 }}
+          OMDB_API_KEY_2: ${{ secrets.OMDB_API_KEY_2 }}
+          OMDB_API_KEY_3: ${{ secrets.OMDB_API_KEY_3 }}
+          OMDB_API_KEY_4: ${{ secrets.OMDB_API_KEY_4 }}
+        continue-on-error: true
+        run: python src/fetch_imdb.py --health-check
+
+      - name: Commit diagnostics from health check
+        if: ${{ github.event_name == 'workflow_dispatch' && inputs.health_check }}
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email 'github-actions[bot]@users.noreply.github.com'
+          git add docs/system-status.json docs/omdb-key-state.json docs/update-log.json
+          if git diff --staged --quiet; then
+            echo 'No diagnostic changes.'
+          else
+            git commit -m 'chore(diagnostics): refresh OMDb key health [skip ci]'
+            git push
+          fi
+
+      - name: Run resilient data + poster cache
+        if: ${{ !(github.event_name == 'workflow_dispatch' && inputs.health_check) }}
+        env:
+          OMDB_API_KEYS: ${{ secrets.OMDB_API_KEYS }}
+          OMDB_API_KEY: ${{ secrets.OMDB_API_KEY }}
+          OMDB_API_KEY_1: ${{ secrets.OMDB_API_KEY_1 }}
+          OMDB_API_KEY_2: ${{ secrets.OMDB_API_KEY_2 }}
+          OMDB_API_KEY_3: ${{ secrets.OMDB_API_KEY_3 }}
+          OMDB_API_KEY_4: ${{ secrets.OMDB_API_KEY_4 }}
+          IMDB_COOKIES: ${{ secrets.IMDB_COOKIES }}
+          FORCE_REFRESH: ${{ github.event.inputs.force_refresh || 'false' }}
+        run: python src/fetch_imdb.py
+
+      - name: Validate dataset and local poster cache
+        if: ${{ !(github.event_name == 'workflow_dispatch' && inputs.health_check) }}
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          p = Path('docs/movies.json')
+          if not p.exists(): raise SystemExit('docs/movies.json missing')
+          d = json.loads(p.read_text(encoding='utf-8'))
+          movies = d.get('movies')
+          if not isinstance(movies, list) or not movies: raise SystemExit('Dataset empty or invalid')
+          ids = [m.get('imdb_id') for m in movies]
+          if any(not x for x in ids): raise SystemExit('Missing IMDb id in dataset')
+          if len(ids) != len(set(ids)): raise SystemExit('Duplicate IMDb IDs detected')
+          poster_dir = Path('docs/posters')
+          local_count = 0
+          invalid_local = 0
+          for movie in movies:
+              rel = movie.get('poster_local')
+              if rel:
+                  local_count += 1
+                  fp = Path('docs') / str(rel).replace('\\','/')
+                  if not fp.exists() or fp.stat().st_size <= 0: invalid_local += 1
+          enriched = sum(bool((m.get('raw_omdb') or {}).get('imdbID') or m.get('omdb_found')) for m in movies)
+          print('records:', len(movies))
+          print('OMDb enriched:', enriched)
+          print('local posters referenced:', local_count)
+          print('invalid local poster references:', invalid_local)
+          print('poster files:', len(list(poster_dir.glob('*.webp'))) if poster_dir.exists() else 0)
+          if invalid_local:
+              raise SystemExit('Invalid local poster references detected')
+          PY
+
+      - name: Commit dataset + poster cache + diagnostics
+        if: ${{ !(github.event_name == 'workflow_dispatch' && inputs.health_check) }}
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email 'github-actions[bot]@users.noreply.github.com'
+          git add docs/movies.json docs/posters docs/system-status.json docs/omdb-key-state.json docs/update-log.json
+          if git diff --staged --quiet; then
+            echo 'No repository data changes.'
+          else
+            git commit -m 'chore(data): resilient IMDb cache, local posters and diagnostics [skip ci]'
+            git push
+          fi
+
+      - name: Upload GitHub Pages artifact
+        if: ${{ !(github.event_name == 'workflow_dispatch' && inputs.health_check) }}
         uses: actions/upload-pages-artifact@v3
         with:
-          path: 'docs'
-      
-      - name: Commit و Push
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add docs/movies.json
-          git diff --staged --quiet || git commit -m "به‌روزرسانی خودکار فیلم‌ها [skip ci]"
-          git push
+          path: docs
 
   deploy:
-    runs-on: ubuntu-latest
+    if: ${{ !(github.event_name == 'workflow_dispatch' && inputs.health_check) }}
     needs: update-data
+    runs-on: ubuntu-latest
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
-      - name: انتشار به GitHub Pages
+      - name: Deploy GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
