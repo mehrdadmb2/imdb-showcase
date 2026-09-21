@@ -1,5 +1,67 @@
 {
-  "schema_version": 2,
-  "updated_at": "",
-  "keys": {}
+  "schema_version": 3,
+  "updated_at": "2026-09-21T14:31:05.141277+00:00",
+  "keys": {
+    "85c6a9535c01": {
+      "label": "key-1",
+      "fingerprint": "85c6a9535c01",
+      "total_requests": 206,
+      "total_success": 205,
+      "total_not_found": 0,
+      "total_errors": 1,
+      "last_status": "success",
+      "last_error": "",
+      "daily_date": "2026-09-21",
+      "daily_requests": 206,
+      "daily_success": 205,
+      "daily_errors": 1,
+      "last_seen_at": "2026-09-21T14:31:05.141253+00:00"
+    },
+    "409c1abd8842": {
+      "label": "key-2",
+      "fingerprint": "409c1abd8842",
+      "total_requests": 206,
+      "total_success": 205,
+      "total_not_found": 0,
+      "total_errors": 1,
+      "last_status": "success",
+      "last_error": "",
+      "daily_date": "2026-09-21",
+      "daily_requests": 206,
+      "daily_success": 205,
+      "daily_errors": 1,
+      "last_seen_at": "2026-09-21T14:31:05.141263+00:00"
+    },
+    "b9708d2c4dbb": {
+      "label": "key-3",
+      "fingerprint": "b9708d2c4dbb",
+      "total_requests": 206,
+      "total_success": 205,
+      "total_not_found": 0,
+      "total_errors": 1,
+      "last_status": "success",
+      "last_error": "",
+      "daily_date": "2026-09-21",
+      "daily_requests": 206,
+      "daily_success": 205,
+      "daily_errors": 1,
+      "last_seen_at": "2026-09-21T14:31:05.141268+00:00"
+    },
+    "2caed1031b1c": {
+      "label": "key-4",
+      "fingerprint": "2caed1031b1c",
+      "total_requests": 205,
+      "total_success": 204,
+      "total_not_found": 0,
+      "total_errors": 1,
+      "last_status": "success",
+      "last_error": "",
+      "daily_date": "2026-09-21",
+      "daily_requests": 205,
+      "daily_success": 204,
+      "daily_errors": 1,
+      "last_seen_at": "2026-09-21T14:31:05.141273+00:00"
+    }
+  },
+  "policy": "950 OMDb requests per key/day, tracked across workflow runs"
 }
