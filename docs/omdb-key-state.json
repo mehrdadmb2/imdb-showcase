@@ -1,6 +1,6 @@
 {
   "schema_version": 3,
-  "updated_at": "2026-09-21T14:31:05.141277+00:00",
+  "updated_at": "2026-09-21T18:12:16.450504+00:00",
   "keys": {
     "85c6a9535c01": {
       "label": "key-1",
@@ -9,13 +9,13 @@
       "total_success": 205,
       "total_not_found": 0,
       "total_errors": 1,
-      "last_status": "success",
+      "last_status": "active",
       "last_error": "",
       "daily_date": "2026-09-21",
       "daily_requests": 206,
       "daily_success": 205,
       "daily_errors": 1,
-      "last_seen_at": "2026-09-21T14:31:05.141253+00:00"
+      "last_seen_at": "2026-09-21T18:12:16.450473+00:00"
     },
     "409c1abd8842": {
       "label": "key-2",
@@ -24,13 +24,13 @@
       "total_success": 205,
       "total_not_found": 0,
       "total_errors": 1,
-      "last_status": "success",
+      "last_status": "active",
       "last_error": "",
       "daily_date": "2026-09-21",
       "daily_requests": 206,
       "daily_success": 205,
       "daily_errors": 1,
-      "last_seen_at": "2026-09-21T14:31:05.141263+00:00"
+      "last_seen_at": "2026-09-21T18:12:16.450487+00:00"
     },
     "b9708d2c4dbb": {
       "label": "key-3",
@@ -39,13 +39,13 @@
       "total_success": 205,
       "total_not_found": 0,
       "total_errors": 1,
-      "last_status": "success",
+      "last_status": "active",
       "last_error": "",
       "daily_date": "2026-09-21",
       "daily_requests": 206,
       "daily_success": 205,
       "daily_errors": 1,
-      "last_seen_at": "2026-09-21T14:31:05.141268+00:00"
+      "last_seen_at": "2026-09-21T18:12:16.450494+00:00"
     },
     "2caed1031b1c": {
       "label": "key-4",
@@ -54,13 +54,13 @@
       "total_success": 204,
       "total_not_found": 0,
       "total_errors": 1,
-      "last_status": "success",
+      "last_status": "active",
       "last_error": "",
       "daily_date": "2026-09-21",
       "daily_requests": 205,
       "daily_success": 204,
       "daily_errors": 1,
-      "last_seen_at": "2026-09-21T14:31:05.141273+00:00"
+      "last_seen_at": "2026-09-21T18:12:16.450500+00:00"
     }
   },
   "policy": "950 OMDb requests per key/day, tracked across workflow runs"
