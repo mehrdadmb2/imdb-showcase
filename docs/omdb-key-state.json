@@ -1,5 +1,67 @@
 {
-  "schema_version": 2,
-  "updated_at": "",
-  "keys": {}
+  "schema_version": 3,
+  "updated_at": "2026-09-22T16:57:18.130586+00:00",
+  "keys": {
+    "85c6a9535c01": {
+      "label": "key-1",
+      "fingerprint": "85c6a9535c01",
+      "total_requests": 1,
+      "total_success": 0,
+      "total_not_found": 0,
+      "total_errors": 1,
+      "last_status": "api_error",
+      "last_error": "Incorrect IMDb ID.",
+      "daily_date": "2026-09-22",
+      "daily_requests": 1,
+      "daily_success": 0,
+      "daily_errors": 1,
+      "last_seen_at": "2026-09-22T16:57:18.130550+00:00"
+    },
+    "409c1abd8842": {
+      "label": "key-2",
+      "fingerprint": "409c1abd8842",
+      "total_requests": 1,
+      "total_success": 0,
+      "total_not_found": 0,
+      "total_errors": 1,
+      "last_status": "api_error",
+      "last_error": "Incorrect IMDb ID.",
+      "daily_date": "2026-09-22",
+      "daily_requests": 1,
+      "daily_success": 0,
+      "daily_errors": 1,
+      "last_seen_at": "2026-09-22T16:57:18.130568+00:00"
+    },
+    "b9708d2c4dbb": {
+      "label": "key-3",
+      "fingerprint": "b9708d2c4dbb",
+      "total_requests": 1,
+      "total_success": 0,
+      "total_not_found": 0,
+      "total_errors": 1,
+      "last_status": "api_error",
+      "last_error": "Incorrect IMDb ID.",
+      "daily_date": "2026-09-22",
+      "daily_requests": 1,
+      "daily_success": 0,
+      "daily_errors": 1,
+      "last_seen_at": "2026-09-22T16:57:18.130575+00:00"
+    },
+    "2caed1031b1c": {
+      "label": "key-4",
+      "fingerprint": "2caed1031b1c",
+      "total_requests": 1,
+      "total_success": 0,
+      "total_not_found": 0,
+      "total_errors": 1,
+      "last_status": "api_error",
+      "last_error": "Incorrect IMDb ID.",
+      "daily_date": "2026-09-22",
+      "daily_requests": 1,
+      "daily_success": 0,
+      "daily_errors": 1,
+      "last_seen_at": "2026-09-22T16:57:18.130582+00:00"
+    }
+  },
+  "policy": "950 OMDb requests per key/day, tracked across workflow runs"
 }

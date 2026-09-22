@@ -1,5 +1,169 @@
 {
   "schema_version": 2,
-  "updated_at": "",
-  "runs": []
+  "updated_at": "2026-09-22T16:57:18.282783+00:00",
+  "runs": [
+    {
+      "schema_version": 4,
+      "status": "degraded",
+      "message": "IMDb Showcase production pipeline diagnostics",
+      "generated_at": "2026-09-22T16:57:18.130474+00:00",
+      "run": {
+        "mode": "update",
+        "started_at": "2026-09-22T16:52:44.156216+00:00",
+        "finished_at": "2026-09-22T16:57:18.130474+00:00",
+        "duration_seconds": 273.97,
+        "keys_detected": 4,
+        "counts": {
+          "source_records": 1769,
+          "cache_reused": 1768,
+          "api_attempts": 1,
+          "omdb_success": 0,
+          "omdb_not_found": 0,
+          "omdb_errors": 1,
+          "stale_preserved": 0,
+          "partial_records": 1,
+          "records_missing_enrichment": 1,
+          "records_due_monthly_refresh": 0,
+          "records_deferred_retry": 0,
+          "poster_reused": 1660,
+          "poster_attempts": 96,
+          "posters_downloaded": 0,
+          "posters_missing": 107,
+          "imdb_poster_fallback_attempts": 11
+        },
+        "keys": [
+          {
+            "label": "key-1",
+            "fingerprint": "85c6a9535c01",
+            "status": "api_error",
+            "requests_this_run": 1,
+            "requests_before_run_today": 0,
+            "requests_today_total": 1,
+            "remaining_today_budget": 949,
+            "success_this_run": 0,
+            "not_found_this_run": 0,
+            "errors_this_run": 1,
+            "last_error": "Incorrect IMDb ID."
+          },
+          {
+            "label": "key-2",
+            "fingerprint": "409c1abd8842",
+            "status": "api_error",
+            "requests_this_run": 1,
+            "requests_before_run_today": 0,
+            "requests_today_total": 1,
+            "remaining_today_budget": 949,
+            "success_this_run": 0,
+            "not_found_this_run": 0,
+            "errors_this_run": 1,
+            "last_error": "Incorrect IMDb ID."
+          },
+          {
+            "label": "key-3",
+            "fingerprint": "b9708d2c4dbb",
+            "status": "api_error",
+            "requests_this_run": 1,
+            "requests_before_run_today": 0,
+            "requests_today_total": 1,
+            "remaining_today_budget": 949,
+            "success_this_run": 0,
+            "not_found_this_run": 0,
+            "errors_this_run": 1,
+            "last_error": "Incorrect IMDb ID."
+          },
+          {
+            "label": "key-4",
+            "fingerprint": "2caed1031b1c",
+            "status": "api_error",
+            "requests_this_run": 1,
+            "requests_before_run_today": 0,
+            "requests_today_total": 1,
+            "remaining_today_budget": 949,
+            "success_this_run": 0,
+            "not_found_this_run": 0,
+            "errors_this_run": 1,
+            "last_error": "Incorrect IMDb ID."
+          }
+        ],
+        "errors": [
+          {
+            "imdb_id": "tt43749709",
+            "title": "Grand Theft Auto VI: An Extended Look",
+            "reason": "Incorrect IMDb ID.",
+            "key": "2caed1031b1c"
+          }
+        ],
+        "policy": {
+          "cache_ttl_days": 30,
+          "incomplete_retry_hours": 24,
+          "poster_retry_hours": 24,
+          "monthly_refresh_only_for_complete_records": true,
+          "failure_preservation": true,
+          "repository_local_posters": true
+        }
+      },
+      "keys": [
+        {
+          "label": "key-1",
+          "fingerprint": "85c6a9535c01",
+          "status": "api_error",
+          "requests_this_run": 1,
+          "requests_before_run_today": 0,
+          "requests_today_total": 1,
+          "remaining_today_budget": 949,
+          "success_this_run": 0,
+          "not_found_this_run": 0,
+          "errors_this_run": 1,
+          "last_error": "Incorrect IMDb ID."
+        },
+        {
+          "label": "key-2",
+          "fingerprint": "409c1abd8842",
+          "status": "api_error",
+          "requests_this_run": 1,
+          "requests_before_run_today": 0,
+          "requests_today_total": 1,
+          "remaining_today_budget": 949,
+          "success_this_run": 0,
+          "not_found_this_run": 0,
+          "errors_this_run": 1,
+          "last_error": "Incorrect IMDb ID."
+        },
+        {
+          "label": "key-3",
+          "fingerprint": "b9708d2c4dbb",
+          "status": "api_error",
+          "requests_this_run": 1,
+          "requests_before_run_today": 0,
+          "requests_today_total": 1,
+          "remaining_today_budget": 949,
+          "success_this_run": 0,
+          "not_found_this_run": 0,
+          "errors_this_run": 1,
+          "last_error": "Incorrect IMDb ID."
+        },
+        {
+          "label": "key-4",
+          "fingerprint": "2caed1031b1c",
+          "status": "api_error",
+          "requests_this_run": 1,
+          "requests_before_run_today": 0,
+          "requests_today_total": 1,
+          "remaining_today_budget": 949,
+          "success_this_run": 0,
+          "not_found_this_run": 0,
+          "errors_this_run": 1,
+          "last_error": "Incorrect IMDb ID."
+        }
+      ],
+      "errors": [
+        {
+          "imdb_id": "tt43749709",
+          "title": "Grand Theft Auto VI: An Extended Look",
+          "reason": "Incorrect IMDb ID.",
+          "key": "2caed1031b1c"
+        }
+      ]
+    }
+  ]
 }
