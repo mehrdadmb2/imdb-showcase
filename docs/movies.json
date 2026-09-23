@@ -1,23 +1,23 @@
 {
   "schema_version": 8,
-  "last_manual_update": "2026-09-22T16:57:18.130474+00:00",
+  "last_manual_update": "2026-09-23T04:40:11.768353+00:00",
   "data_meta": {
     "source_records": 1769,
-    "cache_reused": 1768,
-    "api_attempts": 1,
+    "cache_reused": 1769,
+    "api_attempts": 0,
     "omdb_success": 0,
     "omdb_not_found": 0,
-    "omdb_errors": 1,
+    "omdb_errors": 0,
     "stale_preserved": 0,
-    "partial_records": 1,
+    "partial_records": 0,
     "records_missing_enrichment": 1,
     "records_due_monthly_refresh": 0,
-    "records_deferred_retry": 0,
+    "records_deferred_retry": 1,
     "poster_reused": 1660,
-    "poster_attempts": 96,
+    "poster_attempts": 0,
     "posters_downloaded": 0,
-    "posters_missing": 107,
-    "imdb_poster_fallback_attempts": 11,
+    "posters_missing": 0,
+    "imdb_poster_fallback_attempts": 0,
     "output_records": 1769,
     "omdb_key_count": 4,
     "daily_budget_per_key": 950,
@@ -178638,12 +178638,5 @@
       "poster_last_attempt_at": "2026-09-21T14:31:05.089489+00:00"
     }
   ],
-  "errors": [
-    {
-      "imdb_id": "tt43749709",
-      "title": "Grand Theft Auto VI: An Extended Look",
-      "reason": "Incorrect IMDb ID.",
-      "key": "2caed1031b1c"
-    }
-  ]
+  "errors": []
 }
