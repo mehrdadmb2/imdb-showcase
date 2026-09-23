@@ -1,6 +1,6 @@
 {
   "schema_version": 8,
-  "last_manual_update": "2026-09-23T04:40:11.768353+00:00",
+  "last_manual_update": "2026-09-23T16:52:33.967443+00:00",
   "data_meta": {
     "source_records": 1769,
     "cache_reused": 1769,
@@ -16,8 +16,8 @@
     "poster_reused": 1660,
     "poster_attempts": 0,
     "posters_downloaded": 0,
-    "posters_missing": 0,
-    "imdb_poster_fallback_attempts": 0,
+    "posters_missing": 1,
+    "imdb_poster_fallback_attempts": 1,
     "output_records": 1769,
     "omdb_key_count": 4,
     "daily_budget_per_key": 950,
@@ -173694,7 +173694,7 @@
       "data_fetched_at": "2026-09-21T14:30:58.022179+00:00",
       "cache_updated_at": "2026-09-21T14:30:58.022179+00:00",
       "poster_remote": "",
-      "imdb_poster_last_attempt_at": "2026-09-21T14:30:58.022318+00:00"
+      "imdb_poster_last_attempt_at": "2026-09-23T16:52:32.867859+00:00"
     },
     {
       "imdb_id": "tt0478970",
