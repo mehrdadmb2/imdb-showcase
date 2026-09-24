@@ -1,6 +1,6 @@
 {
   "schema_version": 3,
-  "updated_at": "2026-09-24T04:45:05.586728+00:00",
+  "updated_at": "2026-09-24T17:06:30.295455+00:00",
   "keys": {
     "85c6a9535c01": {
       "label": "key-1",
@@ -9,13 +9,13 @@
       "total_success": 0,
       "total_not_found": 0,
       "total_errors": 2,
-      "last_status": "api_error",
+      "last_status": "active",
       "last_error": "Incorrect IMDb ID.",
       "daily_date": "2026-09-24",
       "daily_requests": 1,
       "daily_success": 0,
       "daily_errors": 1,
-      "last_seen_at": "2026-09-24T04:45:05.586706+00:00"
+      "last_seen_at": "2026-09-24T17:06:30.295431+00:00"
     },
     "409c1abd8842": {
       "label": "key-2",
@@ -24,13 +24,13 @@
       "total_success": 0,
       "total_not_found": 0,
       "total_errors": 2,
-      "last_status": "api_error",
+      "last_status": "active",
       "last_error": "Incorrect IMDb ID.",
       "daily_date": "2026-09-24",
       "daily_requests": 1,
       "daily_success": 0,
       "daily_errors": 1,
-      "last_seen_at": "2026-09-24T04:45:05.586715+00:00"
+      "last_seen_at": "2026-09-24T17:06:30.295441+00:00"
     },
     "b9708d2c4dbb": {
       "label": "key-3",
@@ -39,13 +39,13 @@
       "total_success": 0,
       "total_not_found": 0,
       "total_errors": 2,
-      "last_status": "api_error",
+      "last_status": "active",
       "last_error": "Incorrect IMDb ID.",
       "daily_date": "2026-09-24",
       "daily_requests": 1,
       "daily_success": 0,
       "daily_errors": 1,
-      "last_seen_at": "2026-09-24T04:45:05.586720+00:00"
+      "last_seen_at": "2026-09-24T17:06:30.295447+00:00"
     },
     "2caed1031b1c": {
       "label": "key-4",
@@ -54,13 +54,13 @@
       "total_success": 0,
       "total_not_found": 0,
       "total_errors": 2,
-      "last_status": "api_error",
+      "last_status": "active",
       "last_error": "Incorrect IMDb ID.",
       "daily_date": "2026-09-24",
       "daily_requests": 1,
       "daily_success": 0,
       "daily_errors": 1,
-      "last_seen_at": "2026-09-24T04:45:05.586725+00:00"
+      "last_seen_at": "2026-09-24T17:06:30.295452+00:00"
     }
   },
   "policy": "950 OMDb requests per key/day, tracked across workflow runs"
