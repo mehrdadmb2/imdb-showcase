@@ -1,7 +1,156 @@
 {
   "schema_version": 2,
-  "updated_at": "2026-09-25T04:55:19.193476+00:00",
+  "updated_at": "2026-09-25T17:06:29.786584+00:00",
   "runs": [
+    {
+      "schema_version": 4,
+      "status": "degraded",
+      "message": "IMDb Showcase production pipeline diagnostics",
+      "generated_at": "2026-09-25T17:06:29.630485+00:00",
+      "run": {
+        "mode": "update",
+        "started_at": "2026-09-25T17:05:53.221464+00:00",
+        "finished_at": "2026-09-25T17:06:29.630485+00:00",
+        "duration_seconds": 36.41,
+        "keys_detected": 4,
+        "counts": {
+          "source_records": 1769,
+          "cache_reused": 1769,
+          "api_attempts": 0,
+          "omdb_success": 0,
+          "omdb_not_found": 0,
+          "omdb_errors": 0,
+          "stale_preserved": 0,
+          "partial_records": 0,
+          "records_missing_enrichment": 1,
+          "records_due_monthly_refresh": 0,
+          "records_deferred_retry": 1,
+          "poster_reused": 1660,
+          "poster_attempts": 0,
+          "posters_downloaded": 0,
+          "posters_missing": 1,
+          "imdb_poster_fallback_attempts": 1
+        },
+        "keys": [
+          {
+            "label": "key-1",
+            "fingerprint": "85c6a9535c01",
+            "status": "active",
+            "requests_this_run": 0,
+            "requests_before_run_today": 1,
+            "requests_today_total": 1,
+            "remaining_today_budget": 949,
+            "success_this_run": 0,
+            "not_found_this_run": 0,
+            "errors_this_run": 0,
+            "last_error": ""
+          },
+          {
+            "label": "key-2",
+            "fingerprint": "409c1abd8842",
+            "status": "active",
+            "requests_this_run": 0,
+            "requests_before_run_today": 1,
+            "requests_today_total": 1,
+            "remaining_today_budget": 949,
+            "success_this_run": 0,
+            "not_found_this_run": 0,
+            "errors_this_run": 0,
+            "last_error": ""
+          },
+          {
+            "label": "key-3",
+            "fingerprint": "b9708d2c4dbb",
+            "status": "active",
+            "requests_this_run": 0,
+            "requests_before_run_today": 1,
+            "requests_today_total": 1,
+            "remaining_today_budget": 949,
+            "success_this_run": 0,
+            "not_found_this_run": 0,
+            "errors_this_run": 0,
+            "last_error": ""
+          },
+          {
+            "label": "key-4",
+            "fingerprint": "2caed1031b1c",
+            "status": "active",
+            "requests_this_run": 0,
+            "requests_before_run_today": 1,
+            "requests_today_total": 1,
+            "remaining_today_budget": 949,
+            "success_this_run": 0,
+            "not_found_this_run": 0,
+            "errors_this_run": 0,
+            "last_error": ""
+          }
+        ],
+        "errors": [],
+        "policy": {
+          "cache_ttl_days": 30,
+          "incomplete_retry_hours": 24,
+          "poster_retry_hours": 24,
+          "monthly_refresh_only_for_complete_records": true,
+          "failure_preservation": true,
+          "repository_local_posters": true
+        }
+      },
+      "keys": [
+        {
+          "label": "key-1",
+          "fingerprint": "85c6a9535c01",
+          "status": "active",
+          "requests_this_run": 0,
+          "requests_before_run_today": 1,
+          "requests_today_total": 1,
+          "remaining_today_budget": 949,
+          "success_this_run": 0,
+          "not_found_this_run": 0,
+          "errors_this_run": 0,
+          "last_error": ""
+        },
+        {
+          "label": "key-2",
+          "fingerprint": "409c1abd8842",
+          "status": "active",
+          "requests_this_run": 0,
+          "requests_before_run_today": 1,
+          "requests_today_total": 1,
+          "remaining_today_budget": 949,
+          "success_this_run": 0,
+          "not_found_this_run": 0,
+          "errors_this_run": 0,
+          "last_error": ""
+        },
+        {
+          "label": "key-3",
+          "fingerprint": "b9708d2c4dbb",
+          "status": "active",
+          "requests_this_run": 0,
+          "requests_before_run_today": 1,
+          "requests_today_total": 1,
+          "remaining_today_budget": 949,
+          "success_this_run": 0,
+          "not_found_this_run": 0,
+          "errors_this_run": 0,
+          "last_error": ""
+        },
+        {
+          "label": "key-4",
+          "fingerprint": "2caed1031b1c",
+          "status": "active",
+          "requests_this_run": 0,
+          "requests_before_run_today": 1,
+          "requests_today_total": 1,
+          "remaining_today_budget": 949,
+          "success_this_run": 0,
+          "not_found_this_run": 0,
+          "errors_this_run": 0,
+          "last_error": ""
+        }
+      ],
+      "errors": []
+    },
     {
       "schema_version": 4,
       "status": "degraded",
