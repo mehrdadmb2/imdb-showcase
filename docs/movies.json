@@ -1,23 +1,23 @@
 {
   "schema_version": 8,
-  "last_manual_update": "2026-09-28T19:42:48.845954+00:00",
+  "last_manual_update": "2026-09-29T05:38:55.907633+00:00",
   "data_meta": {
     "source_records": 1778,
-    "cache_reused": 1777,
-    "api_attempts": 1,
+    "cache_reused": 1778,
+    "api_attempts": 0,
     "omdb_success": 0,
     "omdb_not_found": 0,
-    "omdb_errors": 1,
+    "omdb_errors": 0,
     "stale_preserved": 0,
-    "partial_records": 1,
+    "partial_records": 0,
     "records_missing_enrichment": 1,
     "records_due_monthly_refresh": 0,
-    "records_deferred_retry": 0,
+    "records_deferred_retry": 1,
     "poster_reused": 1669,
-    "poster_attempts": 96,
+    "poster_attempts": 0,
     "posters_downloaded": 0,
-    "posters_missing": 96,
-    "imdb_poster_fallback_attempts": 0,
+    "posters_missing": 11,
+    "imdb_poster_fallback_attempts": 11,
     "output_records": 1778,
     "omdb_key_count": 4,
     "daily_budget_per_key": 950,
@@ -2061,7 +2061,7 @@
       "last_api_attempt_at": "2026-09-20T14:21:01.778895+00:00",
       "failure_count": 0,
       "poster_remote": "",
-      "imdb_poster_last_attempt_at": "2026-09-27T05:13:00.788462+00:00",
+      "imdb_poster_last_attempt_at": "2026-09-29T05:38:19.297677+00:00",
       "poster_local": "",
       "poster_status": "unavailable",
       "schema_record_version": 4
@@ -2137,7 +2137,7 @@
       "last_api_attempt_at": "2026-09-20T14:21:02.083371+00:00",
       "failure_count": 0,
       "poster_remote": "",
-      "imdb_poster_last_attempt_at": "2026-09-27T05:13:00.994901+00:00",
+      "imdb_poster_last_attempt_at": "2026-09-29T05:38:19.527667+00:00",
       "poster_local": "",
       "poster_status": "unavailable",
       "schema_record_version": 4
@@ -2213,7 +2213,7 @@
       "last_api_attempt_at": "2026-09-20T14:21:02.263663+00:00",
       "failure_count": 0,
       "poster_remote": "",
-      "imdb_poster_last_attempt_at": "2026-09-27T05:13:01.063975+00:00",
+      "imdb_poster_last_attempt_at": "2026-09-29T05:38:19.597151+00:00",
       "poster_local": "",
       "poster_status": "unavailable",
       "schema_record_version": 4
@@ -2289,7 +2289,7 @@
       "last_api_attempt_at": "2026-09-20T14:21:02.455023+00:00",
       "failure_count": 0,
       "poster_remote": "",
-      "imdb_poster_last_attempt_at": "2026-09-27T05:13:01.131627+00:00",
+      "imdb_poster_last_attempt_at": "2026-09-29T05:38:19.668802+00:00",
       "poster_local": "",
       "poster_status": "unavailable",
       "schema_record_version": 4
@@ -2365,7 +2365,7 @@
       "last_api_attempt_at": "2026-09-20T14:21:02.636560+00:00",
       "failure_count": 0,
       "poster_remote": "",
-      "imdb_poster_last_attempt_at": "2026-09-27T05:13:01.201233+00:00",
+      "imdb_poster_last_attempt_at": "2026-09-29T05:38:19.736781+00:00",
       "poster_local": "",
       "poster_status": "unavailable",
       "schema_record_version": 4
@@ -2553,7 +2553,7 @@
       "last_api_attempt_at": "2026-09-20T14:21:03.025069+00:00",
       "failure_count": 0,
       "poster_remote": "",
-      "imdb_poster_last_attempt_at": "2026-09-27T05:13:01.289847+00:00",
+      "imdb_poster_last_attempt_at": "2026-09-29T05:38:19.824099+00:00",
       "poster_local": "",
       "poster_status": "unavailable",
       "schema_record_version": 4
@@ -2629,7 +2629,7 @@
       "last_api_attempt_at": "2026-09-20T14:21:03.206441+00:00",
       "failure_count": 0,
       "poster_remote": "",
-      "imdb_poster_last_attempt_at": "2026-09-27T05:13:01.360610+00:00",
+      "imdb_poster_last_attempt_at": "2026-09-29T05:38:19.897587+00:00",
       "poster_local": "",
       "poster_status": "unavailable",
       "schema_record_version": 4
@@ -2705,7 +2705,7 @@
       "last_api_attempt_at": "2026-09-20T14:21:03.379899+00:00",
       "failure_count": 0,
       "poster_remote": "",
-      "imdb_poster_last_attempt_at": "2026-09-27T05:13:01.431007+00:00",
+      "imdb_poster_last_attempt_at": "2026-09-29T05:38:19.969138+00:00",
       "poster_local": "",
       "poster_status": "unavailable",
       "schema_record_version": 4
@@ -2781,7 +2781,7 @@
       "last_api_attempt_at": "2026-09-20T14:21:03.554475+00:00",
       "failure_count": 0,
       "poster_remote": "",
-      "imdb_poster_last_attempt_at": "2026-09-27T05:13:01.499886+00:00",
+      "imdb_poster_last_attempt_at": "2026-09-29T05:38:20.038409+00:00",
       "poster_local": "",
       "poster_status": "unavailable",
       "schema_record_version": 4
@@ -6170,7 +6170,7 @@
       "last_api_attempt_at": "2026-09-20T14:21:11.994231+00:00",
       "failure_count": 0,
       "poster_remote": "",
-      "imdb_poster_last_attempt_at": "2026-09-27T05:13:02.285199+00:00",
+      "imdb_poster_last_attempt_at": "2026-09-29T05:38:20.819025+00:00",
       "poster_local": "",
       "poster_status": "unavailable",
       "schema_record_version": 4
@@ -8685,7 +8685,7 @@
       "last_api_attempt_at": "2026-09-20T14:21:15.707811+00:00",
       "failure_count": 0,
       "poster_remote": "",
-      "imdb_poster_last_attempt_at": "2026-09-27T05:13:02.846795+00:00",
+      "imdb_poster_last_attempt_at": "2026-09-29T05:38:21.383082+00:00",
       "poster_local": "",
       "poster_status": "unavailable",
       "schema_record_version": 4
@@ -179532,12 +179532,5 @@
       "poster_last_attempt_at": "2026-09-21T14:31:05.089489+00:00"
     }
   ],
-  "errors": [
-    {
-      "imdb_id": "tt43749709",
-      "title": "Grand Theft Auto VI: An Extended Look",
-      "reason": "Incorrect IMDb ID.",
-      "key": "2caed1031b1c"
-    }
-  ]
+  "errors": []
 }
