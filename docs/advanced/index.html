@@ -3,231 +3,139 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-  <meta name="theme-color" content="#07090e">
-  <meta name="description" content="IMDb Showcase Advanced — تحلیل عمیق کتابخانه شخصی فیلم و سریال">
+  <meta name="theme-color" content="#171717">
   <title>IMDb Showcase — Advanced Cinema Intelligence</title>
   <link rel="icon" href="../pic/logo.png" type="image/png">
-
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Estedad:wght@400;500;600;700;800;900&family=Manrope:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Rubik:wght@400;500;600;700;800&family=Tajawal:wght@400;500;700;800&family=Vazirmatn:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Manrope:wght@500;600;700;800&family=Vazirmatn:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.9/dist/chart.umd.min.js" defer></script>
   <link rel="stylesheet" href="style.css">
 </head>
-<body data-theme="obsidian">
-  <div class="ambient" aria-hidden="true">
-    <div class="nebula nebula-1"></div>
-    <div class="nebula nebula-2"></div>
-    <div class="nebula nebula-3"></div>
-    <div class="aurora aurora-1"></div>
-    <div class="aurora aurora-2"></div>
-    <div class="stars stars-a"></div>
-    <div class="stars stars-b"></div>
-    <div class="grain"></div>
-  </div>
+<body>
+  <div class="space" aria-hidden="true"><div class="nebula n1"></div><div class="nebula n2"></div><div class="nebula n3"></div><div class="stars"></div><div class="noise"></div></div>
 
-  <header class="topbar glass" id="top">
-    <div class="topbar-left">
-      <a href="../" class="brand-link" aria-label="بازگشت به نسخه کلاسیک">
-        <span class="brand-mark"><img src="../pic/logo.png" alt=""></span>
-        <span class="brand-text"><b>IMDb Showcase</b><small>ADVANCED INTELLIGENCE</small></span>
-      </a>
-      <span class="live-chip"><i></i><span id="bootHealth">LOADING</span></span>
-    </div>
-
-    <div class="topbar-actions">
-      <a class="top-action" href="../">↩ کلاسیک</a>
-      <a class="top-action" href="https://www.imdb.com/user/p.if6bmsibrbg5dapfqbjrld4lhy?ref_=rt_nv_profile" target="_blank" rel="noopener noreferrer">🎬 پروفایل IMDb</a>
-      <button class="top-action icon-only" id="themeButton" type="button" aria-expanded="false" title="انتخاب تم">🎨</button>
-      <button class="top-action icon-only" id="motionButton" type="button" title="روشن/خاموش کردن افکت‌ها">✦</button>
-      <div class="theme-menu glass" id="themeMenu" hidden>
-        <button type="button" data-theme="obsidian"><span class="theme-dot obsidian"></span><span>Obsidian</span></button>
-        <button type="button" data-theme="aurora"><span class="theme-dot aurora"></span><span>Aurora</span></button>
-        <button type="button" data-theme="ember"><span class="theme-dot ember"></span><span>Ember</span></button>
-        <button type="button" data-theme="ocean"><span class="theme-dot ocean"></span><span>Ocean</span></button>
-      </div>
-    </div>
+  <header class="adv-header glass">
+    <a class="brand" href="../">
+      <img src="../pic/logo.png" alt="">
+      <div><b>IMDb Showcase</b><span>ADVANCED CINEMA INTELLIGENCE</span></div>
+    </a>
+    <nav class="header-nav" aria-label="ناوبری">
+      <a href="../" class="nav-btn">↩ کلاسیک</a>
+      <a href="https://www.imdb.com/user/p.if6bmsibrbg5dapfqbjrld4lhy?ref_=ext_shr_lnk" target="_blank" rel="noopener noreferrer" class="nav-btn mint">🎬 IMDb من ↗</a><a href="https://github.com/mehrdadmb2/imdb-showcase/actions/workflows/update-movies.yml" target="_blank" rel="noopener noreferrer" class="nav-btn">⚙️ Actions</a>
+    </nav>
   </header>
 
-  <main class="page-shell">
-    <section class="hero glass reveal">
+  <main class="shell">
+    <section class="hero glass">
       <div class="hero-copy">
-        <div class="eyebrow"><span class="eyebrow-dot"></span><span>ADVANCED MODE</span><b id="bootText">در حال آماده‌سازی…</b></div>
-        <h1>کتابخانه تو،<br><em>با جزئیات عمیق‌تر.</em></h1>
-        <p>تحلیل امتیازها، سلیقه، ژانرها، سال‌ها، سریال‌ها و داده‌های هر عنوان؛ همه از همان Dataset مشترک نسخه اصلی.</p>
+        <div class="eyebrow"><i></i> ADVANCED MODE</div>
+        <h1>کتابخانه سینمایی<br><em>با جزئیات واقعی.</em></h1>
+        <p>یک رابط عمیق برای Dataset مشترک: جستجو، سریال، فصل و قسمت، وضعیت Cache، پوسترهای محلی، جزئیات OMDb و سلامت Pipeline.</p>
         <div class="hero-actions">
-          <button class="btn primary" id="jumpLibrary" type="button">🎞️ کتابخانه</button>
-          <button class="btn secondary" id="toggleInsights" type="button">📊 تحلیل کتابخانه</button>
-          <button class="btn secondary" id="jumpDiagnostics" type="button">🧪 سلامت داده</button>
-        </div>
-        <div class="hero-tags">
-          <span>⚡ Local-first</span>
-          <span>🖼️ Cached posters</span>
-          <span>🧠 OMDb aware</span>
-          <span>📺 Series-aware</span>
+          <button id="jumpLibrary" class="btn mint">🎞️ کتابخانه</button>
+          <button id="openAnalytics" class="btn">📊 تحلیل</button>
+          <button id="openDiagnostics" class="btn">🧪 Diagnostics</button>
         </div>
       </div>
-
-      <div class="hero-orbit" aria-hidden="true">
-        <div class="orbit orbit-1"></div>
-        <div class="orbit orbit-2"></div>
-        <div class="orbit orbit-3"></div>
-        <div class="orbit-core"><span>🎬</span><b>IMDB</b><small>SHOWCASE</small></div>
-        <div class="orbit-token token-1">⭐ RATINGS</div>
-        <div class="orbit-token token-2">📺 SERIES</div>
-        <div class="orbit-token token-3">🖼️ POSTERS</div>
-        <div class="orbit-token token-4">📦 CACHE</div>
+      <div class="orbit-wrap" aria-hidden="true">
+        <div class="orbit r1"></div><div class="orbit r2"></div><div class="orbit r3"></div>
+        <div class="core"><span>🎬</span><small>IMDB</small></div>
       </div>
     </section>
 
-    <section class="kpi-grid reveal" id="overview">
-      <article class="kpi glass"><span>🎞️ عناوین</span><b id="kpiTitles">—</b><small>کل Dataset</small></article>
-      <article class="kpi glass"><span>⭐ امتیاز میانگین</span><b id="kpiAverage">—</b><small>امتیاز شخصی</small></article>
-      <article class="kpi glass"><span>🎬 فیلم</span><b id="kpiMovies">—</b><small>Movie / Short</small></article>
-      <article class="kpi glass"><span>📺 سریال</span><b id="kpiSeries">—</b><small>TV Series</small></article>
-      <article class="kpi glass"><span>🎞️ قسمت</span><b id="kpiEpisodes">—</b><small>TV Episodes</small></article>
-      <article class="kpi glass"><span>⏱️ زمان کل</span><b id="kpiRuntime">—</b><small>ساعت و دقیقه</small></article>
-      <article class="kpi glass"><span>🖼️ Poster</span><b id="kpiPosters">—</b><small>پوشش قابل نمایش</small></article>
-      <article class="kpi glass"><span>🧠 OMDb</span><b id="kpiOmdb">—</b><small>رکوردهای غنی‌شده</small></article>
+    <section class="metric-grid">
+      <article class="metric glass"><span>🎞️ عنوان</span><strong id="mTitles">—</strong><small>Dataset</small></article>
+      <article class="metric glass"><span>🎬 فیلم</span><strong id="mMovies">—</strong><small>Movies</small></article>
+      <article class="metric glass"><span>📺 سریال</span><strong id="mSeries">—</strong><small>Series</small></article>
+      <article class="metric glass"><span>🎞️ قسمت</span><strong id="mEpisodes">—</strong><small>Episodes</small></article>
+      <article class="metric glass"><span>⏱️ زمان</span><strong id="mRuntime">—</strong><small>ساعت و دقیقه</small></article>
+      <article class="metric glass"><span>⭐ میانگین من</span><strong id="mAvg">—</strong><small>Your rating</small></article>
+      <article class="metric glass"><span>🖼️ Poster Cache</span><strong id="mPosterCoverage">—</strong><small>Local coverage</small></article>
+      <article class="metric glass"><span>🧠 OMDb Cache</span><strong id="mOmdbCoverage">—</strong><small>Enriched records</small></article>
     </section>
 
-    <section class="profile-grid reveal">
-      <article class="profile-card glass">
-        <div class="section-head"><div><span>PROFILE INSIGHT</span><h2>⭐ امضای سلیقه</h2></div><span class="mini-label">Local analysis</span></div>
-        <div class="taste-meter">
-          <div class="taste-ring"><span id="tasteScore">—</span><small>AVG</small></div>
-          <div class="taste-copy"><b id="tasteHeadline">در حال تحلیل…</b><p id="tasteDescription">تحلیل از روی امتیازهای ثبت‌شده و توزیع ژانرها انجام می‌شود.</p></div>
-        </div>
-        <div class="taste-facts">
-          <div><span>بیشترین ژانر</span><b id="tasteGenre">—</b></div>
-          <div><span>دهه فعال‌تر</span><b id="tasteDecade">—</b></div>
-          <div><span>کمترین امتیاز</span><b id="tasteLow">—</b></div>
-          <div><span>بیشترین امتیاز</span><b id="tasteHigh">—</b></div>
-        </div>
-      </article>
-
-      <article class="profile-card glass rating-distribution">
-        <div class="section-head"><div><span>RATINGS INSIGHTS</span><h2>📈 توزیع امتیاز 1–10</h2></div><span class="mini-label">Personal ratings</span></div>
-        <div id="ratingBars" class="rating-bars"></div>
-      </article>
+    <section class="section latest-block">
+      <div class="section-head"><div><span>RECENT ACTIVITY</span><h2>🔥 آخرین امتیازها</h2></div><button id="latestToLibrary" class="link-btn">نمایش همه ↗</button></div>
+      <div id="latestGrid" class="latest-grid"></div>
     </section>
 
-    <section class="section glass reveal" id="library">
-      <div class="section-head">
-        <div><span>DISCOVERY ENGINE</span><h2>🔎 جستجوی پیشرفته</h2></div>
-        <div class="section-actions"><span id="querySummary">آماده</span></div>
-      </div>
-      <div class="search-row">
-        <div class="search-box">
-          <span>⌕</span>
-          <input id="search" autocomplete="off" placeholder="عنوان، بازیگر، کارگردان، ژانر، IMDb ID..." aria-label="جستجو">
-          <kbd>/</kbd>
-        </div>
-      </div>
-      <div class="filter-grid">
-        <label>جستجو در<select id="searchField"><option value="all">همه فیلدها</option><option value="title">عنوان</option><option value="original_title">عنوان اصلی</option><option value="actors">بازیگران</option><option value="directors">کارگردان</option><option value="writer">نویسنده</option><option value="genres">ژانر</option><option value="plot">خلاصه</option><option value="imdb_id">IMDb ID</option></select></label>
-        <label>نوع<select id="typeFilter"><option value="all">همه</option><option value="Movie">🎬 فیلم</option><option value="Short">🎞️ کوتاه</option><option value="TV Series">📺 سریال</option><option value="TV Episode">🎞️ قسمت</option></select></label>
-        <label>ژانر<select id="genreFilter"><option value="all">همه ژانرها</option></select></label>
-        <label>سال<select id="yearFilter"><option value="all">همه سال‌ها</option></select></label>
-        <label>مرتب‌سازی<select id="sortFilter"><option value="date_desc">جدیدترین امتیاز</option><option value="rating_desc">بالاترین امتیاز من</option><option value="imdb_desc">بالاترین IMDb</option><option value="year_desc">جدیدترین سال</option><option value="title_asc">الفبایی</option></select></label>
-        <button id="resetFilters" class="btn secondary" type="button">↺ بازنشانی</button>
+    <section class="toolbar glass" id="librarySection">
+      <div class="search-line"><span>⌕</span><input id="search" autocomplete="off" placeholder="جستجو در عنوان، بازیگر، کارگردان، ژانر، IMDb ID..."><kbd>/</kbd></div>
+      <div class="toolbar-controls">
+        <select id="type"><option value="all">همه نوع‌ها</option><option value="Movie">🎬 فیلم</option><option value="TV Series">📺 سریال</option><option value="TV Episode">🎞️ قسمت</option><option value="Short">🎞️ کوتاه</option></select>
+        <select id="genre"><option value="all">همه ژانرها</option></select>
+        <select id="year"><option value="all">همه سال‌ها</option></select>
+        <select id="sort"><option value="date_desc">جدیدترین امتیاز</option><option value="rating_desc">بالاترین امتیاز من</option><option value="imdb_desc">بالاترین IMDb</option><option value="year_desc">جدیدترین سال</option><option value="title_asc">الفبا</option></select>
+        <button id="reset" class="btn">↺ بازنشانی</button>
       </div>
     </section>
 
-    <section class="section reveal">
-      <div class="section-head"><div><span>RATING TIMELINE</span><h2>🗓️ مسیر امتیازدهی</h2></div><span id="timelineSummary" class="mini-label">—</span></div>
-      <div class="timeline-shell glass" id="ratingTimeline"></div>
+    <section class="section series-section">
+      <div class="section-head"><div><span>SERIES UNIVERSE</span><h2>📺 ساختار سریال‌ها</h2></div><span id="seriesCount" class="muted">—</span></div>
+      <div id="seriesGrid" class="series-grid"></div>
     </section>
 
-    <section class="section reveal">
-      <div class="section-head"><div><span>GENRE SIGNATURE</span><h2>🎭 ژانرهای پرتکرار</h2></div><span class="mini-label">تعداد عناوین</span></div>
-      <div class="genre-cloud glass" id="genreCloud"></div>
-    </section>
-
-    <section class="section reveal">
-      <div class="section-head"><div><span>SERIES UNIVERSE</span><h2>📺 سریال‌ها و فصل‌ها</h2></div><span id="seriesSummary" class="mini-label">—</span></div>
-      <div class="series-grid" id="seriesGrid"></div>
-    </section>
-
-    <section class="section reveal">
-      <div class="section-head"><div><span>LIBRARY</span><h2>🎞️ کتابخانه کامل</h2></div><div id="resultInfo" class="result-info">—</div></div>
-      <div id="movieGrid" class="movie-grid"></div>
+    <section class="section library-section" id="library">
+      <div class="section-head"><div><span>LIBRARY</span><h2>🎞️ همه عنوان‌ها</h2></div><span id="resultInfo" class="muted">—</span></div>
+      <div id="grid" class="card-grid"></div>
       <div class="pager glass">
-        <button id="firstPage" type="button">«</button>
-        <button id="prevPage" type="button">‹</button>
-        <div id="pageNumbers" class="page-numbers"></div>
-        <button id="nextPage" type="button">›</button>
-        <button id="lastPage" type="button">»</button>
-        <span id="pageCounter" class="page-counter">—</span>
-        <label class="page-size">کارت در صفحه<select id="pageSize"><option>12</option><option selected>24</option><option>36</option><option>48</option></select></label>
+        <button id="first" type="button" title="First page">«</button><button id="prev" type="button" title="Previous page">‹</button><div id="pages" class="pages"></div><button id="next" type="button" title="Next page">›</button><button id="last" type="button" title="Last page">»</button>
+        <span id="pageCount" class="page-count"></span><label>کارت در صفحه <select id="pageSize"><option>12</option><option selected>24</option><option>36</option><option>48</option></select></label>
       </div>
     </section>
 
-    <section class="section analytics-panel glass reveal" id="analyticsPanel" hidden>
-      <div class="section-head"><div><span>ANALYTICS LAB</span><h2>📊 تحلیل عمیق کتابخانه</h2></div><span class="mini-label">Charts on demand</span></div>
-      <div class="analytics-grid">
-        <article class="chart-card glass"><h3>🎭 ژانر</h3><div class="chart-area"><canvas id="genreChart"></canvas></div></article>
-        <article class="chart-card glass"><h3>⭐ امتیاز</h3><div class="chart-area"><canvas id="ratingChart"></canvas></div></article>
-        <article class="chart-card glass wide"><h3>📅 سال انتشار</h3><div class="chart-area"><canvas id="yearChart"></canvas></div></article>
-      </div>
-      <div class="rank-grid">
-        <article class="rank-card glass"><h3>🏆 بالاترین امتیازها</h3><div id="topRated"></div></article>
-        <article class="rank-card glass"><h3>🪨 پایین‌ترین امتیازها</h3><div id="lowRated"></div></article>
+    <section class="section analytics" id="analytics" hidden>
+      <div class="section-head"><div><span>ANALYTICS</span><h2>📊 تحلیل کتابخانه</h2></div></div>
+      <div class="chart-grid">
+        <article class="chart glass"><h3>🎭 ژانرها</h3><div><canvas id="genreChart"></canvas></div></article>
+        <article class="chart glass"><h3>⭐ توزیع امتیاز من</h3><div><canvas id="ratingChart"></canvas></div></article>
+        <article class="chart glass wide"><h3>📆 فعالیت بر اساس سال</h3><div><canvas id="yearChart"></canvas></div></article>
       </div>
     </section>
 
-    <section class="section diagnostics-panel glass reveal" id="diagnostics">
-      <div class="section-head">
-        <div><span>DATA OBSERVABILITY</span><h2>🧪 سلامت داده و Cache</h2><p>هیچ Secret خامی اینجا نمایش داده نمی‌شود.</p></div>
-        <div class="section-actions"><button class="btn secondary small" id="refreshDiagnostics" type="button">↻ بروزرسانی</button><button class="btn secondary small" id="copyDiagnostics" type="button">📋 کپی گزارش</button></div>
-      </div>
-      <div id="diagSummary" class="diag-summary"></div>
-      <div class="diag-columns">
-        <article class="diag-box glass"><h3>🔐 کلیدهای OMDb</h3><div id="keyTable"></div></article>
-        <article class="diag-box glass"><h3>📦 Cache و Poster</h3><div id="cacheTable"></div></article>
-        <article class="diag-box glass wide"><div class="diag-log-head"><h3>🧾 آخرین اجرا</h3><span id="logStatus" class="status-chip">—</span></div><pre id="errorLog">در حال دریافت…</pre></article>
+    <section class="section diagnostics" id="diagnostics">
+      <div class="diag-head"><div><span>PIPELINE OBSERVABILITY</span><h2>🧪 گزارش سلامت و لاگ</h2><p>هیچ Secretی اینجا نمایش داده نمی‌شود؛ فقط fingerprint و وضعیت امن کلیدها.</p></div><div class="diag-actions"><button id="refreshDiagnostics" class="btn mint">↻ بروزرسانی</button><button id="copyDiagnostics" class="btn">📋 کپی گزارش</button></div></div>
+      <div class="diag-summary" id="diagSummary"></div>
+      <div class="diag-grid">
+        <div class="diag-panel glass"><h3>🔐 وضعیت کلیدهای OMDb</h3><div id="keyTable"></div></div>
+        <div class="diag-panel glass"><h3>📦 وضعیت Cache / Poster</h3><div id="cacheTable"></div></div>
+        <div class="diag-panel glass wide"><h3>🧾 خطاهای اخیر</h3><pre id="errorLog">در حال دریافت…</pre></div>
       </div>
     </section>
 
-    <section class="section insights-panel glass reveal" id="pageInsights">
-      <div class="section-head"><div><span>SITE INSIGHTS</span><h2>👁️ آمار بازدید سایت</h2></div><button class="icon-button" id="advInsightsRefresh" type="button">↻</button></div>
-      <div class="insights-grid">
-        <article><span>کل بازدید</span><b id="advTotalViews">—</b></article>
-        <article><span>بازدیدکننده یکتا</span><b id="advUniqueVisitors">—</b></article>
-        <article class="today"><span>بازدید امروز</span><b id="advTodayViews">—</b></article>
-        <article><span>جلسات</span><b id="advSessions">—</b></article>
+    <section class="section insights glass" id="pageInsights">
+      <div class="insights-head"><div><span>PAGE INSIGHTS</span><h2>👁️ آمار بازدید سایت</h2></div><button id="advInsightsRefresh" class="btn">↻</button></div>
+      <div class="insight-cards">
+        <div><span>کل بازدید</span><b id="advTotalViews">—</b></div>
+        <div><span>بازدیدکننده یکتا</span><b id="advUniqueVisitors">—</b></div>
+        <div class="today"><span>امروز</span><b id="advTodayViews">—</b></div>
+        <div><span>جلسات</span><b id="advSessions">—</b></div>
       </div>
       <div class="insights-foot"><span id="advInsightsStatus">در حال دریافت…</span><span id="advLastEvent">—</span><div id="advTrendBars" class="trend"></div></div>
     </section>
   </main>
 
-  <div class="modal" id="detailModal" hidden>
-    <div class="modal-card glass" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
-      <button id="closeModal" class="modal-close" type="button">×</button>
+  <div class="modal" id="modal" hidden>
+    <div class="modal-inner glass" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+      <button id="closeModal" class="close" type="button">×</button>
       <div class="modal-hero">
-        <div class="modal-poster-wrap"><img id="modalPoster" alt=""><div id="modalFallback" class="modal-fallback">🎬<span>Poster unavailable</span></div></div>
+        <div class="big-poster"><img id="modalPoster" alt=""><div id="modalFallback">🎬</div></div>
         <div class="modal-copy">
-          <span id="modalType" class="modal-type">TITLE</span>
-          <h2 id="modalTitle">—</h2>
-          <div id="modalOriginal" class="modal-original">—</div>
-          <div id="modalTags" class="modal-tags"></div>
-          <div class="score-strip">
-            <div><small>امتیاز من</small><b id="modalUser">—</b></div>
-            <div><small>IMDb</small><b id="modalIMDb">—</b></div>
-            <div><small>Metascore</small><b id="modalMeta">—</b></div>
-          </div>
-          <p id="modalPlot" class="modal-plot">—</p>
-          <div class="modal-actions"><a id="modalLink" class="btn primary" href="#" target="_blank" rel="noopener noreferrer">IMDb ↗</a><button id="copyId" class="btn secondary" type="button">کپی IMDb ID</button></div>
+          <div id="modalType" class="kicker">TITLE</div><h2 id="modalTitle">—</h2><div id="modalOriginal" class="original">—</div>
+          <div id="modalTags" class="tags"></div>
+          <div class="score-row"><div><small>امتیاز من</small><b id="modalUser">—</b></div><div><small>IMDb</small><b id="modalIMDb">—</b></div><div><small>Metascore</small><b id="modalMeta">—</b></div></div>
+          <p id="modalPlot" class="plot">—</p>
+          <div class="modal-buttons"><a id="modalLink" href="#" target="_blank" rel="noopener noreferrer" class="btn mint">IMDb ↗</a><button id="copyId" class="btn">کپی IMDb ID</button></div>
         </div>
       </div>
-      <div id="modalDetails" class="modal-details"></div>
-      <div id="modalSeries" class="modal-series"></div>
-      <details class="raw-data"><summary>🧾 داده خام CSV + OMDb</summary><pre id="modalRaw"></pre></details>
+      <div id="modalDetails" class="detail-grid"></div>
+      <div id="seriesDetails" class="series-detail"></div>
+      <details class="raw"><summary>🧾 داده خام CSV + OMDb</summary><pre id="rawData"></pre></details>
     </div>
   </div>
 
-  <div id="toast" class="toast" role="status" aria-live="polite"></div>
-
+  <div class="toast" id="toast"></div>
   <script src="../page-insights.js" defer></script>
   <script src="starfield.js" defer></script>
   <script src="script.js" defer></script>

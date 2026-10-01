@@ -154,21 +154,12 @@
     }
 
     function getLocalPosterUrl(movie) {
-        let candidate = getSafeString(movie?.poster_local, '').replace(/\\/g, '/').trim();
+        const candidate = getSafeString(movie?.poster_local, '');
         if (!candidate) return '';
         if (/^https?:\/\//i.test(candidate)) return candidate;
-        candidate = candidate.replace(/^\.\//, '').replace(/^\//, '');
-        if (candidate.startsWith('docs/')) candidate = candidate.slice(5);
-        if (candidate.startsWith('posters/')) return candidate;
-        if (candidate.includes('/posters/')) return candidate.slice(candidate.indexOf('posters/'));
-        return `posters/${candidate}`;
-    }
-
-    function getRemotePosterUrl(movie) {
-        const direct = getSafeString(movie?.poster, '');
-        if (/^https?:\/\//i.test(direct)) return direct;
-        const raw = movie?.raw_omdb && typeof movie.raw_omdb === 'object' ? getSafeString(movie.raw_omdb.Poster, '') : '';
-        return /^https?:\/\//i.test(raw) ? raw : '';
+        if (candidate.startsWith('/')) return candidate;
+        if (candidate.startsWith('../')) return candidate;
+        return candidate.startsWith('posters/') ? candidate : `posters/${candidate.replace(/^\//, '')}`;
     }
 
     function normalizeMovieRecord(movie) {
@@ -404,12 +395,10 @@
     function movieCardHtml(movie) {
         const genres = splitValues(movie.genres).slice(0, 3)
             .map(g => `<span class="movie-genre-tag">${escapeHtml(g)}</span>`).join('');
-        const localPoster = getLocalPosterUrl(movie);
-        const remotePoster = getRemotePosterUrl(movie);
-        const initialPoster = localPoster || remotePoster;
+        const poster = getLocalPosterUrl(movie) || getSafeString(movie.poster, '');
         const safeTitle = escapeHtml(movie.title);
-        const posterHtml = initialPoster
-            ? `<img class="movie-poster" src="${escapeHtml(initialPoster)}" alt="${safeTitle}" loading="lazy" decoding="async" data-poster-id="${escapeHtml(movie.imdb_id)}" data-local-poster="${escapeHtml(localPoster)}" data-remote-poster="${escapeHtml(remotePoster)}"><div class="movie-poster-placeholder" data-fallback-for="${escapeHtml(movie.imdb_id)}" style="display:none">🎬</div>`
+        const posterHtml = poster
+            ? `<img class="movie-poster" src="${escapeHtml(poster)}" alt="${safeTitle}" loading="lazy" decoding="async" data-poster-id="${escapeHtml(movie.imdb_id)}"><div class="movie-poster-placeholder" data-fallback-for="${escapeHtml(movie.imdb_id)}" style="display:none">🎬</div>`
             : `<div class="movie-poster-placeholder">🎬</div>`;
         const typeBadge = movie.title_type === 'TV Episode'
             ? '<div class="movie-type-badge">📺 قسمت</div>'
@@ -482,30 +471,39 @@
     }
 
     function updateStats() {
+        const totalTitles = allMovies.length;
         const movies = allMovies.filter(m => m.title_type === 'Movie' || m.title_type === 'Short').length;
-        const series = allMovies.filter(m => m.title_type === 'TV Episode' || m.title_type === 'TV Series').length;
+        const series = allMovies.filter(m => m.title_type === 'TV Series').length;
         const episodes = allMovies.filter(m => m.is_episode || m.title_type === 'TV Episode').length;
-        const totalMinutes = allMovies.reduce((sum, m) => sum + toNumber(String(m.runtime || '').match(/\d+/)?.[0]), 0);
+
+        const totalMinutes = allMovies.reduce((sum, m) => {
+            const match = String(m.runtime || '').match(/\d+/);
+            return sum + toNumber(match ? match[0] : 0);
+        }, 0);
+
         const rated = allMovies.filter(m => toNumber(m.user_rating) > 0);
-        const avg = rated.length ? rated.reduce((sum, m) => sum + toNumber(m.user_rating), 0) / rated.length : 0;
+        const avg = rated.length
+            ? rated.reduce((sum, m) => sum + toNumber(m.user_rating), 0) / rated.length
+            : 0;
+
         const genres = new Set();
-        allMovies.forEach(m => splitValues(m.genres).forEach(g => genres.add(g)));
+        allMovies.forEach(m => {
+            splitValues(m.genres).forEach(g => genres.add(g));
+        });
 
-        if ($('totalMovies')) $('totalMovies').textContent = movies;
-        if ($('totalSeries')) $('totalSeries').textContent = series;
-        if ($('totalHours')) $('totalHours').textContent = formatCompactRuntime(totalMinutes);
-        if ($('avgRating')) $('avgRating').textContent = avg ? avg.toFixed(1) : '0';
-        if ($('totalGenres')) $('totalGenres').textContent = genres.size;
-        if ($('statTotalEpisodes')) $('statTotalEpisodes').textContent = episodes;
-    }
+        // Header counters intentionally stay in English/Latin digits.
+        if ($('totalTitles')) $('totalTitles').textContent = totalTitles.toLocaleString('en-US');
+        if ($('totalMovies')) $('totalMovies').textContent = movies.toLocaleString('en-US');
+        if ($('totalSeries')) $('totalSeries').textContent = series.toLocaleString('en-US');
+        if ($('totalEpisodes')) $('totalEpisodes').textContent = episodes.toLocaleString('en-US');
 
-    function formatCompactRuntime(minutes) {
-        const n = Number(minutes) || 0;
-        const hours = Math.floor(n / 60);
-        const mins = n % 60;
-        if (hours && mins) return `${hours} ساعت و ${mins} دقیقه`;
-        if (hours) return `${hours} ساعت`;
-        return `${mins} دقیقه`;
+        // Header runtime is deliberately HOURS ONLY. Modal/runtime details keep their own full formatter.
+        const totalHours = Math.floor(totalMinutes / 60);
+        if ($('totalHours')) $('totalHours').textContent = totalHours.toLocaleString('en-US');
+
+        if ($('avgRating')) $('avgRating').textContent = avg ? avg.toFixed(1) : '0.0';
+        if ($('totalGenres')) $('totalGenres').textContent = genres.size.toLocaleString('en-US');
+        if ($('statTotalEpisodes')) $('statTotalEpisodes').textContent = episodes.toLocaleString('en-US');
     }
 
     function updateFirstLast() {
@@ -614,24 +612,11 @@
 
         const image = $('modalPoster');
         const placeholder = $('modalPosterPlaceholder');
-        const localPoster = getLocalPosterUrl(movie);
-        const remotePoster = getRemotePosterUrl(movie);
+        const poster = getLocalPosterUrl(movie) || getSafeString(movie.poster, '');
         if (image) {
-            const sources = [localPoster, remotePoster].filter(Boolean).filter((v, i, a) => a.indexOf(v) === i);
-            let sourceIndex = 0;
-            const useSource = () => {
-                if (sourceIndex >= sources.length) {
-                    image.style.display = 'none';
-                    if (placeholder) placeholder.style.display = 'flex';
-                    return;
-                }
-                image.src = sources[sourceIndex++];
-                image.alt = movie.title;
-                image.style.display = 'block';
-                if (placeholder) placeholder.style.display = 'none';
-            };
-            image.onerror = () => useSource();
-            useSource();
+            image.onerror = () => { image.style.display = 'none'; if (placeholder) placeholder.style.display = 'flex'; };
+            if (poster) { image.src = poster; image.alt = movie.title; image.style.display = 'block'; if (placeholder) placeholder.style.display = 'none'; }
+            else { image.removeAttribute('src'); image.style.display = 'none'; if (placeholder) placeholder.style.display = 'flex'; }
         }
 
         const setText = (id2, value, fallback = 'N/A') => { const el = $(id2); if (el) el.textContent = getSafeString(value, fallback); };
@@ -812,13 +797,6 @@
             const img = e.target;
             if (!(img instanceof HTMLImageElement)) return;
             if (!img.classList.contains('movie-poster')) return;
-            const remote = img.dataset.remotePoster || '';
-            const triedRemote = img.dataset.triedRemote === '1';
-            if (remote && !triedRemote && img.currentSrc !== remote) {
-                img.dataset.triedRemote = '1';
-                img.src = remote;
-                return;
-            }
             const fallback = img.parentElement?.querySelector('[data-fallback-for]');
             if (fallback) fallback.style.display = 'flex';
             img.style.display = 'none';

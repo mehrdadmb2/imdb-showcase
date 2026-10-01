@@ -93,7 +93,7 @@ header { position: sticky; top: 0; z-index: 100; padding: 12px 24px; }
 .header-stats { display: flex; gap: 20px; padding: 6px 18px; border-radius: 50px; background: rgba(255,255,255,0.04); flex-wrap: wrap; }
 .stat-item { display: flex; align-items: baseline; gap: 4px; }
 .stat-number { font-size: 18px; font-weight: 800; background: linear-gradient(135deg, var(--accent), var(--accent2)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-.stat-label { font-size: 12px; color: var(--text-muted); }
+.stat-label { font-size: 12px; color: var(--text-muted); white-space: nowrap; letter-spacing: .04em; }
 
 .header-actions { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
 .btn-glass {
