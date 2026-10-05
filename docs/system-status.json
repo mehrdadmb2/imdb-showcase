@@ -2,37 +2,37 @@
   "schema_version": 2,
   "status": "degraded",
   "message": "IMDb Showcase pipeline diagnostics",
-  "generated_at": "2026-10-05T05:30:35.673517+00:00",
+  "generated_at": "2026-10-05T16:55:54.649939+00:00",
   "run": {
-    "started_at": "2026-10-05T05:29:58.111061+00:00",
-    "finished_at": "2026-10-05T05:30:35.673517+00:00",
-    "duration_seconds": 37.6,
+    "started_at": "2026-10-05T16:55:09.529072+00:00",
+    "finished_at": "2026-10-05T16:55:54.649939+00:00",
+    "duration_seconds": 44.78,
     "mode": "update",
     "keys_detected": 4,
     "counts": {
-      "source_records": 1787,
-      "cache_reused": 1787,
-      "api_attempts": 0,
-      "omdb_success": 0,
+      "source_records": 1792,
+      "cache_reused": 1786,
+      "api_attempts": 6,
+      "omdb_success": 5,
       "omdb_not_found": 0,
-      "omdb_errors": 0,
+      "omdb_errors": 1,
       "stale_preserved": 0,
-      "partial_records": 0,
+      "partial_records": 1,
       "posters_reused": 1678,
-      "posters_downloaded": 0,
+      "posters_downloaded": 5,
       "posters_missing": 205,
-      "poster_attempts": 96,
+      "poster_attempts": 101,
       "records_due_monthly_refresh": 1,
-      "records_missing_enrichment": 1,
-      "records_in_retry_cooldown": 1
+      "records_missing_enrichment": 6,
+      "records_in_retry_cooldown": 0
     },
     "keys": [
       {
         "label": "key-1",
         "fingerprint": "85c6a9535c01",
-        "status": "not_tested",
-        "requests_this_run": 0,
-        "success_this_run": 0,
+        "status": "active",
+        "requests_this_run": 2,
+        "success_this_run": 2,
         "not_found_this_run": 0,
         "errors_this_run": 0,
         "last_error": ""
@@ -40,19 +40,19 @@
       {
         "label": "key-2",
         "fingerprint": "409c1abd8842",
-        "status": "not_tested",
-        "requests_this_run": 0,
-        "success_this_run": 0,
+        "status": "active_with_errors",
+        "requests_this_run": 2,
+        "success_this_run": 1,
         "not_found_this_run": 0,
-        "errors_this_run": 0,
-        "last_error": ""
+        "errors_this_run": 1,
+        "last_error": "Incorrect IMDb ID."
       },
       {
         "label": "key-3",
         "fingerprint": "b9708d2c4dbb",
-        "status": "not_tested",
-        "requests_this_run": 0,
-        "success_this_run": 0,
+        "status": "active",
+        "requests_this_run": 1,
+        "success_this_run": 1,
         "not_found_this_run": 0,
         "errors_this_run": 0,
         "last_error": ""
@@ -60,24 +60,31 @@
       {
         "label": "key-4",
         "fingerprint": "2caed1031b1c",
-        "status": "not_tested",
-        "requests_this_run": 0,
-        "success_this_run": 0,
+        "status": "active",
+        "requests_this_run": 1,
+        "success_this_run": 1,
         "not_found_this_run": 0,
         "errors_this_run": 0,
         "last_error": ""
       }
     ],
-    "errors": [],
+    "errors": [
+      {
+        "imdb_id": "tt43749709",
+        "title": "Grand Theft Auto VI: An Extended Look",
+        "reason": "Incorrect IMDb ID.",
+        "key": "409c1abd8842"
+      }
+    ],
     "message": "اطلاعات قبلی هنگام شکست دریافت جدید حفظ می‌شود."
   },
   "keys": [
     {
       "label": "key-1",
       "fingerprint": "85c6a9535c01",
-      "status": "not_tested",
-      "requests_this_run": 0,
-      "success_this_run": 0,
+      "status": "active",
+      "requests_this_run": 2,
+      "success_this_run": 2,
       "not_found_this_run": 0,
       "errors_this_run": 0,
       "last_error": ""
@@ -85,19 +92,19 @@
     {
       "label": "key-2",
       "fingerprint": "409c1abd8842",
-      "status": "not_tested",
-      "requests_this_run": 0,
-      "success_this_run": 0,
+      "status": "active_with_errors",
+      "requests_this_run": 2,
+      "success_this_run": 1,
       "not_found_this_run": 0,
-      "errors_this_run": 0,
-      "last_error": ""
+      "errors_this_run": 1,
+      "last_error": "Incorrect IMDb ID."
     },
     {
       "label": "key-3",
       "fingerprint": "b9708d2c4dbb",
-      "status": "not_tested",
-      "requests_this_run": 0,
-      "success_this_run": 0,
+      "status": "active",
+      "requests_this_run": 1,
+      "success_this_run": 1,
       "not_found_this_run": 0,
       "errors_this_run": 0,
       "last_error": ""
@@ -105,13 +112,20 @@
     {
       "label": "key-4",
       "fingerprint": "2caed1031b1c",
-      "status": "not_tested",
-      "requests_this_run": 0,
-      "success_this_run": 0,
+      "status": "active",
+      "requests_this_run": 1,
+      "success_this_run": 1,
       "not_found_this_run": 0,
       "errors_this_run": 0,
       "last_error": ""
     }
   ],
-  "errors": []
+  "errors": [
+    {
+      "imdb_id": "tt43749709",
+      "title": "Grand Theft Auto VI: An Extended Look",
+      "reason": "Incorrect IMDb ID.",
+      "key": "409c1abd8842"
+    }
+  ]
 }
