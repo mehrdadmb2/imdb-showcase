@@ -1,7 +1,138 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-10-07T05:51:04.167735+00:00",
+  "updated_at": "2026-10-07T18:54:48.163257+00:00",
   "runs": [
+    {
+      "schema_version": 2,
+      "status": "degraded",
+      "message": "IMDb Showcase pipeline diagnostics",
+      "generated_at": "2026-10-07T18:54:47.972732+00:00",
+      "run": {
+        "started_at": "2026-10-07T18:53:49.318102+00:00",
+        "finished_at": "2026-10-07T18:54:47.972732+00:00",
+        "duration_seconds": 58.77,
+        "mode": "update",
+        "keys_detected": 4,
+        "counts": {
+          "source_records": 1792,
+          "cache_reused": 1791,
+          "api_attempts": 1,
+          "omdb_success": 0,
+          "omdb_not_found": 0,
+          "omdb_errors": 1,
+          "stale_preserved": 0,
+          "partial_records": 1,
+          "posters_reused": 1684,
+          "posters_downloaded": 0,
+          "posters_missing": 203,
+          "poster_attempts": 95,
+          "records_due_monthly_refresh": 1,
+          "records_missing_enrichment": 1,
+          "records_in_retry_cooldown": 0
+        },
+        "keys": [
+          {
+            "label": "key-1",
+            "fingerprint": "85c6a9535c01",
+            "status": "active_with_errors",
+            "requests_this_run": 1,
+            "success_this_run": 0,
+            "not_found_this_run": 0,
+            "errors_this_run": 1,
+            "last_error": "Incorrect IMDb ID."
+          },
+          {
+            "label": "key-2",
+            "fingerprint": "409c1abd8842",
+            "status": "not_tested",
+            "requests_this_run": 0,
+            "success_this_run": 0,
+            "not_found_this_run": 0,
+            "errors_this_run": 0,
+            "last_error": ""
+          },
+          {
+            "label": "key-3",
+            "fingerprint": "b9708d2c4dbb",
+            "status": "not_tested",
+            "requests_this_run": 0,
+            "success_this_run": 0,
+            "not_found_this_run": 0,
+            "errors_this_run": 0,
+            "last_error": ""
+          },
+          {
+            "label": "key-4",
+            "fingerprint": "2caed1031b1c",
+            "status": "not_tested",
+            "requests_this_run": 0,
+            "success_this_run": 0,
+            "not_found_this_run": 0,
+            "errors_this_run": 0,
+            "last_error": ""
+          }
+        ],
+        "errors": [
+          {
+            "imdb_id": "tt43749709",
+            "title": "Grand Theft Auto VI: An Extended Look",
+            "reason": "Incorrect IMDb ID.",
+            "key": "85c6a9535c01"
+          }
+        ],
+        "message": "اطلاعات قبلی هنگام شکست دریافت جدید حفظ می‌شود."
+      },
+      "keys": [
+        {
+          "label": "key-1",
+          "fingerprint": "85c6a9535c01",
+          "status": "active_with_errors",
+          "requests_this_run": 1,
+          "success_this_run": 0,
+          "not_found_this_run": 0,
+          "errors_this_run": 1,
+          "last_error": "Incorrect IMDb ID."
+        },
+        {
+          "label": "key-2",
+          "fingerprint": "409c1abd8842",
+          "status": "not_tested",
+          "requests_this_run": 0,
+          "success_this_run": 0,
+          "not_found_this_run": 0,
+          "errors_this_run": 0,
+          "last_error": ""
+        },
+        {
+          "label": "key-3",
+          "fingerprint": "b9708d2c4dbb",
+          "status": "not_tested",
+          "requests_this_run": 0,
+          "success_this_run": 0,
+          "not_found_this_run": 0,
+          "errors_this_run": 0,
+          "last_error": ""
+        },
+        {
+          "label": "key-4",
+          "fingerprint": "2caed1031b1c",
+          "status": "not_tested",
+          "requests_this_run": 0,
+          "success_this_run": 0,
+          "not_found_this_run": 0,
+          "errors_this_run": 0,
+          "last_error": ""
+        }
+      ],
+      "errors": [
+        {
+          "imdb_id": "tt43749709",
+          "title": "Grand Theft Auto VI: An Extended Look",
+          "reason": "Incorrect IMDb ID.",
+          "key": "85c6a9535c01"
+        }
+      ]
+    },
     {
       "schema_version": 2,
       "status": "degraded",
