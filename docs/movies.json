@@ -1,21 +1,21 @@
 {
   "schema_version": 6,
-  "last_manual_update": "2026-10-06T18:19:27.784468+00:00",
+  "last_manual_update": "2026-10-07T05:51:04.004039+00:00",
   "data_meta": {
     "source_records": 1792,
-    "cache_reused": 1791,
-    "api_attempts": 1,
+    "cache_reused": 1792,
+    "api_attempts": 0,
     "omdb_success": 0,
     "omdb_not_found": 0,
-    "omdb_errors": 1,
+    "omdb_errors": 0,
     "stale_preserved": 0,
-    "partial_records": 1,
+    "partial_records": 0,
     "records_missing_enrichment": 1,
     "records_due_monthly_refresh": 1,
     "records_deferred_retry": 0,
     "poster_reused": 1678,
-    "poster_attempts": 96,
-    "posters_downloaded": 1,
+    "poster_attempts": 95,
+    "posters_downloaded": 0,
     "posters_missing": 203,
     "imdb_poster_fallback_attempts": 11,
     "output_records": 1792,
@@ -24,8 +24,8 @@
     "cache_ttl_days": 30,
     "shared_dataset": true,
     "local_posters_dir": "docs/posters",
-    "posters_reused": 1683,
-    "records_in_retry_cooldown": 0,
+    "posters_reused": 1684,
+    "records_in_retry_cooldown": 1,
     "force_refresh": false,
     "incomplete_retry_hours": 24,
     "network_retry_hours": 6,
@@ -34,12 +34,12 @@
       {
         "label": "key-1",
         "fingerprint": "85c6a9535c01",
-        "status": "active_with_errors",
-        "requests_this_run": 1,
+        "status": "not_tested",
+        "requests_this_run": 0,
         "success_this_run": 0,
         "not_found_this_run": 0,
-        "errors_this_run": 1,
-        "last_error": "Incorrect IMDb ID."
+        "errors_this_run": 0,
+        "last_error": ""
       },
       {
         "label": "key-2",
@@ -181074,12 +181074,5 @@
       "poster_last_attempt_at": "2026-09-21T14:31:05.089489+00:00"
     }
   ],
-  "errors": [
-    {
-      "imdb_id": "tt43749709",
-      "title": "Grand Theft Auto VI: An Extended Look",
-      "reason": "Incorrect IMDb ID.",
-      "key": "85c6a9535c01"
-    }
-  ]
+  "errors": []
 }
