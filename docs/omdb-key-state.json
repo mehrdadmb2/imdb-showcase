@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-10-07T18:54:47.972960+00:00",
+  "updated_at": "2026-10-08T05:56:17.107114+00:00",
   "keys": {
     "85c6a9535c01": {
       "label": "key-1",
@@ -9,13 +9,13 @@
       "total_success": 2,
       "total_not_found": 0,
       "total_errors": 4,
-      "last_status": "active_with_errors",
+      "last_status": "not_tested",
       "last_error": "Incorrect IMDb ID.",
-      "daily_date": "2026-10-07",
-      "daily_requests": 1,
+      "daily_date": "2026-10-08",
+      "daily_requests": 0,
       "daily_success": 0,
-      "daily_errors": 1,
-      "last_seen_at": "2026-10-07T18:54:47.972943+00:00"
+      "daily_errors": 0,
+      "last_seen_at": "2026-10-08T05:56:17.107101+00:00"
     },
     "409c1abd8842": {
       "label": "key-2",
@@ -26,11 +26,11 @@
       "total_errors": 1,
       "last_status": "not_tested",
       "last_error": "Incorrect IMDb ID.",
-      "daily_date": "2026-10-07",
+      "daily_date": "2026-10-08",
       "daily_requests": 0,
       "daily_success": 0,
       "daily_errors": 0,
-      "last_seen_at": "2026-10-07T18:54:47.972950+00:00"
+      "last_seen_at": "2026-10-08T05:56:17.107107+00:00"
     },
     "b9708d2c4dbb": {
       "label": "key-3",
@@ -41,11 +41,11 @@
       "total_errors": 0,
       "last_status": "not_tested",
       "last_error": "",
-      "daily_date": "2026-10-07",
+      "daily_date": "2026-10-08",
       "daily_requests": 0,
       "daily_success": 0,
       "daily_errors": 0,
-      "last_seen_at": "2026-10-07T18:54:47.972954+00:00"
+      "last_seen_at": "2026-10-08T05:56:17.107109+00:00"
     },
     "2caed1031b1c": {
       "label": "key-4",
@@ -56,11 +56,11 @@
       "total_errors": 0,
       "last_status": "not_tested",
       "last_error": "",
-      "daily_date": "2026-10-07",
+      "daily_date": "2026-10-08",
       "daily_requests": 0,
       "daily_success": 0,
       "daily_errors": 0,
-      "last_seen_at": "2026-10-07T18:54:47.972957+00:00"
+      "last_seen_at": "2026-10-08T05:56:17.107112+00:00"
     }
   }
 }
