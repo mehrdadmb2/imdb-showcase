@@ -1,15 +1,15 @@
 {
   "schema_version": 6,
-  "last_manual_update": "2026-10-08T18:49:59.706856+00:00",
+  "last_manual_update": "2026-10-09T06:02:25.009697+00:00",
   "data_meta": {
     "source_records": 1792,
-    "cache_reused": 1792,
-    "api_attempts": 0,
+    "cache_reused": 1791,
+    "api_attempts": 1,
     "omdb_success": 0,
     "omdb_not_found": 0,
-    "omdb_errors": 0,
+    "omdb_errors": 1,
     "stale_preserved": 0,
-    "partial_records": 0,
+    "partial_records": 1,
     "records_missing_enrichment": 1,
     "records_due_monthly_refresh": 1,
     "records_deferred_retry": 0,
@@ -25,7 +25,7 @@
     "shared_dataset": true,
     "local_posters_dir": "docs/posters",
     "posters_reused": 1684,
-    "records_in_retry_cooldown": 1,
+    "records_in_retry_cooldown": 0,
     "force_refresh": false,
     "incomplete_retry_hours": 24,
     "network_retry_hours": 6,
@@ -34,12 +34,12 @@
       {
         "label": "key-1",
         "fingerprint": "85c6a9535c01",
-        "status": "not_tested",
-        "requests_this_run": 0,
+        "status": "active_with_errors",
+        "requests_this_run": 1,
         "success_this_run": 0,
         "not_found_this_run": 0,
-        "errors_this_run": 0,
-        "last_error": ""
+        "errors_this_run": 1,
+        "last_error": "Error getting data."
       },
       {
         "label": "key-2",
@@ -7531,15 +7531,15 @@
         "Directors": ""
       },
       "data_status": "partial",
-      "data_stale_reason": "Incorrect IMDb ID.",
-      "last_api_attempt_at": "2026-10-07T18:53:51.543548+00:00",
-      "failure_count": 15,
-      "next_retry_at": "2026-10-08T18:53:51.543566+00:00",
+      "data_stale_reason": "Error getting data.",
+      "last_api_attempt_at": "2026-10-09T06:01:52.657847+00:00",
+      "failure_count": 16,
+      "next_retry_at": "2026-10-10T06:01:52.657863+00:00",
       "poster_local": "",
       "poster_status": "unavailable",
       "schema_record_version": 2,
       "cache_updated_at": "",
-      "poster_last_attempt_at": "2026-10-07T18:53:51.358449+00:00"
+      "poster_last_attempt_at": "2026-10-09T06:01:52.483126+00:00"
     },
     {
       "imdb_id": "tt32654916",
@@ -181074,5 +181074,12 @@
       "poster_last_attempt_at": "2026-09-21T14:31:05.089489+00:00"
     }
   ],
-  "errors": []
+  "errors": [
+    {
+      "imdb_id": "tt43749709",
+      "title": "Grand Theft Auto VI: An Extended Look",
+      "reason": "Error getting data.",
+      "key": "85c6a9535c01"
+    }
+  ]
 }
