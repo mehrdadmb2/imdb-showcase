@@ -2,47 +2,47 @@
   "schema_version": 2,
   "status": "degraded",
   "message": "IMDb Showcase pipeline diagnostics",
-  "generated_at": "2026-10-09T06:02:25.009697+00:00",
+  "generated_at": "2026-10-09T17:45:42.463072+00:00",
   "run": {
-    "started_at": "2026-10-09T06:01:50.877827+00:00",
-    "finished_at": "2026-10-09T06:02:25.009697+00:00",
-    "duration_seconds": 34.21,
+    "started_at": "2026-10-09T17:44:57.696270+00:00",
+    "finished_at": "2026-10-09T17:45:42.463072+00:00",
+    "duration_seconds": 44.86,
     "mode": "update",
     "keys_detected": 4,
     "counts": {
-      "source_records": 1792,
-      "cache_reused": 1791,
-      "api_attempts": 1,
-      "omdb_success": 0,
+      "source_records": 1794,
+      "cache_reused": 1792,
+      "api_attempts": 2,
+      "omdb_success": 2,
       "omdb_not_found": 0,
-      "omdb_errors": 1,
+      "omdb_errors": 0,
       "stale_preserved": 0,
-      "partial_records": 1,
+      "partial_records": 0,
       "posters_reused": 1684,
-      "posters_downloaded": 0,
+      "posters_downloaded": 2,
       "posters_missing": 203,
-      "poster_attempts": 95,
+      "poster_attempts": 97,
       "records_due_monthly_refresh": 1,
-      "records_missing_enrichment": 1,
-      "records_in_retry_cooldown": 0
+      "records_missing_enrichment": 3,
+      "records_in_retry_cooldown": 1
     },
     "keys": [
       {
         "label": "key-1",
         "fingerprint": "85c6a9535c01",
-        "status": "active_with_errors",
+        "status": "active",
         "requests_this_run": 1,
-        "success_this_run": 0,
+        "success_this_run": 1,
         "not_found_this_run": 0,
-        "errors_this_run": 1,
-        "last_error": "Error getting data."
+        "errors_this_run": 0,
+        "last_error": ""
       },
       {
         "label": "key-2",
         "fingerprint": "409c1abd8842",
-        "status": "not_tested",
-        "requests_this_run": 0,
-        "success_this_run": 0,
+        "status": "active",
+        "requests_this_run": 1,
+        "success_this_run": 1,
         "not_found_this_run": 0,
         "errors_this_run": 0,
         "last_error": ""
@@ -68,33 +68,26 @@
         "last_error": ""
       }
     ],
-    "errors": [
-      {
-        "imdb_id": "tt43749709",
-        "title": "Grand Theft Auto VI: An Extended Look",
-        "reason": "Error getting data.",
-        "key": "85c6a9535c01"
-      }
-    ],
+    "errors": [],
     "message": "اطلاعات قبلی هنگام شکست دریافت جدید حفظ می‌شود."
   },
   "keys": [
     {
       "label": "key-1",
       "fingerprint": "85c6a9535c01",
-      "status": "active_with_errors",
+      "status": "active",
       "requests_this_run": 1,
-      "success_this_run": 0,
+      "success_this_run": 1,
       "not_found_this_run": 0,
-      "errors_this_run": 1,
-      "last_error": "Error getting data."
+      "errors_this_run": 0,
+      "last_error": ""
     },
     {
       "label": "key-2",
       "fingerprint": "409c1abd8842",
-      "status": "not_tested",
-      "requests_this_run": 0,
-      "success_this_run": 0,
+      "status": "active",
+      "requests_this_run": 1,
+      "success_this_run": 1,
       "not_found_this_run": 0,
       "errors_this_run": 0,
       "last_error": ""
@@ -120,12 +113,5 @@
       "last_error": ""
     }
   ],
-  "errors": [
-    {
-      "imdb_id": "tt43749709",
-      "title": "Grand Theft Auto VI: An Extended Look",
-      "reason": "Error getting data.",
-      "key": "85c6a9535c01"
-    }
-  ]
+  "errors": []
 }
