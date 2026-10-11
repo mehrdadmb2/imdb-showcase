@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-10-11T05:39:52.072740+00:00",
+  "updated_at": "2026-10-11T17:41:02.446096+00:00",
   "keys": {
     "85c6a9535c01": {
       "label": "key-1",
@@ -15,7 +15,7 @@
       "daily_requests": 0,
       "daily_success": 0,
       "daily_errors": 0,
-      "last_seen_at": "2026-10-11T05:39:52.072714+00:00"
+      "last_seen_at": "2026-10-11T17:41:02.446069+00:00"
     },
     "409c1abd8842": {
       "label": "key-2",
@@ -30,7 +30,7 @@
       "daily_requests": 0,
       "daily_success": 0,
       "daily_errors": 0,
-      "last_seen_at": "2026-10-11T05:39:52.072725+00:00"
+      "last_seen_at": "2026-10-11T17:41:02.446081+00:00"
     },
     "b9708d2c4dbb": {
       "label": "key-3",
@@ -45,7 +45,7 @@
       "daily_requests": 0,
       "daily_success": 0,
       "daily_errors": 0,
-      "last_seen_at": "2026-10-11T05:39:52.072731+00:00"
+      "last_seen_at": "2026-10-11T17:41:02.446088+00:00"
     },
     "2caed1031b1c": {
       "label": "key-4",
@@ -60,7 +60,7 @@
       "daily_requests": 0,
       "daily_success": 0,
       "daily_errors": 0,
-      "last_seen_at": "2026-10-11T05:39:52.072737+00:00"
+      "last_seen_at": "2026-10-11T17:41:02.446092+00:00"
     }
   }
 }
