@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-10-13T19:14:00.542731+00:00",
+  "updated_at": "2026-10-14T04:47:25.364173+00:00",
   "keys": {
     "85c6a9535c01": {
       "label": "key-1",
@@ -11,11 +11,11 @@
       "total_errors": 5,
       "last_status": "not_tested",
       "last_error": "Error getting data.",
-      "daily_date": "2026-10-13",
+      "daily_date": "2026-10-14",
       "daily_requests": 0,
       "daily_success": 0,
       "daily_errors": 0,
-      "last_seen_at": "2026-10-13T19:14:00.542715+00:00"
+      "last_seen_at": "2026-10-14T04:47:25.364148+00:00"
     },
     "409c1abd8842": {
       "label": "key-2",
@@ -26,11 +26,11 @@
       "total_errors": 1,
       "last_status": "not_tested",
       "last_error": "Incorrect IMDb ID.",
-      "daily_date": "2026-10-13",
+      "daily_date": "2026-10-14",
       "daily_requests": 0,
       "daily_success": 0,
       "daily_errors": 0,
-      "last_seen_at": "2026-10-13T19:14:00.542723+00:00"
+      "last_seen_at": "2026-10-14T04:47:25.364160+00:00"
     },
     "b9708d2c4dbb": {
       "label": "key-3",
@@ -41,11 +41,11 @@
       "total_errors": 0,
       "last_status": "not_tested",
       "last_error": "",
-      "daily_date": "2026-10-13",
+      "daily_date": "2026-10-14",
       "daily_requests": 0,
       "daily_success": 0,
       "daily_errors": 0,
-      "last_seen_at": "2026-10-13T19:14:00.542726+00:00"
+      "last_seen_at": "2026-10-14T04:47:25.364166+00:00"
     },
     "2caed1031b1c": {
       "label": "key-4",
@@ -56,11 +56,11 @@
       "total_errors": 0,
       "last_status": "not_tested",
       "last_error": "",
-      "daily_date": "2026-10-13",
+      "daily_date": "2026-10-14",
       "daily_requests": 0,
       "daily_success": 0,
       "daily_errors": 0,
-      "last_seen_at": "2026-10-13T19:14:00.542729+00:00"
+      "last_seen_at": "2026-10-14T04:47:25.364170+00:00"
     }
   }
 }
