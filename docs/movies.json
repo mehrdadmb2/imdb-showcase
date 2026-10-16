@@ -1,21 +1,21 @@
 {
   "schema_version": 6,
-  "last_manual_update": "2026-10-16T13:50:16.952700+00:00",
+  "last_manual_update": "2026-10-16T16:34:31.294102+00:00",
   "data_meta": {
     "source_records": 1803,
-    "cache_reused": 1795,
-    "api_attempts": 8,
-    "omdb_success": 8,
+    "cache_reused": 1803,
+    "api_attempts": 0,
+    "omdb_success": 0,
     "omdb_not_found": 0,
     "omdb_errors": 0,
     "stale_preserved": 0,
     "partial_records": 0,
-    "records_missing_enrichment": 8,
+    "records_missing_enrichment": 0,
     "records_due_monthly_refresh": 0,
     "records_deferred_retry": 0,
     "poster_reused": 1678,
-    "poster_attempts": 103,
-    "posters_downloaded": 8,
+    "poster_attempts": 95,
+    "posters_downloaded": 0,
     "posters_missing": 202,
     "imdb_poster_fallback_attempts": 11,
     "output_records": 1803,
@@ -24,7 +24,7 @@
     "cache_ttl_days": 30,
     "shared_dataset": true,
     "local_posters_dir": "docs/posters",
-    "posters_reused": 1688,
+    "posters_reused": 1696,
     "records_in_retry_cooldown": 0,
     "force_refresh": false,
     "incomplete_retry_hours": 24,
@@ -34,9 +34,9 @@
       {
         "label": "key-1",
         "fingerprint": "85c6a9535c01",
-        "status": "active",
-        "requests_this_run": 2,
-        "success_this_run": 2,
+        "status": "not_tested",
+        "requests_this_run": 0,
+        "success_this_run": 0,
         "not_found_this_run": 0,
         "errors_this_run": 0,
         "last_error": ""
@@ -44,9 +44,9 @@
       {
         "label": "key-2",
         "fingerprint": "409c1abd8842",
-        "status": "active",
-        "requests_this_run": 2,
-        "success_this_run": 2,
+        "status": "not_tested",
+        "requests_this_run": 0,
+        "success_this_run": 0,
         "not_found_this_run": 0,
         "errors_this_run": 0,
         "last_error": ""
@@ -54,9 +54,9 @@
       {
         "label": "key-3",
         "fingerprint": "b9708d2c4dbb",
-        "status": "active",
-        "requests_this_run": 2,
-        "success_this_run": 2,
+        "status": "not_tested",
+        "requests_this_run": 0,
+        "success_this_run": 0,
         "not_found_this_run": 0,
         "errors_this_run": 0,
         "last_error": ""
@@ -64,9 +64,9 @@
       {
         "label": "key-4",
         "fingerprint": "2caed1031b1c",
-        "status": "active",
-        "requests_this_run": 2,
-        "success_this_run": 2,
+        "status": "not_tested",
+        "requests_this_run": 0,
+        "success_this_run": 0,
         "not_found_this_run": 0,
         "errors_this_run": 0,
         "last_error": ""
@@ -180,7 +180,7 @@
         "Response": "True"
       },
       "omdb_found": true,
-      "data_status": "fresh",
+      "data_status": "cached",
       "data_fetched_at": "2026-10-16T13:49:30.773620+00:00",
       "cache_updated_at": "2026-10-16T13:49:30.773620+00:00",
       "last_api_attempt_at": "2026-10-16T13:49:30.773620+00:00",
@@ -298,7 +298,7 @@
         "Response": "True"
       },
       "omdb_found": true,
-      "data_status": "fresh",
+      "data_status": "cached",
       "data_fetched_at": "2026-10-16T13:49:31.208192+00:00",
       "cache_updated_at": "2026-10-16T13:49:31.208192+00:00",
       "last_api_attempt_at": "2026-10-16T13:49:31.208192+00:00",
@@ -416,7 +416,7 @@
         "Response": "True"
       },
       "omdb_found": true,
-      "data_status": "fresh",
+      "data_status": "cached",
       "data_fetched_at": "2026-10-16T13:49:31.489400+00:00",
       "cache_updated_at": "2026-10-16T13:49:31.489400+00:00",
       "last_api_attempt_at": "2026-10-16T13:49:31.489400+00:00",
@@ -534,7 +534,7 @@
         "Response": "True"
       },
       "omdb_found": true,
-      "data_status": "fresh",
+      "data_status": "cached",
       "data_fetched_at": "2026-10-16T13:49:31.799377+00:00",
       "cache_updated_at": "2026-10-16T13:49:31.799377+00:00",
       "last_api_attempt_at": "2026-10-16T13:49:31.799377+00:00",
@@ -652,7 +652,7 @@
         "Response": "True"
       },
       "omdb_found": true,
-      "data_status": "fresh",
+      "data_status": "cached",
       "data_fetched_at": "2026-10-16T13:49:32.087952+00:00",
       "cache_updated_at": "2026-10-16T13:49:32.087952+00:00",
       "last_api_attempt_at": "2026-10-16T13:49:32.087952+00:00",
@@ -753,7 +753,7 @@
         "Response": "True"
       },
       "omdb_found": true,
-      "data_status": "fresh",
+      "data_status": "cached",
       "data_fetched_at": "2026-10-16T13:49:32.380152+00:00",
       "cache_updated_at": "2026-10-16T13:49:32.380152+00:00",
       "last_api_attempt_at": "2026-10-16T13:49:32.380152+00:00",
@@ -854,7 +854,7 @@
         "Response": "True"
       },
       "omdb_found": true,
-      "data_status": "fresh",
+      "data_status": "cached",
       "data_fetched_at": "2026-10-16T13:49:32.663687+00:00",
       "cache_updated_at": "2026-10-16T13:49:32.663687+00:00",
       "last_api_attempt_at": "2026-10-16T13:49:32.663687+00:00",
@@ -972,7 +972,7 @@
         "Response": "True"
       },
       "omdb_found": true,
-      "data_status": "fresh",
+      "data_status": "cached",
       "data_fetched_at": "2026-10-16T13:49:32.966594+00:00",
       "cache_updated_at": "2026-10-16T13:49:32.966594+00:00",
       "last_api_attempt_at": "2026-10-16T13:49:32.966594+00:00",
