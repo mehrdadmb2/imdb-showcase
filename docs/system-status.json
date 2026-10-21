@@ -2,27 +2,27 @@
   "schema_version": 2,
   "status": "degraded",
   "message": "IMDb Showcase pipeline diagnostics",
-  "generated_at": "2026-10-20T16:57:36.292394+00:00",
+  "generated_at": "2026-10-21T04:37:49.344688+00:00",
   "run": {
-    "started_at": "2026-10-20T16:55:56.683893+00:00",
-    "finished_at": "2026-10-20T16:57:36.292394+00:00",
-    "duration_seconds": 99.66,
+    "started_at": "2026-10-21T04:37:16.197346+00:00",
+    "finished_at": "2026-10-21T04:37:49.344688+00:00",
+    "duration_seconds": 33.23,
     "mode": "update",
     "keys_detected": 4,
     "counts": {
       "source_records": 1803,
-      "cache_reused": 854,
-      "api_attempts": 949,
-      "omdb_success": 949,
+      "cache_reused": 1803,
+      "api_attempts": 0,
+      "omdb_success": 0,
       "omdb_not_found": 0,
       "omdb_errors": 0,
       "stale_preserved": 0,
       "partial_records": 0,
-      "posters_reused": 1696,
-      "posters_downloaded": 1,
-      "posters_missing": 263,
-      "poster_attempts": 158,
-      "records_due_monthly_refresh": 949,
+      "posters_reused": 1697,
+      "posters_downloaded": 0,
+      "posters_missing": 139,
+      "poster_attempts": 33,
+      "records_due_monthly_refresh": 0,
       "records_missing_enrichment": 0,
       "records_in_retry_cooldown": 0
     },
@@ -30,9 +30,9 @@
       {
         "label": "key-1",
         "fingerprint": "85c6a9535c01",
-        "status": "active",
-        "requests_this_run": 238,
-        "success_this_run": 238,
+        "status": "not_tested",
+        "requests_this_run": 0,
+        "success_this_run": 0,
         "not_found_this_run": 0,
         "errors_this_run": 0,
         "last_error": ""
@@ -40,9 +40,9 @@
       {
         "label": "key-2",
         "fingerprint": "409c1abd8842",
-        "status": "active",
-        "requests_this_run": 237,
-        "success_this_run": 237,
+        "status": "not_tested",
+        "requests_this_run": 0,
+        "success_this_run": 0,
         "not_found_this_run": 0,
         "errors_this_run": 0,
         "last_error": ""
@@ -50,9 +50,9 @@
       {
         "label": "key-3",
         "fingerprint": "b9708d2c4dbb",
-        "status": "active",
-        "requests_this_run": 237,
-        "success_this_run": 237,
+        "status": "not_tested",
+        "requests_this_run": 0,
+        "success_this_run": 0,
         "not_found_this_run": 0,
         "errors_this_run": 0,
         "last_error": ""
@@ -60,9 +60,9 @@
       {
         "label": "key-4",
         "fingerprint": "2caed1031b1c",
-        "status": "active",
-        "requests_this_run": 237,
-        "success_this_run": 237,
+        "status": "not_tested",
+        "requests_this_run": 0,
+        "success_this_run": 0,
         "not_found_this_run": 0,
         "errors_this_run": 0,
         "last_error": ""
@@ -75,9 +75,9 @@
     {
       "label": "key-1",
       "fingerprint": "85c6a9535c01",
-      "status": "active",
-      "requests_this_run": 238,
-      "success_this_run": 238,
+      "status": "not_tested",
+      "requests_this_run": 0,
+      "success_this_run": 0,
       "not_found_this_run": 0,
       "errors_this_run": 0,
       "last_error": ""
@@ -85,9 +85,9 @@
     {
       "label": "key-2",
       "fingerprint": "409c1abd8842",
-      "status": "active",
-      "requests_this_run": 237,
-      "success_this_run": 237,
+      "status": "not_tested",
+      "requests_this_run": 0,
+      "success_this_run": 0,
       "not_found_this_run": 0,
       "errors_this_run": 0,
       "last_error": ""
@@ -95,9 +95,9 @@
     {
       "label": "key-3",
       "fingerprint": "b9708d2c4dbb",
-      "status": "active",
-      "requests_this_run": 237,
-      "success_this_run": 237,
+      "status": "not_tested",
+      "requests_this_run": 0,
+      "success_this_run": 0,
       "not_found_this_run": 0,
       "errors_this_run": 0,
       "last_error": ""
@@ -105,9 +105,9 @@
     {
       "label": "key-4",
       "fingerprint": "2caed1031b1c",
-      "status": "active",
-      "requests_this_run": 237,
-      "success_this_run": 237,
+      "status": "not_tested",
+      "requests_this_run": 0,
+      "success_this_run": 0,
       "not_found_this_run": 0,
       "errors_this_run": 0,
       "last_error": ""
