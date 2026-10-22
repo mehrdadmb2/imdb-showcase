@@ -2,11 +2,11 @@
   "schema_version": 2,
   "status": "degraded",
   "message": "IMDb Showcase pipeline diagnostics",
-  "generated_at": "2026-10-22T04:36:34.298600+00:00",
+  "generated_at": "2026-10-22T17:06:37.268341+00:00",
   "run": {
-    "started_at": "2026-10-22T04:35:45.783340+00:00",
-    "finished_at": "2026-10-22T04:36:34.298600+00:00",
-    "duration_seconds": 48.59,
+    "started_at": "2026-10-22T17:05:54.331230+00:00",
+    "finished_at": "2026-10-22T17:06:37.268341+00:00",
+    "duration_seconds": 43.01,
     "mode": "update",
     "keys_detected": 4,
     "counts": {
