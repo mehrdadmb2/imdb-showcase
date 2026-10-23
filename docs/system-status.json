@@ -2,11 +2,11 @@
   "schema_version": 2,
   "status": "degraded",
   "message": "IMDb Showcase pipeline diagnostics",
-  "generated_at": "2026-10-22T17:06:37.268341+00:00",
+  "generated_at": "2026-10-23T04:41:49.949257+00:00",
   "run": {
-    "started_at": "2026-10-22T17:05:54.331230+00:00",
-    "finished_at": "2026-10-22T17:06:37.268341+00:00",
-    "duration_seconds": 43.01,
+    "started_at": "2026-10-23T04:41:07.158857+00:00",
+    "finished_at": "2026-10-23T04:41:49.949257+00:00",
+    "duration_seconds": 42.87,
     "mode": "update",
     "keys_detected": 4,
     "counts": {
@@ -20,8 +20,8 @@
       "partial_records": 0,
       "posters_reused": 1697,
       "posters_downloaded": 0,
-      "posters_missing": 168,
-      "poster_attempts": 62,
+      "posters_missing": 201,
+      "poster_attempts": 95,
       "records_due_monthly_refresh": 0,
       "records_missing_enrichment": 0,
       "records_in_retry_cooldown": 0

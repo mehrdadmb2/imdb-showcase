@@ -1,6 +1,6 @@
 {
   "schema_version": 6,
-  "last_manual_update": "2026-10-22T17:06:37.268341+00:00",
+  "last_manual_update": "2026-10-23T04:41:49.949257+00:00",
   "data_meta": {
     "source_records": 1803,
     "cache_reused": 1803,
@@ -14,9 +14,9 @@
     "records_due_monthly_refresh": 0,
     "records_deferred_retry": 0,
     "poster_reused": 1678,
-    "poster_attempts": 62,
+    "poster_attempts": 95,
     "posters_downloaded": 0,
-    "posters_missing": 168,
+    "posters_missing": 201,
     "imdb_poster_fallback_attempts": 11,
     "output_records": 1803,
     "omdb_key_count": 4,
