@@ -1,0 +1,88 @@
+name: Configure Cinema Vault Telegram Webhook
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: configure-telegram-webhook
+  cancel-in-progress: false
+
+jobs:
+  configure:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Validate required secrets
+        env:
+          BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          WEBHOOK_SECRET: ${{ secrets.TELEGRAM_WEBHOOK_SECRET }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -n "$BOT_TOKEN" || { echo "Missing repository secret TELEGRAM_BOT_TOKEN"; exit 1; }
+          test -n "$WEBHOOK_SECRET" || { echo "Missing repository secret TELEGRAM_WEBHOOK_SECRET"; exit 1; }
+          if ! [[ "$WEBHOOK_SECRET" =~ ^[A-Za-z0-9_-]{1,256}$ ]]; then
+            echo "TELEGRAM_WEBHOOK_SECRET has invalid characters. Use only A-Z, a-z, 0-9, underscore and hyphen."
+            exit 1
+          fi
+          echo "Required secrets found; values are not printed."
+
+      - name: Set webhook
+        env:
+          BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          WEBHOOK_SECRET: ${{ secrets.TELEGRAM_WEBHOOK_SECRET }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          API="https://api.telegram.org/bot${BOT_TOKEN}"
+          WEBHOOK_URL="https://imdb-showcase-telegram-bot.game-developer-mb.workers.dev/telegram/webhook"
+          BODY="$(jq -cn --arg url "$WEBHOOK_URL" --arg secret "$WEBHOOK_SECRET" '{url:$url, secret_token:$secret, allowed_updates:["message","callback_query"], max_connections:20}')"
+          RESPONSE="$(curl --silent --show-error --max-time 30 -H 'Content-Type: application/json' --data "$BODY" "$API/setWebhook")"
+          echo "$RESPONSE" | jq '{ok, description, result: (if .result then {url:.result.url, pending_update_count:.result.pending_update_count, max_connections:.result.max_connections} else null end)}'
+          echo "$RESPONSE" | jq -e '.ok == true' >/dev/null
+
+      - name: Set public bot commands
+        env:
+          BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          API="https://api.telegram.org/bot${BOT_TOKEN}"
+          COMMANDS="$(jq -cn '[
+            {command:"start", description:"🎬 شروع و نمایش منوی اصلی"},
+            {command:"help", description:"🧭 راهنمای استفاده از ربات"},
+            {command:"search", description:"🔎 جستجوی فیلم، سریال یا IMDb ID"},
+            {command:"latest", description:"🆕 آخرین عنوان‌های کتابخانه"},
+            {command:"top", description:"🏆 بالاترین امتیازهای شخصی"},
+            {command:"series", description:"📺 مرور سریال‌های کتابخانه"},
+            {command:"genres", description:"🎭 نمایش ژانرهای موجود"},
+            {command:"genre", description:"🧩 جستجو بر اساس ژانر"},
+            {command:"stats", description:"📊 آمار کتابخانه فیلم و سریال"},
+            {command:"random", description:"🎲 انتخاب یک عنوان تصادفی"},
+            {command:"mylist", description:"⭐ فهرست علاقه‌مندی‌های من"},
+            {command:"subscribe", description:"🔔 فعال‌سازی اعلان عنوان‌های جدید"},
+            {command:"unsubscribe", description:"🔕 توقف اعلان‌های جدید"},
+            {command:"id", description:"🪪 نمایش شناسه عددی تلگرام"},
+            {command:"about", description:"🌐 درباره ربات و سایت"}
+          ]')"
+          BODY="$(jq -cn --argjson commands "$COMMANDS" '{commands:$commands}')"
+          RESPONSE="$(curl --silent --show-error --max-time 30 -H 'Content-Type: application/json' --data "$BODY" "$API/setMyCommands")"
+          echo "$RESPONSE" | jq '{ok, description, result}'
+          echo "$RESPONSE" | jq -e '.ok == true' >/dev/null
+
+      - name: Verify webhook and commands
+        env:
+          BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          API="https://api.telegram.org/bot${BOT_TOKEN}"
+          INFO="$(curl --silent --show-error --max-time 30 "$API/getWebhookInfo")"
+          echo "$INFO" | jq '{ok, description, result: (if .result then {url:.result.url, has_custom_certificate:.result.has_custom_certificate, pending_update_count:.result.pending_update_count, last_error_date:.result.last_error_date, last_error_message:.result.last_error_message} else null end)}'
+          echo "$INFO" | jq -e '.ok == true and .result.url == "https://imdb-showcase-telegram-bot.game-developer-mb.workers.dev/telegram/webhook"' >/dev/null
+          COMMANDS="$(curl --silent --show-error --max-time 30 "$API/getMyCommands")"
+          echo "$COMMANDS" | jq '{ok, description, command_count: ((.result // []) | length), commands: [.result[]? | .command]}'
+          echo "$COMMANDS" | jq -e '.ok == true and (.result | length) > 0' >/dev/null
