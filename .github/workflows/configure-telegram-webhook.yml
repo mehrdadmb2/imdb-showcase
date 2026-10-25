@@ -41,7 +41,7 @@ jobs:
           WEBHOOK_URL="https://imdb-showcase-telegram-bot.game-developer-mb.workers.dev/telegram/webhook"
           BODY="$(jq -cn --arg url "$WEBHOOK_URL" --arg secret "$WEBHOOK_SECRET" '{url:$url, secret_token:$secret, allowed_updates:["message","callback_query"], max_connections:20}')"
           RESPONSE="$(curl --silent --show-error --max-time 30 -H 'Content-Type: application/json' --data "$BODY" "$API/setWebhook")"
-          echo "$RESPONSE" | jq '{ok, description, result: (if .result then {url:.result.url, pending_update_count:.result.pending_update_count, max_connections:.result.max_connections} else null end)}'
+          echo "$RESPONSE" | jq '{ok, description, result: (if (.result | type) == "object" then {url:.result.url, pending_update_count:.result.pending_update_count, max_connections:.result.max_connections} else .result end)}'
           echo "$RESPONSE" | jq -e '.ok == true' >/dev/null
 
       - name: Set public bot commands
