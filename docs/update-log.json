@@ -1,7 +1,124 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-10-25T16:08:25.709845+00:00",
+  "updated_at": "2026-10-25T20:06:57.206600+00:00",
   "runs": [
+    {
+      "schema_version": 2,
+      "status": "degraded",
+      "message": "IMDb Showcase pipeline diagnostics",
+      "generated_at": "2026-10-25T20:06:57.042326+00:00",
+      "run": {
+        "started_at": "2026-10-25T20:06:18.713997+00:00",
+        "finished_at": "2026-10-25T20:06:57.042326+00:00",
+        "duration_seconds": 38.4,
+        "mode": "update",
+        "keys_detected": 4,
+        "counts": {
+          "source_records": 1811,
+          "cache_reused": 1803,
+          "api_attempts": 8,
+          "omdb_success": 8,
+          "omdb_not_found": 0,
+          "omdb_errors": 0,
+          "stale_preserved": 0,
+          "partial_records": 0,
+          "posters_reused": 1697,
+          "posters_downloaded": 8,
+          "posters_missing": 201,
+          "poster_attempts": 103,
+          "records_due_monthly_refresh": 0,
+          "records_missing_enrichment": 8,
+          "records_in_retry_cooldown": 0
+        },
+        "keys": [
+          {
+            "label": "key-1",
+            "fingerprint": "85c6a9535c01",
+            "status": "active",
+            "requests_this_run": 2,
+            "success_this_run": 2,
+            "not_found_this_run": 0,
+            "errors_this_run": 0,
+            "last_error": ""
+          },
+          {
+            "label": "key-2",
+            "fingerprint": "409c1abd8842",
+            "status": "active",
+            "requests_this_run": 2,
+            "success_this_run": 2,
+            "not_found_this_run": 0,
+            "errors_this_run": 0,
+            "last_error": ""
+          },
+          {
+            "label": "key-3",
+            "fingerprint": "b9708d2c4dbb",
+            "status": "active",
+            "requests_this_run": 2,
+            "success_this_run": 2,
+            "not_found_this_run": 0,
+            "errors_this_run": 0,
+            "last_error": ""
+          },
+          {
+            "label": "key-4",
+            "fingerprint": "2caed1031b1c",
+            "status": "active",
+            "requests_this_run": 2,
+            "success_this_run": 2,
+            "not_found_this_run": 0,
+            "errors_this_run": 0,
+            "last_error": ""
+          }
+        ],
+        "errors": [],
+        "message": "اطلاعات قبلی هنگام شکست دریافت جدید حفظ می‌شود."
+      },
+      "keys": [
+        {
+          "label": "key-1",
+          "fingerprint": "85c6a9535c01",
+          "status": "active",
+          "requests_this_run": 2,
+          "success_this_run": 2,
+          "not_found_this_run": 0,
+          "errors_this_run": 0,
+          "last_error": ""
+        },
+        {
+          "label": "key-2",
+          "fingerprint": "409c1abd8842",
+          "status": "active",
+          "requests_this_run": 2,
+          "success_this_run": 2,
+          "not_found_this_run": 0,
+          "errors_this_run": 0,
+          "last_error": ""
+        },
+        {
+          "label": "key-3",
+          "fingerprint": "b9708d2c4dbb",
+          "status": "active",
+          "requests_this_run": 2,
+          "success_this_run": 2,
+          "not_found_this_run": 0,
+          "errors_this_run": 0,
+          "last_error": ""
+        },
+        {
+          "label": "key-4",
+          "fingerprint": "2caed1031b1c",
+          "status": "active",
+          "requests_this_run": 2,
+          "success_this_run": 2,
+          "not_found_this_run": 0,
+          "errors_this_run": 0,
+          "last_error": ""
+        }
+      ],
+      "errors": []
+    },
     {
       "schema_version": 2,
       "status": "degraded",
@@ -3287,123 +3404,6 @@
         "started_at": "2026-10-12T05:49:22.428221+00:00",
         "finished_at": "2026-10-12T05:50:07.098999+00:00",
         "duration_seconds": 44.74,
-        "mode": "update",
-        "keys_detected": 4,
-        "counts": {
-          "source_records": 1795,
-          "cache_reused": 1795,
-          "api_attempts": 0,
-          "omdb_success": 0,
-          "omdb_not_found": 0,
-          "omdb_errors": 0,
-          "stale_preserved": 0,
-          "partial_records": 0,
-          "posters_reused": 1688,
-          "posters_downloaded": 0,
-          "posters_missing": 202,
-          "poster_attempts": 95,
-          "records_due_monthly_refresh": 0,
-          "records_missing_enrichment": 0,
-          "records_in_retry_cooldown": 0
-        },
-        "keys": [
-          {
-            "label": "key-1",
-            "fingerprint": "85c6a9535c01",
-            "status": "not_tested",
-            "requests_this_run": 0,
-            "success_this_run": 0,
-            "not_found_this_run": 0,
-            "errors_this_run": 0,
-            "last_error": ""
-          },
-          {
-            "label": "key-2",
-            "fingerprint": "409c1abd8842",
-            "status": "not_tested",
-            "requests_this_run": 0,
-            "success_this_run": 0,
-            "not_found_this_run": 0,
-            "errors_this_run": 0,
-            "last_error": ""
-          },
-          {
-            "label": "key-3",
-            "fingerprint": "b9708d2c4dbb",
-            "status": "not_tested",
-            "requests_this_run": 0,
-            "success_this_run": 0,
-            "not_found_this_run": 0,
-            "errors_this_run": 0,
-            "last_error": ""
-          },
-          {
-            "label": "key-4",
-            "fingerprint": "2caed1031b1c",
-            "status": "not_tested",
-            "requests_this_run": 0,
-            "success_this_run": 0,
-            "not_found_this_run": 0,
-            "errors_this_run": 0,
-            "last_error": ""
-          }
-        ],
-        "errors": [],
-        "message": "اطلاعات قبلی هنگام شکست دریافت جدید حفظ می‌شود."
-      },
-      "keys": [
-        {
-          "label": "key-1",
-          "fingerprint": "85c6a9535c01",
-          "status": "not_tested",
-          "requests_this_run": 0,
-          "success_this_run": 0,
-          "not_found_this_run": 0,
-          "errors_this_run": 0,
-          "last_error": ""
-        },
-        {
-          "label": "key-2",
-          "fingerprint": "409c1abd8842",
-          "status": "not_tested",
-          "requests_this_run": 0,
-          "success_this_run": 0,
-          "not_found_this_run": 0,
-          "errors_this_run": 0,
-          "last_error": ""
-        },
-        {
-          "label": "key-3",
-          "fingerprint": "b9708d2c4dbb",
-          "status": "not_tested",
-          "requests_this_run": 0,
-          "success_this_run": 0,
-          "not_found_this_run": 0,
-          "errors_this_run": 0,
-          "last_error": ""
-        },
-        {
-          "label": "key-4",
-          "fingerprint": "2caed1031b1c",
-          "status": "not_tested",
-          "requests_this_run": 0,
-          "success_this_run": 0,
-          "not_found_this_run": 0,
-          "errors_this_run": 0,
-          "last_error": ""
-        }
-      ],
-      "errors": []
-    },
-    {
-      "schema_version": 2,
-      "status": "degraded",
-      "message": "IMDb Showcase pipeline diagnostics",
-      "generated_at": "2026-10-11T17:41:02.445869+00:00",
-      "run": {
-        "started_at": "2026-10-11T17:40:12.914865+00:00",
-        "finished_at": "2026-10-11T17:41:02.445869+00:00",
-        "duration_seconds": 49.6,
         "mode": "update",
         "keys_detected": 4,
         "counts": {
