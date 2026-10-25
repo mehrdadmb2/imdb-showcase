@@ -1,0 +1,67 @@
+name: Trigger Cinema Vault Telegram Worker
+
+on:
+  schedule:
+    # Replace Cloudflare Cron Triggers: invoke the protected worker endpoint every 30 minutes.
+    - cron: "7,37 * * * *"
+  workflow_dispatch:
+
+permissions: {}
+
+concurrency:
+  group: cinema-vault-worker-scheduler
+  cancel-in-progress: false
+
+jobs:
+  run-scheduler:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Validate configuration
+        env:
+          WORKER_PING_SECRET: ${{ secrets.WORKER_PING_SECRET }}
+        run: |
+          if [ -z "$WORKER_PING_SECRET" ]; then
+            echo "::error::Repository secret WORKER_PING_SECRET is missing. Add it under Settings > Secrets and variables > Actions."
+            exit 1
+          fi
+
+      - name: Check worker health
+        env:
+          WORKER_URL: https://imdb-showcase-telegram-bot.game-developer-mb.workers.dev
+        run: |
+          set -euo pipefail
+          curl --fail --silent --show-error \
+            --connect-timeout 15 --max-time 30 \
+            "$WORKER_URL/health"
+          echo
+
+      - name: Run the protected bot scheduler
+        env:
+          WORKER_URL: https://imdb-showcase-telegram-bot.game-developer-mb.workers.dev
+          WORKER_PING_SECRET: ${{ secrets.WORKER_PING_SECRET }}
+        run: |
+          set -euo pipefail
+          body_file="$(mktemp)"
+          code="$(curl --silent --show-error \
+            --connect-timeout 15 --max-time 240 \
+            --output "$body_file" --write-out "%{http_code}" \
+            --request POST \
+            --header "X-Worker-Ping-Secret: $WORKER_PING_SECRET" \
+            --header "Accept: application/json" \
+            "$WORKER_URL/internal/scheduled")" || {
+              cat "$body_file" 2>/dev/null || true
+              echo "::error::Request to the Worker failed at the network layer."
+              exit 1
+            }
+          cat "$body_file"
+          echo
+          if [ "$code" != "200" ]; then
+            echo "::error::Worker scheduler returned HTTP $code"
+            exit 1
+          fi
+          grep -q '"ok"[[:space:]]*:[[:space:]]*true' "$body_file" || {
+            echo "::error::Worker response did not confirm success."
+            exit 1
+          }
+          echo "Scheduler completed successfully."
