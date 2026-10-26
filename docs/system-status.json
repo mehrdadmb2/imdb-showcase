@@ -2,37 +2,37 @@
   "schema_version": 2,
   "status": "degraded",
   "message": "IMDb Showcase pipeline diagnostics",
-  "generated_at": "2026-10-25T20:06:57.042326+00:00",
+  "generated_at": "2026-10-26T04:39:23.166094+00:00",
   "run": {
-    "started_at": "2026-10-25T20:06:18.713997+00:00",
-    "finished_at": "2026-10-25T20:06:57.042326+00:00",
-    "duration_seconds": 38.4,
+    "started_at": "2026-10-26T04:38:37.967637+00:00",
+    "finished_at": "2026-10-26T04:39:23.166094+00:00",
+    "duration_seconds": 45.45,
     "mode": "update",
     "keys_detected": 4,
     "counts": {
       "source_records": 1811,
-      "cache_reused": 1803,
-      "api_attempts": 8,
-      "omdb_success": 8,
+      "cache_reused": 1811,
+      "api_attempts": 0,
+      "omdb_success": 0,
       "omdb_not_found": 0,
       "omdb_errors": 0,
       "stale_preserved": 0,
       "partial_records": 0,
-      "posters_reused": 1697,
-      "posters_downloaded": 8,
+      "posters_reused": 1705,
+      "posters_downloaded": 0,
       "posters_missing": 201,
-      "poster_attempts": 103,
+      "poster_attempts": 95,
       "records_due_monthly_refresh": 0,
-      "records_missing_enrichment": 8,
+      "records_missing_enrichment": 0,
       "records_in_retry_cooldown": 0
     },
     "keys": [
       {
         "label": "key-1",
         "fingerprint": "85c6a9535c01",
-        "status": "active",
-        "requests_this_run": 2,
-        "success_this_run": 2,
+        "status": "not_tested",
+        "requests_this_run": 0,
+        "success_this_run": 0,
         "not_found_this_run": 0,
         "errors_this_run": 0,
         "last_error": ""
@@ -40,9 +40,9 @@
       {
         "label": "key-2",
         "fingerprint": "409c1abd8842",
-        "status": "active",
-        "requests_this_run": 2,
-        "success_this_run": 2,
+        "status": "not_tested",
+        "requests_this_run": 0,
+        "success_this_run": 0,
         "not_found_this_run": 0,
         "errors_this_run": 0,
         "last_error": ""
@@ -50,9 +50,9 @@
       {
         "label": "key-3",
         "fingerprint": "b9708d2c4dbb",
-        "status": "active",
-        "requests_this_run": 2,
-        "success_this_run": 2,
+        "status": "not_tested",
+        "requests_this_run": 0,
+        "success_this_run": 0,
         "not_found_this_run": 0,
         "errors_this_run": 0,
         "last_error": ""
@@ -60,9 +60,9 @@
       {
         "label": "key-4",
         "fingerprint": "2caed1031b1c",
-        "status": "active",
-        "requests_this_run": 2,
-        "success_this_run": 2,
+        "status": "not_tested",
+        "requests_this_run": 0,
+        "success_this_run": 0,
         "not_found_this_run": 0,
         "errors_this_run": 0,
         "last_error": ""
@@ -75,9 +75,9 @@
     {
       "label": "key-1",
       "fingerprint": "85c6a9535c01",
-      "status": "active",
-      "requests_this_run": 2,
-      "success_this_run": 2,
+      "status": "not_tested",
+      "requests_this_run": 0,
+      "success_this_run": 0,
       "not_found_this_run": 0,
       "errors_this_run": 0,
       "last_error": ""
@@ -85,9 +85,9 @@
     {
       "label": "key-2",
       "fingerprint": "409c1abd8842",
-      "status": "active",
-      "requests_this_run": 2,
-      "success_this_run": 2,
+      "status": "not_tested",
+      "requests_this_run": 0,
+      "success_this_run": 0,
       "not_found_this_run": 0,
       "errors_this_run": 0,
       "last_error": ""
@@ -95,9 +95,9 @@
     {
       "label": "key-3",
       "fingerprint": "b9708d2c4dbb",
-      "status": "active",
-      "requests_this_run": 2,
-      "success_this_run": 2,
+      "status": "not_tested",
+      "requests_this_run": 0,
+      "success_this_run": 0,
       "not_found_this_run": 0,
       "errors_this_run": 0,
       "last_error": ""
@@ -105,9 +105,9 @@
     {
       "label": "key-4",
       "fingerprint": "2caed1031b1c",
-      "status": "active",
-      "requests_this_run": 2,
-      "success_this_run": 2,
+      "status": "not_tested",
+      "requests_this_run": 0,
+      "success_this_run": 0,
       "not_found_this_run": 0,
       "errors_this_run": 0,
       "last_error": ""
