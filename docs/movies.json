@@ -1,17 +1,17 @@
 {
   "schema_version": 6,
-  "last_manual_update": "2026-10-28T05:31:35.195564+00:00",
+  "last_manual_update": "2026-10-28T18:19:59.312547+00:00",
   "data_meta": {
     "source_records": 1811,
-    "cache_reused": 1802,
-    "api_attempts": 9,
-    "omdb_success": 9,
+    "cache_reused": 1811,
+    "api_attempts": 0,
+    "omdb_success": 0,
     "omdb_not_found": 0,
     "omdb_errors": 0,
     "stale_preserved": 0,
     "partial_records": 0,
     "records_missing_enrichment": 0,
-    "records_due_monthly_refresh": 9,
+    "records_due_monthly_refresh": 0,
     "records_deferred_retry": 0,
     "poster_reused": 1678,
     "poster_attempts": 95,
@@ -34,9 +34,9 @@
       {
         "label": "key-1",
         "fingerprint": "85c6a9535c01",
-        "status": "active",
-        "requests_this_run": 3,
-        "success_this_run": 3,
+        "status": "not_tested",
+        "requests_this_run": 0,
+        "success_this_run": 0,
         "not_found_this_run": 0,
         "errors_this_run": 0,
         "last_error": ""
@@ -44,9 +44,9 @@
       {
         "label": "key-2",
         "fingerprint": "409c1abd8842",
-        "status": "active",
-        "requests_this_run": 2,
-        "success_this_run": 2,
+        "status": "not_tested",
+        "requests_this_run": 0,
+        "success_this_run": 0,
         "not_found_this_run": 0,
         "errors_this_run": 0,
         "last_error": ""
@@ -54,9 +54,9 @@
       {
         "label": "key-3",
         "fingerprint": "b9708d2c4dbb",
-        "status": "active",
-        "requests_this_run": 2,
-        "success_this_run": 2,
+        "status": "not_tested",
+        "requests_this_run": 0,
+        "success_this_run": 0,
         "not_found_this_run": 0,
         "errors_this_run": 0,
         "last_error": ""
@@ -64,9 +64,9 @@
       {
         "label": "key-4",
         "fingerprint": "2caed1031b1c",
-        "status": "active",
-        "requests_this_run": 2,
-        "success_this_run": 2,
+        "status": "not_tested",
+        "requests_this_run": 0,
+        "success_this_run": 0,
         "not_found_this_run": 0,
         "errors_this_run": 0,
         "last_error": ""
@@ -3764,7 +3764,7 @@
         "Response": "True"
       },
       "omdb_found": true,
-      "data_status": "fresh",
+      "data_status": "cached",
       "data_fetched_at": "2026-10-28T05:30:52.621272+00:00",
       "cache_updated_at": "2026-10-28T05:30:52.621272+00:00",
       "last_api_attempt_at": "2026-10-28T05:30:52.621272+00:00",
@@ -3865,7 +3865,7 @@
         "Response": "True"
       },
       "omdb_found": true,
-      "data_status": "fresh",
+      "data_status": "cached",
       "data_fetched_at": "2026-10-28T05:30:52.696338+00:00",
       "cache_updated_at": "2026-10-28T05:30:52.696338+00:00",
       "last_api_attempt_at": "2026-10-28T05:30:52.696338+00:00",
@@ -3966,7 +3966,7 @@
         "Response": "True"
       },
       "omdb_found": true,
-      "data_status": "fresh",
+      "data_status": "cached",
       "data_fetched_at": "2026-10-28T05:30:52.772751+00:00",
       "cache_updated_at": "2026-10-28T05:30:52.772751+00:00",
       "last_api_attempt_at": "2026-10-28T05:30:52.772751+00:00",
@@ -4067,7 +4067,7 @@
         "Response": "True"
       },
       "omdb_found": true,
-      "data_status": "fresh",
+      "data_status": "cached",
       "data_fetched_at": "2026-10-28T05:30:52.849793+00:00",
       "cache_updated_at": "2026-10-28T05:30:52.849793+00:00",
       "last_api_attempt_at": "2026-10-28T05:30:52.849793+00:00",
@@ -4168,7 +4168,7 @@
         "Response": "True"
       },
       "omdb_found": true,
-      "data_status": "fresh",
+      "data_status": "cached",
       "data_fetched_at": "2026-10-28T05:30:52.922248+00:00",
       "cache_updated_at": "2026-10-28T05:30:52.922248+00:00",
       "last_api_attempt_at": "2026-10-28T05:30:52.922248+00:00",
@@ -4269,7 +4269,7 @@
         "Response": "True"
       },
       "omdb_found": true,
-      "data_status": "fresh",
+      "data_status": "cached",
       "data_fetched_at": "2026-10-28T05:30:53.013988+00:00",
       "cache_updated_at": "2026-10-28T05:30:53.013988+00:00",
       "last_api_attempt_at": "2026-10-28T05:30:53.013988+00:00",
@@ -4389,7 +4389,7 @@
         "Response": "True"
       },
       "omdb_found": true,
-      "data_status": "fresh",
+      "data_status": "cached",
       "data_fetched_at": "2026-10-28T05:30:53.101284+00:00",
       "cache_updated_at": "2026-10-28T05:30:53.101284+00:00",
       "last_api_attempt_at": "2026-10-28T05:30:53.101284+00:00",
@@ -4507,7 +4507,7 @@
         "Response": "True"
       },
       "omdb_found": true,
-      "data_status": "fresh",
+      "data_status": "cached",
       "data_fetched_at": "2026-10-28T05:30:53.175692+00:00",
       "cache_updated_at": "2026-10-28T05:30:53.175692+00:00",
       "last_api_attempt_at": "2026-10-28T05:30:53.175692+00:00",
@@ -4625,7 +4625,7 @@
         "Response": "True"
       },
       "omdb_found": true,
-      "data_status": "fresh",
+      "data_status": "cached",
       "data_fetched_at": "2026-10-28T05:30:53.246877+00:00",
       "cache_updated_at": "2026-10-28T05:30:53.246877+00:00",
       "last_api_attempt_at": "2026-10-28T05:30:53.246877+00:00",

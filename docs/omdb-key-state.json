@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-10-28T05:31:35.196347+00:00",
+  "updated_at": "2026-10-28T18:19:59.312847+00:00",
   "keys": {
     "85c6a9535c01": {
       "label": "key-1",
@@ -9,13 +9,13 @@
       "total_success": 455,
       "total_not_found": 0,
       "total_errors": 5,
-      "last_status": "active",
+      "last_status": "not_tested",
       "last_error": "Error getting data.",
       "daily_date": "2026-10-28",
       "daily_requests": 3,
       "daily_success": 3,
       "daily_errors": 0,
-      "last_seen_at": "2026-10-28T05:31:35.196333+00:00"
+      "last_seen_at": "2026-10-28T18:19:59.312831+00:00"
     },
     "409c1abd8842": {
       "label": "key-2",
@@ -24,13 +24,13 @@
       "total_success": 450,
       "total_not_found": 0,
       "total_errors": 1,
-      "last_status": "active",
+      "last_status": "not_tested",
       "last_error": "Incorrect IMDb ID.",
       "daily_date": "2026-10-28",
       "daily_requests": 2,
       "daily_success": 2,
       "daily_errors": 0,
-      "last_seen_at": "2026-10-28T05:31:35.196339+00:00"
+      "last_seen_at": "2026-10-28T18:19:59.312838+00:00"
     },
     "b9708d2c4dbb": {
       "label": "key-3",
@@ -39,13 +39,13 @@
       "total_success": 449,
       "total_not_found": 0,
       "total_errors": 0,
-      "last_status": "active",
+      "last_status": "not_tested",
       "last_error": "",
       "daily_date": "2026-10-28",
       "daily_requests": 2,
       "daily_success": 2,
       "daily_errors": 0,
-      "last_seen_at": "2026-10-28T05:31:35.196342+00:00"
+      "last_seen_at": "2026-10-28T18:19:59.312842+00:00"
     },
     "2caed1031b1c": {
       "label": "key-4",
@@ -54,13 +54,13 @@
       "total_success": 448,
       "total_not_found": 0,
       "total_errors": 0,
-      "last_status": "active",
+      "last_status": "not_tested",
       "last_error": "",
       "daily_date": "2026-10-28",
       "daily_requests": 2,
       "daily_success": 2,
       "daily_errors": 0,
-      "last_seen_at": "2026-10-28T05:31:35.196345+00:00"
+      "last_seen_at": "2026-10-28T18:19:59.312845+00:00"
     }
   }
 }
