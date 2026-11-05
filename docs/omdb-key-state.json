@@ -1,66 +1,66 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-11-05T06:36:49.020935+00:00",
+  "updated_at": "2026-11-05T15:09:35.550436+00:00",
   "keys": {
     "85c6a9535c01": {
       "label": "key-1",
       "fingerprint": "85c6a9535c01",
-      "total_requests": 466,
-      "total_success": 461,
+      "total_requests": 468,
+      "total_success": 463,
       "total_not_found": 0,
       "total_errors": 5,
-      "last_status": "not_tested",
+      "last_status": "active",
       "last_error": "Error getting data.",
       "daily_date": "2026-11-05",
-      "daily_requests": 0,
-      "daily_success": 0,
+      "daily_requests": 2,
+      "daily_success": 2,
       "daily_errors": 0,
-      "last_seen_at": "2026-11-05T06:36:49.020914+00:00"
+      "last_seen_at": "2026-11-05T15:09:35.550420+00:00"
     },
     "409c1abd8842": {
       "label": "key-2",
       "fingerprint": "409c1abd8842",
-      "total_requests": 455,
-      "total_success": 454,
+      "total_requests": 456,
+      "total_success": 455,
       "total_not_found": 0,
       "total_errors": 1,
-      "last_status": "not_tested",
+      "last_status": "active",
       "last_error": "Incorrect IMDb ID.",
       "daily_date": "2026-11-05",
-      "daily_requests": 0,
-      "daily_success": 0,
+      "daily_requests": 1,
+      "daily_success": 1,
       "daily_errors": 0,
-      "last_seen_at": "2026-11-05T06:36:49.020924+00:00"
+      "last_seen_at": "2026-11-05T15:09:35.550427+00:00"
     },
     "b9708d2c4dbb": {
       "label": "key-3",
       "fingerprint": "b9708d2c4dbb",
-      "total_requests": 453,
-      "total_success": 453,
+      "total_requests": 454,
+      "total_success": 454,
       "total_not_found": 0,
       "total_errors": 0,
-      "last_status": "not_tested",
+      "last_status": "active",
       "last_error": "",
       "daily_date": "2026-11-05",
-      "daily_requests": 0,
-      "daily_success": 0,
+      "daily_requests": 1,
+      "daily_success": 1,
       "daily_errors": 0,
-      "last_seen_at": "2026-11-05T06:36:49.020929+00:00"
+      "last_seen_at": "2026-11-05T15:09:35.550431+00:00"
     },
     "2caed1031b1c": {
       "label": "key-4",
       "fingerprint": "2caed1031b1c",
-      "total_requests": 452,
-      "total_success": 452,
+      "total_requests": 453,
+      "total_success": 453,
       "total_not_found": 0,
       "total_errors": 0,
-      "last_status": "not_tested",
+      "last_status": "active",
       "last_error": "",
       "daily_date": "2026-11-05",
-      "daily_requests": 0,
-      "daily_success": 0,
+      "daily_requests": 1,
+      "daily_success": 1,
       "daily_errors": 0,
-      "last_seen_at": "2026-11-05T06:36:49.020933+00:00"
+      "last_seen_at": "2026-11-05T15:09:35.550434+00:00"
     }
   }
 }
