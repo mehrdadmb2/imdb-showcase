@@ -1,21 +1,21 @@
 {
   "schema_version": 1,
-  "updated_at": "2026-11-14T17:57:56.591080+00:00",
+  "updated_at": "2026-11-14T19:35:05.844360+00:00",
   "keys": {
     "85c6a9535c01": {
       "label": "key-1",
       "fingerprint": "85c6a9535c01",
-      "total_requests": 472,
-      "total_success": 467,
+      "total_requests": 473,
+      "total_success": 468,
       "total_not_found": 0,
       "total_errors": 5,
-      "last_status": "not_tested",
+      "last_status": "active",
       "last_error": "Error getting data.",
       "daily_date": "2026-11-14",
-      "daily_requests": 0,
-      "daily_success": 0,
+      "daily_requests": 1,
+      "daily_success": 1,
       "daily_errors": 0,
-      "last_seen_at": "2026-11-14T17:57:56.591055+00:00"
+      "last_seen_at": "2026-11-14T19:35:05.844344+00:00"
     },
     "409c1abd8842": {
       "label": "key-2",
@@ -30,7 +30,7 @@
       "daily_requests": 0,
       "daily_success": 0,
       "daily_errors": 0,
-      "last_seen_at": "2026-11-14T17:57:56.591066+00:00"
+      "last_seen_at": "2026-11-14T19:35:05.844352+00:00"
     },
     "b9708d2c4dbb": {
       "label": "key-3",
@@ -45,7 +45,7 @@
       "daily_requests": 0,
       "daily_success": 0,
       "daily_errors": 0,
-      "last_seen_at": "2026-11-14T17:57:56.591072+00:00"
+      "last_seen_at": "2026-11-14T19:35:05.844355+00:00"
     },
     "2caed1031b1c": {
       "label": "key-4",
@@ -60,7 +60,7 @@
       "daily_requests": 0,
       "daily_success": 0,
       "daily_errors": 0,
-      "last_seen_at": "2026-11-14T17:57:56.591077+00:00"
+      "last_seen_at": "2026-11-14T19:35:05.844358+00:00"
     }
   }
 }
