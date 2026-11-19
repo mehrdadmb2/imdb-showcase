@@ -407,3 +407,14 @@ footer p:last-child { font-size: 11px; margin-top: 4px; }
 
 @media(max-width:768px){.header-actions{gap:6px}.pagination-bar,.page-insights-section{margin-left:12px;margin-right:12px}.insights-metrics{grid-template-columns:repeat(2,1fr)}.pagination-info{width:100%}.pagination-controls{width:100%}}
 @media(max-width:480px){.insights-metrics{grid-template-columns:1fr 1fr}.pagination-controls{gap:3px}.page-btn,.page-number{min-width:32px;height:32px}.chart-box{height:220px}.modal-details{grid-template-columns:1fr}}
+
+
+/* Vault Rank: statistically weighted personal + IMDb ranking */
+.movie-ranking-meta{display:flex;justify-content:space-between;align-items:center;gap:6px;margin-top:7px;padding-top:6px;border-top:1px solid rgba(255,255,255,.055);font-size:9px;color:var(--text-muted)}
+.movie-ranking-meta .vault-score{font-weight:900;color:#7effcb;letter-spacing:.2px}
+.ranking-explainer{color:var(--text-muted);font-size:11px;line-height:1.9;margin:-6px 0 12px}
+.top-movie-sub{font-size:9px;color:var(--text-muted);margin-top:4px;line-height:1.6}
+.top-movie-rating{min-width:78px;text-align:center}
+.top-movie-rating strong{display:block;color:#7effcb;font-size:14px;white-space:nowrap}
+.top-movie-rating small{display:block;color:var(--text-muted);font-size:8px;margin-top:2px}
+@media(max-width:560px){.movie-ranking-meta{font-size:8px}.top-movie-item{gap:8px}.top-movie-rating{min-width:60px}}

@@ -51,6 +51,9 @@
       <article class="metric glass"><span>🎞️ قسمت</span><strong id="mEpisodes">—</strong><small>Episodes</small></article>
       <article class="metric glass"><span>⏱️ زمان</span><strong id="mRuntime">—</strong><small>ساعت و دقیقه</small></article>
       <article class="metric glass"><span>⭐ میانگین من</span><strong id="mAvg">—</strong><small>Your rating</small></article>
+      <article class="metric glass"><span>🌐 میانگین IMDb</span><strong id="mAvgIMDb">—</strong><small>IMDb rating</small></article>
+      <article class="metric glass"><span>🗳️ مجموع رأی‌ها</span><strong id="mVotes">—</strong><small>IMDb votes</small></article>
+      <article class="metric glass"><span>🧠 Vault Rank</span><strong id="mVault">—</strong><small>Weighted average</small></article>
       <article class="metric glass"><span>🖼️ Poster Cache</span><strong id="mPosterCoverage">—</strong><small>Local coverage</small></article>
       <article class="metric glass"><span>🧠 OMDb Cache</span><strong id="mOmdbCoverage">—</strong><small>Enriched records</small></article>
     </section>
@@ -66,7 +69,7 @@
         <select id="type"><option value="all">همه نوع‌ها</option><option value="Movie">🎬 فیلم</option><option value="TV Series">📺 سریال</option><option value="TV Episode">🎞️ قسمت</option><option value="Short">🎞️ کوتاه</option></select>
         <select id="genre"><option value="all">همه ژانرها</option></select>
         <select id="year"><option value="all">همه سال‌ها</option></select>
-        <select id="sort"><option value="date_desc">جدیدترین امتیاز</option><option value="rating_desc">بالاترین امتیاز من</option><option value="imdb_desc">بالاترین IMDb</option><option value="year_desc">جدیدترین سال</option><option value="title_asc">الفبا</option></select>
+        <select id="sort"><option value="vault_desc">🧠 بهترین Vault Rank</option><option value="date_desc">جدیدترین امتیاز</option><option value="rating_desc">بالاترین امتیاز من</option><option value="imdb_desc">بالاترین IMDb</option><option value="votes_desc">بیشترین رأی IMDb</option><option value="year_desc">جدیدترین سال</option><option value="title_asc">الفبا</option></select>
         <button id="reset" class="btn">↺ بازنشانی</button>
       </div>
     </section>
@@ -91,6 +94,7 @@
         <article class="chart glass"><h3>🎭 ژانرها</h3><div><canvas id="genreChart"></canvas></div></article>
         <article class="chart glass"><h3>⭐ توزیع امتیاز من</h3><div><canvas id="ratingChart"></canvas></div></article>
         <article class="chart glass wide"><h3>📆 فعالیت بر اساس سال</h3><div><canvas id="yearChart"></canvas></div></article>
+        <article class="chart glass wide"><h3>🧠 ده عنوان برتر بر اساس Vault Rank</h3><div><canvas id="vaultChart"></canvas></div></article>
       </div>
     </section>
 
@@ -124,7 +128,7 @@
         <div class="modal-copy">
           <div id="modalType" class="kicker">TITLE</div><h2 id="modalTitle">—</h2><div id="modalOriginal" class="original">—</div>
           <div id="modalTags" class="tags"></div>
-          <div class="score-row"><div><small>امتیاز من</small><b id="modalUser">—</b></div><div><small>IMDb</small><b id="modalIMDb">—</b></div><div><small>Metascore</small><b id="modalMeta">—</b></div></div>
+          <div class="score-row"><div><small>امتیاز من</small><b id="modalUser">—</b></div><div><small>IMDb</small><b id="modalIMDb">—</b></div><div><small>Vault Rank</small><b id="modalVault">—</b></div><div><small>Metascore</small><b id="modalMeta">—</b></div></div>
           <p id="modalPlot" class="plot">—</p>
           <div class="modal-buttons"><a id="modalLink" href="#" target="_blank" rel="noopener noreferrer" class="btn mint">IMDb ↗</a><button id="copyId" class="btn">کپی IMDb ID</button></div>
         </div>
@@ -137,6 +141,7 @@
 
   <div class="toast" id="toast"></div>
   <script src="../page-insights.js" defer></script>
+  <script src="../rating-engine.js" defer></script>
   <script src="starfield.js" defer></script>
   <script src="script.js" defer></script>
 </body>

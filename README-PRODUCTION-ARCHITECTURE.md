@@ -143,3 +143,10 @@ The complete CSV row remains under `raw_csv`.
 ## Recovery rule
 
 A malformed or partial update must never intentionally replace a valid, non-empty repository dataset with an empty dataset.
+
+
+## Cinema Vault v2.0 — ranking and notification pipeline
+
+Classic and Advanced load `docs/rating-engine.js`; Telegram Worker carries the equivalent function inline so it can be deployed as one Wrangler entry point. Vault Rank is 65% personal rating + 35% Bayesian IMDb rating (6.5 prior, 1,000 prior votes) + up to 0.20 rating-recency bonus. Vote count tunes the confidence of the IMDb score and is not used as an unbounded popularity score.
+
+The CSV import compares the just-uploaded export with the current committed `src/ratings.csv` before writing. Once the bot commits and dispatches the resilient pipeline, `ping-telegram-worker.yml` listens for the successful `workflow_run` completion and calls the protected Worker scheduler. The existing twice-hourly schedule is retained as a recovery mechanism. New-title notification timestamps come from the D1 notification queue creation time and are formatted for `Asia/Tehran`.

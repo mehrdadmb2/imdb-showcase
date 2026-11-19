@@ -1,68 +1,698 @@
-"use strict";
+(() => {
+  'use strict';
 
-const DATA_URL = "../movies.json";
-const PROFILE_URL = "https://www.imdb.com/user/p.if6bmsibrbg5dapfqbjrld4lhy?ref_=ext_shr_lnk";
-const $ = id => document.getElementById(id);
-let allMovies=[];
-let filteredMovies=[];
-let page=1;
-let pageSize=24;
-let sortMode="date_rated-desc";
-let viewMode="cards";
-let search="";
-let filters={type:"all",genre:"all",year:"all",minRating:0,cache:"all"};
-let charts={};
+  const DATA_URL = '../movies.json';
+  const CACHE_KEY = 'imdb-advanced-data-v11';
+  const PAGE_SIZE_KEY = 'imdb-advanced-page-size-v11';
+  const charts = {};
 
-function s(v,f="N/A"){if(v===undefined||v===null)return f;const x=String(v).trim();return !x||x.toUpperCase()==="N/A"?f:x}
-function n(v){const x=Number.parseFloat(String(v??"").replace(/,/g,""));return Number.isFinite(x)?x:0}
-function esc(v){return String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
-function year(m){const x=String(m.year??"").match(/\b(?:18|19|20)\d{2}\b/);return x?x[0]:""}
-function dateVal(v){const d=Date.parse(v||"");return Number.isFinite(d)?d:0}
-function fmtDate(v){if(!v)return"N/A";const d=new Date(v);return Number.isNaN(d.getTime())?String(v):d.toLocaleDateString("en-GB")}
-function minutes(v){const x=String(v??"").match(/\d+/);return x?Number(x[0]):0}
-function runtime(v){const m=Math.max(0,minutes(v)),h=Math.floor(m/60),mm=m%60;return h?`${h}h ${String(mm).padStart(2,"0")}m`:`${mm}m`}
-function fmtNum(v){return Number(v||0).toLocaleString("en-US")}
-function cacheState(m){return m.cache_status||"legacy"}
-function localPoster(m){return m.poster_local?`../${m.poster_local}`:(/^https?:\/\//i.test(m.poster||"")?m.poster:"")}
-function fallbackPoster(m){const title=s(m.title,"Unknown").slice(0,34),type=m.title_type==="TV Series"?"SERIES":m.title_type==="TV Episode"?"EPISODE":"MOVIE",yr=year(m)||"—";const seed=[...(m.imdb_id||m.title||"x")].reduce((a,c)=>a+c.charCodeAt(0),0);const colors=["#f04467","#7567f5","#22d6d1","#ffb84d","#5a54d6","#36c993"];const a=colors[seed%colors.length],b=colors[(seed*3)%colors.length];const svg=`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 900"><defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop stop-color="${a}"/><stop offset="1" stop-color="${b}"/></linearGradient></defs><rect width="600" height="900" fill="#070911"/><circle cx="110" cy="160" r="190" fill="${a}" opacity=".35"/><circle cx="510" cy="730" r="230" fill="${b}" opacity=".25"/><rect x="30" y="30" width="540" height="840" rx="38" fill="url(#g)" opacity=".14" stroke="white" stroke-opacity=".16"/><text x="300" y="110" fill="white" font-family="Arial" font-size="25" text-anchor="middle" letter-spacing="5">IMDB SHOWCASE</text><text x="300" y="170" fill="white" opacity=".7" font-family="Arial" font-size="18" text-anchor="middle" letter-spacing="3">${esc(type)}</text><text x="300" y="435" fill="white" font-family="Arial" font-size="40" text-anchor="middle" font-weight="700">${esc(title)}</text><text x="300" y="500" fill="white" opacity=".7" font-family="Arial" font-size="25" text-anchor="middle">${esc(yr)}</text><text x="300" y="805" fill="white" opacity=".55" font-family="Arial" font-size="17" text-anchor="middle">LOCAL FALLBACK POSTER</text></svg>`;return`data:image/svg+xml;charset=UTF-8,${encodeURIComponent(svg)}`}
-function imgSrc(m){return localPoster(m)||fallbackPoster(m)}
+  const state = {
+    movies: [],
+    filtered: [],
+    currentPage: 1,
+    pageSize: loadPageSize(),
+    query: '',
+    type: 'all',
+    genre: 'all',
+    year: 'all',
+    sort: 'vault_desc',
+    diagnostics: {
+      system: null,
+      keyState: null,
+      runLog: null
+    },
+    modalId: ''
+  };
 
-async function load(){
-  try{const res=await fetch(`${DATA_URL}?v=${Date.now()}`,{cache:"no-store"});if(!res.ok)throw new Error(`HTTP ${res.status}`);const data=await res.json();allMovies=Array.isArray(data)?data:(data.movies||[]);window.__dataset=data;setHealth("LIVE",100);}
-  catch(err){const cached=loadBrowserCache();if(cached?.length){allMovies=cached;setHealth("BROWSER CACHE",65)}else{allMovies=[];setHealth("ERROR",0)}}
-  normalize();saveBrowserCache();populateFilters();apply();updateHero();renderLatest();renderSeries();
-}
-function normalize(){allMovies=allMovies.map((m,i)=>({...m,imdb_id:m.imdb_id||`local-${i}`,title:s(m.title,"Untitled"),title_type:s(m.title_type,"Other"),user_rating:n(m.user_rating),date_rated:s(m.date_rated,""),imdb_rating:s(m.imdb_rating),genres:s(m.genres),runtime:s(m.runtime),poster_local:s(m.poster_local,""),poster:s(m.poster,"")}))}
-function loadBrowserCache(){try{const x=JSON.parse(localStorage.getItem("imdb-showcase-advanced-v4")||"null");return x?.movies||null}catch{return null}}
-function saveBrowserCache(){try{localStorage.setItem("imdb-showcase-advanced-v4",JSON.stringify({savedAt:new Date().toISOString(),movies:allMovies}))}catch{}}
-function setHealth(label,pct){$("healthStatus").textContent=label;$("healthBar").style.width=`${pct}%`}
-function populateFilters(){const g=new Set(),y=new Set();allMovies.forEach(m=>{String(m.genres||"").split(",").map(x=>x.trim()).filter(Boolean).forEach(x=>g.add(x));const yy=year(m);if(yy)y.add(yy)});$("genreFilter").innerHTML=`<option value="all">All</option>`+[...g].sort().map(x=>`<option>${esc(x)}</option>`).join("");$("yearFilter").innerHTML=`<option value="all">All</option>`+[...y].sort((a,b)=>Number(b)-Number(a)).map(x=>`<option>${x}</option>`).join("")}
-function apply(){const q=search.toLowerCase().trim();filteredMovies=allMovies.filter(m=>{if(q&&!([m.title,m.original_title,m.imdb_id,m.genres,m.directors,m.actors,m.writer,m.series_title].join(" ").toLowerCase().includes(q)))return false;if(filters.type!=="all"&&m.title_type!==filters.type)return false;if(filters.genre!=="all"&&!String(m.genres||"").split(",").map(x=>x.trim()).includes(filters.genre))return false;if(filters.year!=="all"&&year(m)!==filters.year)return false;if(n(m.user_rating)<filters.minRating)return false;if(filters.cache!=="all"&&cacheState(m)!==filters.cache)return false;return true});sort();page=1;render();renderPagination();updateMetrics()}
-function sort(){const [field,dir]=sortMode.split("-");filteredMovies.sort((a,b)=>{let x,y;if(field==="title"){x=a.title.toLowerCase();y=b.title.toLowerCase();return dir==="desc"?y.localeCompare(x):x.localeCompare(y)}if(field==="date_rated")return dir==="desc"?dateVal(b.date_rated)-dateVal(a.date_rated):dateVal(a.date_rated)-dateVal(b.date_rated);if(field==="year")return dir==="desc"?Number(year(b)||0)-Number(year(a)||0):Number(year(a)||0)-Number(year(b)||0);x=n(a[field]);y=n(b[field]);return dir==="desc"?y-x:x-y})}
-function card(m){const tags=String(m.genres||"").split(",").map(x=>x.trim()).filter(Boolean).slice(0,3).map(x=>`<span class="tag">${esc(x)}</span>`).join("");return`<article class="movie-card" data-id="${esc(m.imdb_id)}" tabindex="0"><div class="poster-wrap"><img class="movie-poster" src="${esc(imgSrc(m))}" data-fallback="${esc(fallbackPoster(m))}" alt="${esc(m.title)}" loading="lazy" decoding="async" onerror="this.onerror=null;this.src=this.dataset.fallback"><div class="shine"></div><div class="card-badge"><span class="badge">${esc(m.title_type)}</span><span class="badge">${esc(cacheState(m).toUpperCase())}</span></div></div><div class="movie-body"><div class="movie-title">${esc(m.title)}</div><div class="movie-sub">${esc(year(m)||"—")} • ${esc(runtime(m.runtime))}${m.date_rated?` • ${esc(fmtDate(m.date_rated))}`:""}</div><div class="movie-tags">${tags}</div><div class="rating-line"><span class="mine">⭐ ${m.user_rating||"—"}</span><span class="imdb">IMDb ${esc(m.imdb_rating)}</span></div></div></article>`}
-function render(){const start=(page-1)*pageSize;$("moviesGrid").innerHTML=filteredMovies.slice(start,start+pageSize).map(card).join("")||`<div class="glass" style="grid-column:1/-1;padding:40px;text-align:center;color:var(--muted)">No results</div>`;$("resultsCount").textContent=fmtNum(filteredMovies.length)}
-function renderPagination(){const total=Math.max(1,Math.ceil(filteredMovies.length/pageSize));$("pageSummary").textContent=`${fmtNum(filteredMovies.length?((page-1)*pageSize+1):0)}–${fmtNum(Math.min(page*pageSize,filteredMovies.length))} / ${fmtNum(filteredMovies.length)}`;$("firstPage").disabled=page<=1;$("prevPage").disabled=page<=1;$("nextPage").disabled=page>=total;$("lastPage").disabled=page>=total;let s=Math.max(1,page-2),e=Math.min(total,s+4);s=Math.max(1,e-4);const parts=[];for(let i=s;i<=e;i++)parts.push(`<button class="page-number ${i===page?"active":""}" data-page="${i}">${i}</button>`);$("pageNumbers").innerHTML=parts.join("")}
-function changePage(p){const total=Math.max(1,Math.ceil(filteredMovies.length/pageSize));page=Math.min(total,Math.max(1,p));render();renderPagination();document.getElementById("library")?.scrollIntoView({behavior:"smooth",block:"start"})}
-function updateHero(){const total=allMovies.length,movies=allMovies.filter(m=>m.title_type==="Movie"||m.title_type==="Short").length,series=allMovies.filter(m=>m.title_type==="TV Series").length,episodes=allMovies.filter(m=>m.title_type==="TV Episode").length;const mins=allMovies.reduce((a,m)=>a+minutes(m.runtime),0),rated=allMovies.filter(m=>m.user_rating>0);$("totalTitlesHero").innerHTML=`${fmtNum(total)} <small>titles</small>`;$("watchTime").textContent=runtime(mins);$("heroAvg").textContent=rated.length?(rated.reduce((a,m)=>a+m.user_rating,0)/rated.length).toFixed(1):"0.0";$("heroSeries").textContent=fmtNum(series);$("heroEpisodes").textContent=fmtNum(episodes);$("mTitles").textContent=fmtNum(total);$("mMovies").textContent=fmtNum(movies);$("mSeries").textContent=fmtNum(series);$("mEpisodes").textContent=fmtNum(episodes);$("mRuntime").textContent=runtime(mins)}
-function updateMetrics(){const stale=allMovies.filter(m=>cacheState(m)==="stale").length,cached=allMovies.filter(m=>cacheState(m)==="cached").length,fresh=allMovies.filter(m=>cacheState(m)==="fresh").length;$("mStale").textContent=fmtNum(stale);$("mCached").textContent=fmtNum(cached);$("mFresh").textContent=fmtNum(fresh);$("sortLabel").textContent=sortModeLabel(sortMode)}
-function sortModeLabel(x){return({"date_rated-desc":"Recently rated","date_rated-asc":"Oldest rated","user_rating-desc":"My rating ↓","user_rating-asc":"My rating ↑","imdb_rating-desc":"IMDb ↓","title-asc":"Title A–Z","year-desc":"Newest year"}[x]||x)}
-function renderLatest(){const latest=allMovies.filter(m=>m.date_rated).slice().sort((a,b)=>dateVal(b.date_rated)-dateVal(a.date_rated)).slice(0,6);$("latestCount").textContent=fmtNum(latest.length);$("latestGrid").innerHTML=latest.map(m=>`<article class="latest-card" data-id="${esc(m.imdb_id)}"><img class="latest-poster" src="${esc(imgSrc(m))}" data-fallback="${esc(fallbackPoster(m))}" onerror="this.onerror=null;this.src=this.dataset.fallback"><div class="latest-info"><b>${esc(m.title)}</b><small>${esc(fmtDate(m.date_rated))} • ⭐ ${m.user_rating||"—"}</small></div></article>`).join("")}
-function seriesGroups(){const map=new Map();for(const m of allMovies){if(!(m.series_id||m.series_title||m.is_episode||m.title_type==="TV Series"))continue;const key=m.series_id||m.series_title||m.imdb_id;if(!map.has(key))map.set(key,{key,title:m.series_title||m.title,poster:m.poster_local||m.poster||"",episodes:[],series:null});const g=map.get(key);if(m.is_episode||m.title_type==="TV Episode")g.episodes.push(m);if(m.title_type==="TV Series")g.series=m;if(!g.poster&&(m.poster_local||m.poster))g.poster=m.poster_local||m.poster}return[...map.values()]}
-function renderSeries(){const groups=seriesGroups().slice(0,20);$("seriesGrid").innerHTML=groups.map(g=>{const seasons=new Set(g.episodes.map(e=>e.season_number).filter(Boolean)).size;const mins=g.episodes.reduce((a,e)=>a+minutes(e.runtime),0);return`<article class="series-card" data-series="${esc(g.key)}"><img class="series-poster" src="${esc(g.poster?`../${g.poster}`:fallbackPoster({title:g.title,title_type:"TV Series",imdb_id:g.key}))}" alt=""><div><div class="series-title">${esc(g.title)}</div><div class="series-meta">${fmtNum(seasons)} seasons • ${fmtNum(g.episodes.length)} episodes • ${runtime(mins)}</div><div class="series-tags"><span class="tag">Series hub</span><span class="tag">${fmtNum(g.episodes.filter(e=>e.user_rating>0).length)} rated</span></div></div></article>`}).join("")||`<div style="color:var(--muted);padding:10px">No series data.</div>`}
-function openDetail(id){const m=allMovies.find(x=>x.imdb_id===id);if(!m)return;const poster=$("detailPoster");const fallback=fallbackPoster(m);poster.src=imgSrc(m);poster.onerror=()=>{poster.onerror=null;poster.src=fallback};$("posterFallback").style.display="none";$("detailTitle").textContent=m.title;$("detailOriginal").textContent=m.original_title||m.title;$("detailType").textContent=m.title_type;$("detailCache").textContent=cacheState(m).toUpperCase();$("detailMyRating").textContent=m.user_rating||"—";$("detailImdb").textContent=m.imdb_rating;$("detailMeta").textContent=m.metascore||"—";$("detailVotes").textContent=m.num_votes||"—";$("detailPlot").textContent=m.plot||"No plot information available.";$("detailTags").innerHTML=String(m.genres||"").split(",").map(x=>x.trim()).filter(Boolean).map(x=>`<span class="tag">${esc(x)}</span>`).join("");$("detailImdbLink").href=m.url||`https://www.imdb.com/title/${m.imdb_id}/`;
- const fields={"Year":year(m),"Runtime":runtime(m.runtime),"Rated":m.rated,"Released":m.release_date,"Genre":m.genres,"Director":m.directors,"Writer":m.writer,"Actors":m.actors,"Country":m.country,"Language":m.language,"Awards":m.awards,"Box Office":m.box_office,"Production":m.production,"Website":m.website,"Date Rated":fmtDate(m.date_rated),"Cache updated":m.cache_updated_at,"Poster source":m.poster_source,"Poster local":m.poster_local,"Stale reason":m.data_stale_reason};$("detailGrid").innerHTML=Object.entries(fields).map(([k,v])=>`<div class="detail-cell"><span>${esc(k)}</span><b>${esc(s(v))}</b></div>`).join("");
- const groups=seriesGroups();const g=groups.find(x=>x.key===(m.series_id||m.series_title));if((m.is_episode||m.title_type==="TV Series")&&g){$("seriesDetailSection").hidden=false;const mins=g.episodes.reduce((a,e)=>a+minutes(e.runtime),0);$("seriesStats").innerHTML=[["Seasons",new Set(g.episodes.map(e=>e.season_number).filter(Boolean)).size],["Episodes",g.episodes.length],["Runtime",runtime(mins)],["Rated",g.episodes.filter(e=>e.user_rating>0).length]].map(([k,v])=>`<div class="series-stat"><span>${k}</span><b>${fmtNum(v)}</b></div>`).join("");const seasons=new Map();g.episodes.sort((a,b)=>n(a.season_number)-n(b.season_number)||n(a.episode_number)-n(b.episode_number)).forEach(e=>{const sn=e.season_number||0;if(!seasons.has(sn))seasons.set(sn,[]);seasons.get(sn).push(e)});$("seasonList").innerHTML=[...seasons.entries()].map(([sn,eps])=>`<details class="season" ${sn===n(m.season_number)?"open":""}><summary><span>Season ${sn||"?"}</span><span>${fmtNum(eps.length)} episodes</span></summary><div class="episode-list">${eps.map(e=>`<div class="episode" data-id="${esc(e.imdb_id)}"><small>S${String(e.season_number||0).padStart(2,"0")} E${String(e.episode_number||0).padStart(2,"0")}</small><b>${esc(e.episode_title||e.title)}</b><em>⭐ ${e.user_rating||"—"} • IMDb ${s(e.imdb_rating)}</em></div>`).join("")}</div></details>`).join("")||`<div style="color:var(--muted)">No episode records.</div>`}else{$("seriesDetailSection").hidden=true}
- const raw={imdb_id:m.imdb_id,cache_status:cacheState(m),raw_csv:m.raw_csv||{},raw_omdb:m.raw_omdb||{}};$("rawData").textContent=JSON.stringify(raw,null,2);$("detailModal").hidden=false;document.body.classList.add("modal-open");window.__detailId=m.imdb_id}
-function closeDetail(){$("detailModal").hidden=true;document.body.classList.remove("modal-open")}
-function showAnalytics(){const section=$("analytics");section.hidden=!section.hidden;if(!section.hidden)drawCharts()}
-function drawCharts(){if(typeof Chart==="undefined")return;const genres={},ratings={},years={};allMovies.forEach(m=>{String(m.genres||"").split(",").map(x=>x.trim()).filter(Boolean).forEach(g=>genres[g]=(genres[g]||0)+1);const r=Math.round(m.user_rating||0);if(r)ratings[r]=(ratings[r]||0)+1;const y=year(m);if(y)years[y]=(years[y]||0)+1});const cfg={responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:"#bec1cf",font:{family:"Inter"}}}},scales:{x:{ticks:{color:"#8d91a4"},grid:{color:"rgba(255,255,255,.04)"}},y:{beginAtZero:true,ticks:{color:"#8d91a4"},grid:{color:"rgba(255,255,255,.04)"}}}};[
- ["genreChart","bar",Object.keys(genres).sort((a,b)=>genres[b]-genres[a]).slice(0,12),Object.keys(genres).sort((a,b)=>genres[b]-genres[a]).slice(0,12).map(k=>genres[k])],
- ["ratingChart","bar",Object.keys(ratings).sort((a,b)=>a-b),Object.keys(ratings).sort((a,b)=>a-b).map(k=>ratings[k])],
- ["yearChart","line",Object.keys(years).sort((a,b)=>a-b).slice(-15),Object.keys(years).sort((a,b)=>a-b).slice(-15).map(k=>years[k])]
-].forEach(([id,type,labels,data])=>{const c=$(id);charts[id]?.destroy?.();charts[id]=new Chart(c,{type,data:{labels,datasets:[{label:"Titles",data,backgroundColor:"rgba(240,68,103,.55)",borderColor:"#f04467",borderWidth:2,tension:.35,borderRadius:5}]},options:cfg})});const cmp=allMovies.filter(m=>m.user_rating&&n(m.imdb_rating)).slice(-18);const c=$("compareChart");charts.compareChart?.destroy?.();charts.compareChart=new Chart(c,{type:"bar",data:{labels:cmp.map(m=>m.title.slice(0,13)),datasets:[{label:"My rating",data:cmp.map(m=>m.user_rating),backgroundColor:"rgba(255,216,92,.65)"},{label:"IMDb",data:cmp.map(m=>n(m.imdb_rating)),backgroundColor:"rgba(117,103,245,.65)"}]},options:{...cfg,scales:{...cfg.scales,y:{...cfg.scales.y,max:10}}}})}
+  const $ = (id) => document.getElementById(id);
 
-function bind(){
- $("moviesGrid").addEventListener("click",e=>{const c=e.target.closest(".movie-card");if(c)openDetail(c.dataset.id)});$("moviesGrid").addEventListener("keydown",e=>{const c=e.target.closest(".movie-card");if(c&&(e.key==="Enter"||e.key===" ")){e.preventDefault();openDetail(c.dataset.id)}});$("latestGrid").addEventListener("click",e=>{const c=e.target.closest("[data-id]");if(c)openDetail(c.dataset.id)});$("seriesGrid").addEventListener("click",e=>{const c=e.target.closest("[data-series]");if(c){const g=seriesGroups().find(x=>x.key===c.dataset.series);openDetail(g?.series?.imdb_id||g?.episodes?.[0]?.imdb_id)}});$("seasonList").addEventListener("click",e=>{const c=e.target.closest("[data-id]");if(c)openDetail(c.dataset.id)});
- $("searchInput").addEventListener("input",e=>{search=e.target.value;apply()});$("filterBtn").addEventListener("click",()=>$("filterPanel").hidden=!$("filterPanel").hidden);$("statsBtn").addEventListener("click",showAnalytics);$("minRating").addEventListener("input",e=>{filters.minRating=n(e.target.value);$("minRatingValue").textContent=filters.minRating.toFixed(1);apply()});["typeFilter","genreFilter","yearFilter","cacheFilter"].forEach(id=>$(id).addEventListener("change",e=>{filters[id.replace("Filter","")]=e.target.value;apply()}));$("resetFilters").addEventListener("click",()=>{filters={type:"all",genre:"all",year:"all",minRating:0,cache:"all"};search="";$("searchInput").value="";$("minRating").value=0;$("minRatingValue").textContent="0.0";$("typeFilter").value="all";$("genreFilter").value="all";$("yearFilter").value="all";$("cacheFilter").value="all";apply()});$("sortBtn").addEventListener("click",()=>{const a=["date_rated-desc","date_rated-asc","user_rating-desc","user_rating-asc","imdb_rating-desc","title-asc","year-desc"];sortMode=a[(a.indexOf(sortMode)+1)%a.length];apply()});$("viewBtn").addEventListener("click",()=>{viewMode=viewMode==="cards"?"dense":"cards";$("viewBtn").textContent=viewMode==="cards"?"Cards":"Dense";$("moviesGrid").style.gridTemplateColumns=viewMode==="dense"?"repeat(8,minmax(0,1fr))":""});$("pageSize").addEventListener("change",e=>{pageSize=n(e.target.value)||24;page=1;render();renderPagination()});$("firstPage").addEventListener("click",()=>changePage(1));$("prevPage").addEventListener("click",()=>changePage(page-1));$("nextPage").addEventListener("click",()=>changePage(page+1));$("lastPage").addEventListener("click",()=>changePage(Math.ceil(filteredMovies.length/pageSize)||1));$("pageNumbers").addEventListener("click",e=>{const b=e.target.closest("[data-page]");if(b)changePage(n(b.dataset.page))});$("collapseSeries").addEventListener("click",()=>{$("seriesGrid").hidden=!$("seriesGrid").hidden});$("detailClose").addEventListener("click",closeDetail);$("detailModal").addEventListener("click",e=>{if(e.target===$("detailModal"))closeDetail()});$("detailCopy").addEventListener("click",async()=>{try{await navigator.clipboard.writeText(window.__detailId||"")}catch{}});document.addEventListener("keydown",e=>{if(e.key==="Escape")closeDetail();if(e.key==="/"&&!/INPUT|TEXTAREA|SELECT/.test(document.activeElement?.tagName||"")){e.preventDefault();$("searchInput").focus()}})
-}
-document.addEventListener("DOMContentLoaded",()=>{bind();load()});
+  const log = (...args) => console.info('[IMDb Advanced]', ...args);
+  const warn = (...args) => console.warn('[IMDb Advanced]', ...args);
+
+  function text(value, fallback = '') {
+    if (value === null || value === undefined) return fallback;
+    const s = String(value).replace(/\u0000/g, '').trim();
+    return s && s.toUpperCase() !== 'N/A' ? s : fallback;
+  }
+
+  function num(value) {
+    const n = Number.parseFloat(String(value ?? '').replace(/,/g, '').trim());
+    return Number.isFinite(n) ? n : 0;
+  }
+
+  function escapeHtml(value) {
+    return String(value ?? '').replace(/[&<>"']/g, c => ({
+      '&': '&amp;',
+      '<': '&lt;',
+      '>': '&gt;',
+      '"': '&quot;',
+      "'": '&#039;'
+    })[c]);
+  }
+
+  function split(value) {
+    if (Array.isArray(value)) return value.map(v => text(v)).filter(Boolean);
+    return String(value ?? '').split(',').map(v => v.trim()).filter(Boolean);
+  }
+
+  function year(value) {
+    const m = String(value ?? '').match(/\b(?:18|19|20)\d{2}\b/);
+    return m ? Number(m[0]) : 0;
+  }
+
+  function dateValue(value) {
+    const d = new Date(value || '');
+    return Number.isFinite(d.getTime()) ? d.getTime() : 0;
+  }
+
+  function formatInt(value) {
+    return Math.max(0, Math.round(num(value))).toLocaleString('en-US');
+  }
+
+  function formatRuntime(value) {
+    const m = String(value ?? '').match(/\d+/);
+    const minutes = m ? Number(m[0]) : 0;
+    if (!minutes) return '—';
+    const h = Math.floor(minutes / 60);
+    const min = minutes % 60;
+    if (h && min) return `${h}h ${min}m`;
+    if (h) return `${h}h`;
+    return `${min}m`;
+  }
+
+  function formatDate(value) {
+    const d = new Date(value || '');
+    if (!Number.isFinite(d.getTime())) return text(value, '—');
+    return new Intl.DateTimeFormat('en-GB', {
+      year: 'numeric', month: 'short', day: '2-digit'
+    }).format(d);
+  }
+
+  function rank(movie) {
+    return window.CinemaVaultRating?.metrics(movie) || {
+      score: num(movie.user_rating), personalRating: num(movie.user_rating),
+      imdbRating: num(movie.imdb_rating), bayesianImdb: num(movie.imdb_rating),
+      votes: num(movie.num_votes), freshnessBonus: 0, ageDays: null
+    };
+  }
+
+  function formatVotes(value) {
+    return window.CinemaVaultRating?.formatVotes(value) || formatInt(value);
+  }
+
+  function rankCompare(a, b) {
+    return window.CinemaVaultRating?.compare(a, b)
+      ?? ((rank(b).score - rank(a).score)
+        || (rank(b).votes - rank(a).votes)
+        || (dateValue(b.date_rated) - dateValue(a.date_rated)));
+  }
+
+  function localPoster(movie) {
+    const p = text(movie.poster_local, '');
+    if (!p) return '';
+    if (/^https?:\/\//i.test(p)) return p;
+    if (p.startsWith('../') || p.startsWith('/')) return p;
+    return p.startsWith('posters/') ? `../${p}` : `../posters/${p}`;
+  }
+
+  function posterSrc(movie) {
+    return localPoster(movie) || text(movie.poster, '');
+  }
+
+  function normalize(movie) {
+    const m = movie && typeof movie === 'object' ? movie : {};
+    return {
+      ...m,
+      imdb_id: text(m.imdb_id),
+      title: text(m.title, 'Untitled'),
+      original_title: text(m.original_title, text(m.title, 'Untitled')),
+      year: text(m.year),
+      user_rating: num(m.user_rating),
+      imdb_rating: text(m.imdb_rating),
+      runtime: text(m.runtime),
+      genres: text(m.genres),
+      title_type: text(m.title_type, 'Other'),
+      date_rated: text(m.date_rated),
+      poster: text(m.poster),
+      poster_local: text(m.poster_local),
+      plot: text(m.plot),
+      rated: text(m.rated),
+      directors: text(m.directors),
+      actors: text(m.actors),
+      writer: text(m.writer),
+      country: text(m.country),
+      language: text(m.language),
+      awards: text(m.awards),
+      box_office: text(m.box_office),
+      production: text(m.production),
+      metascore: text(m.metascore),
+      release_date: text(m.release_date),
+      num_votes: text(m.num_votes),
+      website: text(m.website),
+      series_id: text(m.series_id),
+      series_title: text(m.series_title),
+      episode_title: text(m.episode_title),
+      season_number: num(m.season_number),
+      episode_number: num(m.episode_number),
+      total_seasons: num(m.total_seasons),
+      total_episodes: num(m.total_episodes),
+      is_episode: m.is_episode === true || m.title_type === 'TV Episode',
+      data_status: text(m.data_status, 'partial'),
+      poster_status: text(m.poster_status),
+      cache_updated_at: text(m.cache_updated_at),
+      data_fetched_at: text(m.data_fetched_at),
+      raw_csv: m.raw_csv && typeof m.raw_csv === 'object' ? m.raw_csv : {},
+      raw_omdb: m.raw_omdb && typeof m.raw_omdb === 'object' ? m.raw_omdb : {}
+    };
+  }
+
+  function loadPageSize() {
+    try {
+      const n = Number(localStorage.getItem(PAGE_SIZE_KEY));
+      return [12, 24, 36, 48].includes(n) ? n : 24;
+    } catch {
+      return 24;
+    }
+  }
+
+  async function fetchJson(url, timeout = 15000) {
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), timeout);
+    try {
+      const res = await fetch(`${url}${url.includes('?') ? '&' : '?'}v=${Date.now()}`, {
+        cache: 'no-store',
+        signal: controller.signal
+      });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      return await res.json();
+    } finally {
+      clearTimeout(timer);
+    }
+  }
+
+  function cacheRead() {
+    try {
+      const x = JSON.parse(localStorage.getItem(CACHE_KEY) || 'null');
+      return Array.isArray(x?.movies) ? x : null;
+    } catch {
+      return null;
+    }
+  }
+
+  function cacheWrite(movies, generatedAt) {
+    try {
+      localStorage.setItem(CACHE_KEY, JSON.stringify({
+        savedAt: new Date().toISOString(),
+        generatedAt: generatedAt || '',
+        movies
+      }));
+    } catch (err) {
+      warn('localStorage cache unavailable', err);
+    }
+  }
+
+  async function loadData() {
+    try {
+      const data = await fetchJson(DATA_URL);
+      state.movies = (Array.isArray(data?.movies) ? data.movies : data)
+        .map(normalize)
+        .filter(m => m.imdb_id);
+      cacheWrite(state.movies, data?.last_manual_update);
+      log(`Loaded ${state.movies.length} records from shared dataset.`);
+    } catch (err) {
+      const cached = cacheRead();
+      if (!cached) {
+        notify('Dataset قابل دریافت نیست.', 'error');
+        return;
+      }
+      state.movies = cached.movies.map(normalize).filter(m => m.imdb_id);
+      notify('از آخرین نسخه Cache محلی استفاده شد.', 'warn');
+    }
+
+    populateFilters();
+    applyFilters();
+    renderMetrics();
+    renderLatest();
+    renderSeries();
+    loadDiagnostics();
+  }
+
+  function searchBlob(movie) {
+    return [
+      movie.title, movie.original_title, movie.imdb_id,
+      movie.genres, movie.directors, movie.actors,
+      movie.writer, movie.country, movie.language,
+      movie.plot, movie.series_title,
+      movie.episode_title
+    ].join(' ').toLowerCase();
+  }
+
+  function applyFilters() {
+    const q = state.query.trim().toLowerCase();
+    state.filtered = state.movies.filter(movie => {
+      if (q && !searchBlob(movie).includes(q)) return false;
+      if (state.type !== 'all' && movie.title_type !== state.type) return false;
+      if (state.genre !== 'all' && !split(movie.genres).includes(state.genre)) return false;
+      if (state.year !== 'all' && year(movie.year) !== Number(state.year)) return false;
+      return true;
+    });
+
+    state.filtered.sort((a, b) => {
+      switch (state.sort) {
+        case 'vault_desc': return rankCompare(a, b);
+        case 'rating_desc': return num(b.user_rating) - num(a.user_rating);
+        case 'imdb_desc': return num(b.imdb_rating) - num(a.imdb_rating);
+        case 'votes_desc': return rank(b).votes - rank(a).votes;
+        case 'year_desc': return year(b.year) - year(a.year);
+        case 'title_asc': return a.title.localeCompare(b.title);
+        default: return dateValue(b.date_rated) - dateValue(a.date_rated);
+      }
+    });
+
+    const pageCount = Math.max(1, Math.ceil(state.filtered.length / state.pageSize));
+    state.currentPage = Math.min(state.currentPage, pageCount);
+    if (state.currentPage < 1) state.currentPage = 1;
+    renderGrid();
+  }
+
+  function populateFilters() {
+    const genres = new Set();
+    const years = new Set();
+    state.movies.forEach(movie => {
+      split(movie.genres).forEach(g => genres.add(g));
+      const y = year(movie.year);
+      if (y) years.add(y);
+    });
+
+    if ($('genre')) {
+      $('genre').innerHTML = '<option value="all">All genres</option>' + [...genres].sort().map(g => `<option value="${escapeHtml(g)}">${escapeHtml(g)}</option>`).join('');
+    }
+    if ($('year')) {
+      $('year').innerHTML = '<option value="all">All years</option>' + [...years].sort((a,b) => b-a).map(y => `<option value="${y}">${y}</option>`).join('');
+    }
+  }
+
+  function renderMetrics() {
+    const movies = state.movies.filter(m => ['Movie', 'Short'].includes(m.title_type));
+    const series = state.movies.filter(m => m.title_type === 'TV Series');
+    const episodes = state.movies.filter(m => m.is_episode);
+    const minutes = state.movies.reduce((sum, m) => sum + num(String(m.runtime).match(/\d+/)?.[0]), 0);
+    const rated = state.movies.filter(m => m.user_rating > 0);
+    const avg = rated.length ? rated.reduce((s,m) => s + m.user_rating, 0) / rated.length : 0;
+    const imdbRows = state.movies.filter(m => num(m.imdb_rating) > 0);
+    const avgImdb = imdbRows.length ? imdbRows.reduce((s,m) => s + num(m.imdb_rating), 0) / imdbRows.length : 0;
+    const totalVotes = state.movies.reduce((s,m) => s + rank(m).votes, 0);
+    const avgVault = rated.length ? rated.reduce((s,m) => s + rank(m).score, 0) / rated.length : 0;
+    const localPosters = state.movies.filter(m => localPoster(m)).length;
+    const enriched = state.movies.filter(m => Object.keys(m.raw_omdb || {}).length > 0 || m.data_status === 'fresh' || m.data_status === 'cached').length;
+
+    setText('mTitles', formatInt(state.movies.length));
+    setText('mMovies', formatInt(movies.length));
+    setText('mSeries', formatInt(series.length));
+    setText('mEpisodes', formatInt(episodes.length));
+    setText('mRuntime', formatRuntime(minutes));
+    setText('mAvg', avg ? avg.toFixed(1) : '—');
+    setText('mAvgIMDb', avgImdb ? avgImdb.toFixed(2) : '—');
+    setText('mVotes', formatVotes(totalVotes));
+    setText('mVault', avgVault ? avgVault.toFixed(2) : '—');
+    setText('mPosterCoverage', `${state.movies.length ? Math.round(localPosters / state.movies.length * 100) : 0}%`);
+    setText('mOmdbCoverage', `${state.movies.length ? Math.round(enriched / state.movies.length * 100) : 0}%`);
+  }
+
+  function setText(id, value) {
+    const el = $(id);
+    if (el) el.textContent = value;
+  }
+
+  function ratingEmoji(rating) {
+    const r = num(rating);
+    if (r >= 9) return '🤩🔥🏆';
+    if (r >= 8) return '😍🔥';
+    if (r >= 7) return '😊👍';
+    if (r >= 6) return '🙂';
+    if (r >= 5) return '😐';
+    if (r > 0) return '😕';
+    return '🎬';
+  }
+
+  function cardHtml(movie) {
+    const poster = posterSrc(movie);
+    const fallback = ratingEmoji(movie.user_rating);
+    const posterMarkup = poster
+      ? `<img src="${escapeHtml(poster)}" alt="${escapeHtml(movie.title)}" loading="lazy" decoding="async" data-fallback="${escapeHtml(movie.imdb_id)}"><div class="poster-fallback" data-fallback-for="${escapeHtml(movie.imdb_id)}" hidden>${fallback}</div>`
+      : `<div class="poster-fallback">${fallback}</div>`;
+
+    return `<article class="card" data-id="${escapeHtml(movie.imdb_id)}" tabindex="0" role="button">
+      <div class="poster">
+        ${posterMarkup}
+        <div class="badge-top">
+          <span class="pill mint">${movie.is_episode ? '📺 EPISODE' : movie.title_type === 'TV Series' ? '📺 SERIES' : '🎬 MOVIE'}</span>
+          <span class="pill">${movie.user_rating ? `⭐ ${movie.user_rating}` : '—'}</span>
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="card-title">${escapeHtml(movie.title)}</div>
+        <div class="card-sub">${escapeHtml(movie.year || '—')}${movie.series_title ? ` • ${escapeHtml(movie.series_title)}` : ''}</div>
+        <div class="tags">${split(movie.genres).slice(0,3).map(g => `<span>${escapeHtml(g)}</span>`).join('')}</div>
+        <div class="card-score"><span class="mine">${ratingEmoji(movie.user_rating)} ${movie.user_rating || '—'}</span><span class="imdb">IMDb ${escapeHtml(movie.imdb_rating || '—')}</span><b class="vault-mini">🧠 ${rank(movie).score.toFixed(2)}</b></div>
+        <div class="card-votes">🗳️ ${escapeHtml(formatVotes(rank(movie).votes))} IMDb votes <span>·</span> 📅 ${escapeHtml(formatDate(movie.date_rated))}</div>
+      </div>
+    </article>`;
+  }
+
+  function renderGrid() {
+    const grid = $('grid');
+    if (!grid) return;
+    const total = state.filtered.length;
+    const pages = Math.max(1, Math.ceil(total / state.pageSize));
+    const start = (state.currentPage - 1) * state.pageSize;
+    const visible = state.filtered.slice(start, start + state.pageSize);
+    grid.innerHTML = visible.length ? visible.map(cardHtml).join('') : '<div style="grid-column:1/-1;padding:50px;text-align:center;color:#8b9691">No matching titles.</div>';
+    renderPager(pages, total, start);
+  }
+
+  function renderPager(pages, total, start) {
+    const pagesBox = $('pages');
+    if (!pagesBox) return;
+    const end = total ? Math.min(total, start + state.pageSize) : 0;
+    setText('resultInfo', `${formatInt(total)} results • ${formatInt(start + (total ? 1 : 0))}–${formatInt(end)}`);
+    setText('pageCount', `${state.currentPage} / ${pages}`);
+    if ($('first')) $('first').disabled = state.currentPage <= 1;
+    if ($('prev')) $('prev').disabled = state.currentPage <= 1;
+    if ($('next')) $('next').disabled = state.currentPage >= pages;
+    if ($('last')) $('last').disabled = state.currentPage >= pages;
+
+    const nums = new Set([1, pages, state.currentPage, state.currentPage-1, state.currentPage+1, state.currentPage-2, state.currentPage+2]);
+    const ordered = [...nums].filter(n => n >= 1 && n <= pages).sort((a,b) => a-b);
+    let html = '';
+    let previous = 0;
+    for (const n of ordered) {
+      if (previous && n - previous > 1) html += '<span class="page-ellipsis">…</span>';
+      html += `<button type="button" class="${n === state.currentPage ? 'active' : ''}" data-page="${n}">${n}</button>`;
+      previous = n;
+    }
+    pagesBox.innerHTML = html || '<button type="button" class="active">1</button>';
+  }
+
+  function goPage(n) {
+    const pages = Math.max(1, Math.ceil(state.filtered.length / state.pageSize));
+    const page = Math.min(Math.max(1, Number(n) || 1), pages);
+    state.currentPage = page;
+    renderGrid();
+    $('library')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+
+  function renderLatest() {
+    const box = $('latestGrid');
+    if (!box) return;
+    const latest = [...state.movies].filter(m => m.date_rated).sort((a,b) => dateValue(b.date_rated)-dateValue(a.date_rated)).slice(0,6);
+    box.innerHTML = latest.length ? latest.map(movie => `<article class="latest-card" data-id="${escapeHtml(movie.imdb_id)}">
+      ${posterSrc(movie) ? `<img src="${escapeHtml(posterSrc(movie))}" alt="${escapeHtml(movie.title)}" loading="lazy" data-fallback="latest-${escapeHtml(movie.imdb_id)}">` : ''}
+      <div class="latest-copy"><b>${escapeHtml(movie.title)}</b><small>${formatDate(movie.date_rated)} • ⭐ ${movie.user_rating || '—'} • IMDb ${escapeHtml(movie.imdb_rating || '—')}</small><div class="latest-rating">🧠 ${rank(movie).score.toFixed(2)} · 🗳️ ${escapeHtml(formatVotes(rank(movie).votes))} رأی</div></div>
+    </article>`).join('') : '<div class="muted">No rated titles yet.</div>';
+  }
+
+  function renderSeries() {
+    const box = $('seriesGrid');
+    if (!box) return;
+    const map = new Map();
+    state.movies.forEach(m => {
+      if (!(m.series_id || m.series_title || m.title_type === 'TV Series' || m.is_episode)) return;
+      const key = m.series_id || m.series_title || m.imdb_id;
+      if (!map.has(key)) map.set(key, { key, title: m.series_title || m.title, poster: posterSrc(m), episodes: [], series: null });
+      const item = map.get(key);
+      if (!item.poster && posterSrc(m)) item.poster = posterSrc(m);
+      if (m.is_episode) item.episodes.push(m);
+      if (m.title_type === 'TV Series') item.series = m;
+    });
+
+    const series = [...map.values()].sort((a,b) => a.title.localeCompare(b.title)).slice(0,18);
+    setText('seriesCount', `${formatInt(series.length)} groups`);
+    box.innerHTML = series.length ? series.map(s => {
+      const seasons = new Set(s.episodes.map(e => e.season_number).filter(Boolean)).size;
+      const watched = s.episodes.filter(e => e.user_rating > 0).length;
+      const total = s.episodes.length;
+      const progress = total ? Math.round(watched / total * 100) : 0;
+      return `<article class="series-card" data-series="${escapeHtml(s.key)}">
+        <div class="series-head"><div class="series-poster">${s.poster ? `<img src="${escapeHtml(s.poster)}" alt="" loading="lazy">` : '📺'}</div><div><strong>${escapeHtml(s.title)}</strong><p>${seasons || s.series?.total_seasons || 0} seasons • ${total || s.series?.total_episodes || 0} episodes</p></div></div>
+        <div class="series-badges"><span class="badge">⭐ ${watched}/${total || 0}</span><span class="badge">${progress}% rated</span></div>
+        <div class="progress" style="--progress:${progress}%"><i></i></div>
+      </article>`;
+    }).join('') : '<div class="muted">No grouped series data found.</div>';
+  }
+
+  function openModal(id) {
+    const movie = state.movies.find(m => m.imdb_id === id);
+    if (!movie) return notify('رکورد پیدا نشد.', 'error');
+    state.modalId = id;
+    const modal = $('modal');
+    if (!modal) return;
+
+    const poster = posterSrc(movie);
+    const image = $('modalPoster');
+    const fallback = $('modalFallback');
+    if (image) {
+      image.onerror = () => { image.hidden = true; if (fallback) fallback.hidden = false; };
+      if (poster) { image.src = poster; image.hidden = false; if (fallback) fallback.hidden = true; }
+      else { image.removeAttribute('src'); image.hidden = true; if (fallback) fallback.hidden = false; }
+    }
+
+    setText('modalType', movie.title_type.toUpperCase());
+    setText('modalTitle', movie.title);
+    setText('modalOriginal', movie.original_title);
+    setText('modalUser', movie.user_rating || '—');
+    setText('modalIMDb', movie.imdb_rating || '—');
+    setText('modalVault', `${rank(movie).score.toFixed(2)}/10`);
+    setText('modalMeta', movie.metascore || '—');
+    setText('modalPlot', movie.plot || 'No plot information available.');
+
+    const tags = $('modalTags');
+    if (tags) tags.innerHTML = split(movie.genres).map(g => `<span>${escapeHtml(g)}</span>`).join('');
+
+    const details = [
+      ['Year', movie.year], ['Runtime', formatRuntime(movie.runtime)], ['Rated', movie.rated], ['Released', movie.release_date],
+      ['Genres', movie.genres], ['Director', movie.directors], ['Writer', movie.writer], ['Actors', movie.actors],
+      ['Country', movie.country], ['Language', movie.language], ['IMDb Votes', `${formatVotes(rank(movie).votes)} (${formatInt(rank(movie).votes)})`], ['Vault Rank', `${rank(movie).score.toFixed(2)}/10 · IMDb adjusted ${rank(movie).bayesianImdb.toFixed(2)}`], ['Date Rated', formatDate(movie.date_rated)],
+      ['Awards', movie.awards], ['Box Office', movie.box_office], ['Production', movie.production], ['Data Status', movie.data_status],
+      ['Poster Status', movie.poster_status], ['Cache Updated', movie.cache_updated_at ? formatDate(movie.cache_updated_at) : '—']
+    ];
+    const detailGrid = $('modalDetails');
+    if (detailGrid) detailGrid.innerHTML = details.map(([k,v]) => `<div class="detail-card"><span>${escapeHtml(k)}</span><b>${escapeHtml(text(v,'—'))}</b></div>`).join('');
+
+    const seriesDetails = $('seriesDetails');
+    if (seriesDetails) seriesDetails.innerHTML = buildSeriesDetails(movie);
+
+    const raw = $('rawData');
+    if (raw) raw.textContent = JSON.stringify({ csv: movie.raw_csv, omdb: movie.raw_omdb }, null, 2);
+
+    const link = $('modalLink');
+    if (link) link.href = movie.url || `https://www.imdb.com/title/${encodeURIComponent(movie.imdb_id)}/`;
+
+    modal.hidden = false;
+    document.body.style.overflow = 'hidden';
+  }
+
+  function buildSeriesDetails(movie) {
+    if (!(movie.is_episode || movie.title_type === 'TV Series' || movie.series_id || movie.series_title)) return '';
+    const key = movie.series_id || movie.series_title || movie.imdb_id;
+    const eps = state.movies.filter(m => m.is_episode && ((movie.series_id && m.series_id === movie.series_id) || (movie.series_title && m.series_title === movie.series_title) || m.series_id === key))
+      .sort((a,b) => num(a.season_number)-num(b.season_number) || num(a.episode_number)-num(b.episode_number));
+    const seasons = new Map();
+    eps.forEach(e => { const s = e.season_number || 0; if (!seasons.has(s)) seasons.set(s, []); seasons.get(s).push(e); });
+    if (!seasons.size) return `<div class="series-detail"><strong>📺 Series context</strong><p>${escapeHtml(movie.series_title || movie.title)}</p></div>`;
+    return `<div><strong>📺 Series context</strong><div class="episode-grid">${[...seasons.entries()].map(([season,list]) => `<div class="episode" data-season="${season}"><div class="no">Season ${season || '?'}</div><div class="name">${list.length} episodes</div><div class="score">Rated ${list.filter(e => e.user_rating > 0).length}/${list.length}</div></div>`).join('')}</div></div>`;
+  }
+
+  function closeModal() {
+    if ($('modal')) $('modal').hidden = true;
+    document.body.style.overflow = '';
+  }
+
+  function notify(message, kind = 'ok') {
+    const toast = $('toast');
+    if (!toast) return;
+    toast.textContent = message;
+    toast.classList.add('show');
+    toast.dataset.kind = kind;
+    clearTimeout(toast.__t);
+    toast.__t = setTimeout(() => toast.classList.remove('show'), 3200);
+  }
+
+  async function loadDiagnostics() {
+    const [system, keyState, runLog] = await Promise.allSettled([
+      fetchJson('../system-status.json'),
+      fetchJson('../omdb-key-state.json'),
+      fetchJson('../update-log.json')
+    ]);
+    state.diagnostics.system = system.status === 'fulfilled' ? system.value : null;
+    state.diagnostics.keyState = keyState.status === 'fulfilled' ? keyState.value : null;
+    state.diagnostics.runLog = runLog.status === 'fulfilled' ? runLog.value : null;
+    renderDiagnostics();
+  }
+
+  function renderDiagnostics() {
+    const system = state.diagnostics.system || {};
+    const lastRun = Array.isArray(state.diagnostics.runLog?.runs) ? state.diagnostics.runLog.runs[0] : system.run;
+    const errors = system.errors || lastRun?.errors || [];
+    const stateRows = Object.values(state.diagnostics.keyState?.keys || {});
+    const currentRows = Array.isArray(system.keys) ? system.keys : [];
+    const mergedMap = new Map();
+    [...stateRows, ...currentRows].forEach(row => {
+      const key = row.fingerprint || row.label || Math.random().toString(36);
+      const previous = mergedMap.get(key) || {};
+      mergedMap.set(key, { ...previous, ...row });
+    });
+    const rows = [...mergedMap.values()];
+
+    const healthy = rows.filter(r => ['active','healthy'].includes(r.status || r.last_status || r.last_health_check_status)).length;
+    const rate = rows.filter(r => ['rate_limited'].includes(r.status || r.last_status || r.last_health_check_status)).length;
+    const invalid = rows.filter(r => ['invalid'].includes(r.status || r.last_status || r.last_health_check_status)).length;
+    const requests = rows.reduce((s,r) => s + num(r.total_requests ?? r.requests_this_run), 0);
+
+    const summary = $('diagSummary');
+    if (summary) summary.innerHTML = [
+      ['Keys', rows.length || (system.keys || []).length || 0],
+      ['Healthy', healthy],
+      ['Rate limited', rate],
+      ['Total requests', formatInt(requests)]
+    ].map(([k,v]) => `<div><span>${escapeHtml(k)}</span><b>${escapeHtml(String(v))}</b></div>`).join('');
+
+    const keyTable = $('keyTable');
+    const keyArray = rows;
+    if (keyTable) keyTable.innerHTML = keyArray.length ? keyArray.map(r => {
+      const status = r.status || r.last_status || r.last_health_check_status || 'not_tested';
+      const cls = ['active','healthy'].includes(status) ? 'status-active' : ['invalid','rate_limited'].includes(status) ? 'status-bad' : 'status-warn';
+      const daily = r.daily_requests ?? r.requests_this_run ?? 0;
+      const total = r.total_requests ?? 0;
+      return `<div class="key-row"><span>${escapeHtml(r.label || 'key')}</span><span>${escapeHtml(r.fingerprint || '—')}</span><span class="${cls}">${escapeHtml(status)}</span><span>${formatInt(daily)}/day • ${formatInt(total)} total</span></div>`;
+    }).join('') : '<div class="muted">No key diagnostics yet.</div>';
+
+    const cache = $('cacheTable');
+    const runCounts = lastRun?.counts || system.run?.counts || {};
+    if (cache) cache.innerHTML = [
+      ['Records', state.movies.length],
+      ['OMDb enriched', state.movies.filter(m => Object.keys(m.raw_omdb || {}).length).length],
+      ['Local posters', state.movies.filter(m => localPoster(m)).length],
+      ['API attempts', runCounts.api_attempts || 0],
+      ['Cache reused', runCounts.cache_reused || 0],
+      ['Monthly refresh due', runCounts.records_due_monthly_refresh || 0],
+      ['Poster attempts', runCounts.poster_attempts || 0],
+      ['Posters downloaded', runCounts.posters_downloaded || 0]
+    ].map(([k,v]) => `<div class="kv-row"><span>${escapeHtml(k)}</span><b>${escapeHtml(formatInt(v))}</b></div>`).join('');
+
+    const errorLog = $('errorLog');
+    if (errorLog) errorLog.textContent = errors.length ? JSON.stringify(errors, null, 2) : 'No recorded errors in the latest diagnostic snapshot.';
+  }
+
+  function diagnosticsText() {
+    return JSON.stringify({
+      exported_at: new Date().toISOString(),
+      page: location.href,
+      dataset_records: state.movies.length,
+      dataset_status: {
+        local_posters: state.movies.filter(m => localPoster(m)).length,
+        omdb_enriched: state.movies.filter(m => Object.keys(m.raw_omdb || {}).length).length
+      },
+      system: state.diagnostics.system,
+      key_state: state.diagnostics.keyState,
+      last_runs: state.diagnostics.runLog
+    }, null, 2);
+  }
+
+  function init() {
+    $('search')?.addEventListener('input', e => { state.query = e.target.value; state.currentPage = 1; applyFilters(); });
+    $('type')?.addEventListener('change', e => { state.type = e.target.value; state.currentPage = 1; applyFilters(); });
+    $('genre')?.addEventListener('change', e => { state.genre = e.target.value; state.currentPage = 1; applyFilters(); });
+    $('year')?.addEventListener('change', e => { state.year = e.target.value; state.currentPage = 1; applyFilters(); });
+    $('sort')?.addEventListener('change', e => { state.sort = e.target.value; state.currentPage = 1; applyFilters(); });
+    $('reset')?.addEventListener('click', () => {
+      state.query = ''; state.type = 'all'; state.genre = 'all'; state.year = 'all'; state.sort = 'vault_desc'; state.currentPage = 1;
+      if ($('search')) $('search').value = '';
+      if ($('type')) $('type').value = 'all';
+      if ($('genre')) $('genre').value = 'all';
+      if ($('year')) $('year').value = 'all';
+      if ($('sort')) $('sort').value = 'vault_desc';
+      applyFilters();
+    });
+    $('pageSize')?.addEventListener('change', e => {
+      const n = Number(e.target.value);
+      if ([12,24,36,48].includes(n)) { state.pageSize = n; localStorage.setItem(PAGE_SIZE_KEY, String(n)); state.currentPage = 1; renderGrid(); }
+    });
+    $('first')?.addEventListener('click', () => goPage(1));
+    $('prev')?.addEventListener('click', () => goPage(state.currentPage - 1));
+    $('next')?.addEventListener('click', () => goPage(state.currentPage + 1));
+    $('last')?.addEventListener('click', () => goPage(Math.ceil(state.filtered.length / state.pageSize)));
+    $('pages')?.addEventListener('click', e => {
+      const b = e.target.closest('[data-page]');
+      if (b) goPage(Number(b.dataset.page));
+    });
+    $('grid')?.addEventListener('click', e => { const card = e.target.closest('[data-id]'); if (card) openModal(card.dataset.id); });
+    document.addEventListener('error', e => {
+      const img = e.target;
+      if (!(img instanceof HTMLImageElement)) return;
+      const fallbackId = img.dataset.fallback;
+      if (fallbackId) {
+        img.hidden = true;
+        const fallback = img.parentElement?.querySelector(`[data-fallback-for="${CSS.escape(fallbackId)}"]`);
+        if (fallback) fallback.hidden = false;
+      }
+    }, true);
+    $('grid')?.addEventListener('keydown', e => { const card = e.target.closest('[data-id]'); if (card && (e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); openModal(card.dataset.id); } });
+    $('latestGrid')?.addEventListener('click', e => { const card = e.target.closest('[data-id]'); if (card) openModal(card.dataset.id); });
+    $('seriesGrid')?.addEventListener('click', e => {
+      const card = e.target.closest('[data-series]');
+      if (!card) return;
+      const item = state.movies.find(m => (m.series_id || m.series_title || m.imdb_id) === card.dataset.series);
+      if (item) openModal(item.imdb_id);
+    });
+    $('closeModal')?.addEventListener('click', closeModal);
+    $('modal')?.addEventListener('click', e => { if (e.target === $('modal')) closeModal(); });
+    $('copyId')?.addEventListener('click', async () => {
+      try { await navigator.clipboard.writeText(state.modalId || ''); notify('IMDb ID copied.'); } catch { notify('Copy failed.', 'warn'); }
+    });
+    $('refreshDiagnostics')?.addEventListener('click', loadDiagnostics);
+    $('copyDiagnostics')?.addEventListener('click', async () => {
+      try { await navigator.clipboard.writeText(diagnosticsText()); notify('Diagnostic report copied.'); } catch { notify('Copy failed.', 'warn'); }
+    });
+    $('jumpLibrary')?.addEventListener('click', () => $('library')?.scrollIntoView({behavior:'smooth'}));
+    $('latestToLibrary')?.addEventListener('click', () => $('library')?.scrollIntoView({behavior:'smooth'}));
+    $('openAnalytics')?.addEventListener('click', () => {
+      const section = $('analytics');
+      if (!section) return;
+      section.hidden = !section.hidden;
+      if (!section.hidden) generateCharts();
+    });
+    $('openDiagnostics')?.addEventListener('click', () => $('diagnostics')?.scrollIntoView({behavior:'smooth'}));
+    $('advInsightsRefresh')?.addEventListener('click', () => window.IMDBPageInsights?.refresh?.());
+    document.addEventListener('keydown', e => {
+      if (e.key === 'Escape') closeModal();
+      if (e.key === '/' && !['INPUT','SELECT','TEXTAREA'].includes(document.activeElement?.tagName)) { e.preventDefault(); $('search')?.focus(); }
+    });
+    if ($('pageSize')) $('pageSize').value = String(state.pageSize);
+    window.addEventListener('error', e => console.error('[IMDb Advanced] runtime error', e.error || e.message || e), { passive: true });
+    window.addEventListener('unhandledrejection', e => console.error('[IMDb Advanced] unhandled rejection', e.reason), { passive: true });
+    loadData();
+  }
+
+  function generateCharts() {
+    if (typeof Chart === 'undefined') return;
+    Object.values(charts).forEach(c => { try { c.destroy(); } catch {} });
+    const genre = {};
+    const rating = {};
+    const years = {};
+    state.movies.forEach(m => {
+      split(m.genres).forEach(g => genre[g] = (genre[g] || 0) + 1);
+      if (m.user_rating > 0) rating[Math.round(m.user_rating)] = (rating[Math.round(m.user_rating)] || 0) + 1;
+      const y = year(m.year); if (y) years[y] = (years[y] || 0) + 1;
+    });
+    const common = { responsive:true, maintainAspectRatio:false, plugins:{legend:{labels:{color:'#a7b1ac',font:{family:'Manrope'}}}}, scales:{x:{ticks:{color:'#85918b'},grid:{color:'rgba(255,255,255,.04)'}},y:{beginAtZero:true,ticks:{color:'#85918b'},grid:{color:'rgba(255,255,255,.04)'}}} };
+    charts.genre = new Chart($('genreChart'), {type:'bar',data:{labels:Object.entries(genre).sort((a,b)=>b[1]-a[1]).slice(0,12).map(x=>x[0]),datasets:[{label:'Titles',data:Object.entries(genre).sort((a,b)=>b[1]-a[1]).slice(0,12).map(x=>x[1]),backgroundColor:'#21F1A8',borderRadius:7}]},options:common});
+    charts.rating = new Chart($('ratingChart'), {type:'bar',data:{labels:Object.keys(rating).sort((a,b)=>a-b),datasets:[{label:'Ratings',data:Object.keys(rating).sort((a,b)=>a-b).map(x=>rating[x]),backgroundColor:'#d7fff0',borderRadius:7}]},options:common});
+    const ys = Object.keys(years).sort((a,b)=>a-b).slice(-18);
+    charts.year = new Chart($('yearChart'), {type:'line',data:{labels:ys,datasets:[{label:'Titles',data:ys.map(y=>years[y]),borderColor:'#21F1A8',backgroundColor:'rgba(33,241,168,.08)',fill:true,tension:.3}]},options:common});
+    const top = state.movies.filter(m => m.user_rating > 0).sort(rankCompare).slice(0,12).reverse();
+    if ($('vaultChart')) charts.vault = new Chart($('vaultChart'), {type:'bar',data:{labels:top.map(m => m.title.length > 22 ? `${m.title.slice(0,20)}…` : m.title),datasets:[{label:'Vault Rank / 10',data:top.map(m => Number(rank(m).score.toFixed(2))),backgroundColor:'#21F1A8',borderRadius:7}]},options:common});
+  }
+
+  init();
+})();

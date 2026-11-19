@@ -87,6 +87,9 @@
                 <div class="stat-card glass"><div class="stat-card-icon">📺</div><div class="stat-card-number" id="statTotalEpisodes">0</div><div class="stat-card-label">قسمت‌های دیده‌شده</div></div>
                 <div class="stat-card glass"><div class="stat-card-icon">🏆</div><div class="stat-card-number" id="statTopGenre">-</div><div class="stat-card-label">ژانر محبوب</div></div>
                 <div class="stat-card glass"><div class="stat-card-icon">🎯</div><div class="stat-card-number" id="statAvgPerYear">0</div><div class="stat-card-label">میانگین عنوان در سال</div></div>
+                <div class="stat-card glass"><div class="stat-card-icon">🌐</div><div class="stat-card-number" id="statAvgImdb">0.0</div><div class="stat-card-label">میانگین امتیاز IMDb</div></div>
+                <div class="stat-card glass"><div class="stat-card-icon">🗳️</div><div class="stat-card-number" id="statTotalVotes">0</div><div class="stat-card-label">مجموع رأی‌های IMDb</div></div>
+                <div class="stat-card glass"><div class="stat-card-icon">🧠</div><div class="stat-card-number" id="statVaultScore">0.0</div><div class="stat-card-label">میانگین Vault Rank</div></div>
             </div>
             <div class="charts-grid">
                 <div class="chart-container glass"><h3 class="chart-title">🎭 پرتماشاگرترین ژانرها</h3><div class="chart-box"><canvas id="genreChart"></canvas></div></div>
@@ -95,8 +98,9 @@
                 <div class="chart-container glass"><h3 class="chart-title">📆 فعالیت بر اساس ماه</h3><div class="chart-box"><canvas id="monthChart"></canvas></div></div>
                 <div class="chart-container glass full-width"><h3 class="chart-title">🎬 میانگین امتیاز به ازای ژانر</h3><div class="chart-box"><canvas id="genreRatingChart"></canvas></div></div>
                 <div class="chart-container glass full-width"><h3 class="chart-title">📊 تحلیل امتیازات من در مقابل امتیاز IMDb</h3><div class="chart-box"><canvas id="compareChart"></canvas></div></div>
+                <div class="chart-container glass full-width"><h3 class="chart-title">🧠 برترین انتخاب‌ها بر اساس Vault Rank</h3><div class="chart-box"><canvas id="scoreChart"></canvas></div></div>
             </div>
-            <div class="top-movies glass"><h3 class="chart-title">🏆 برترین فیلم‌های من (امتیاز ۱۰)</h3><div id="topMoviesList" class="top-movies-list"></div></div>
+            <div class="top-movies glass"><h3 class="chart-title">🏆 برترین عنوان‌ها | Vault Rank</h3><p class="ranking-explainer">رتبه بر پایه ۶۵٪ امتیاز شخصی + ۳۵٪ امتیاز تعدیل‌شده IMDb (با توجه به تعداد رأی‌ها) + پاداش محدود تازگی تاریخ امتیازدهی محاسبه می‌شود.</p><div id="topMoviesList" class="top-movies-list"></div></div>
         </div>
 
         <div class="movies-grid" id="moviesGrid" aria-live="polite"></div>
@@ -145,7 +149,8 @@
                 <div class="detail-item"><span class="label">👤 بازیگران</span><span class="value" id="modalActors"></span></div>
                 <div class="detail-item"><span class="label">📝 نویسنده</span><span class="value" id="modalWriter"></span></div>
                 <div class="detail-item"><span class="label">📅 انتشار</span><span class="value" id="modalReleased"></span></div>
-                <div class="detail-item"><span class="label">🗳️ رای‌ها</span><span class="value" id="modalVotes"></span></div>
+                <div class="detail-item"><span class="label">🗳️ تعداد رأی IMDb</span><span class="value" id="modalVotes"></span></div>
+                <div class="detail-item"><span class="label">🧠 امتیاز ترکیبی Vault</span><span class="value" id="modalVaultScore"></span></div>
                 <div class="detail-item"><span class="label">📅 امتیاز داده</span><span class="value" id="modalDateRated"></span></div>
                 <div class="detail-item"><span class="label">📄 عنوان اصلی</span><span class="value" id="modalOriginalTitle"></span></div>
                 <div class="detail-item"><span class="label">🌍 کشور</span><span class="value" id="modalCountry"></span></div>
@@ -169,6 +174,7 @@
 
     <script src="starfield.js" defer></script>
     <script src="page-insights.js" defer></script>
+    <script src="rating-engine.js" defer></script>
     <script src="script.js" defer></script>
 </body>
 </html>

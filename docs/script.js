@@ -67,6 +67,26 @@
         return String(value ?? '').split(',').map(x => x.trim()).filter(Boolean);
     }
 
+    function rankingMetrics(movie) {
+        return window.CinemaVaultRating?.metrics(movie) || {
+            score: toNumber(movie?.user_rating), baseScore: toNumber(movie?.user_rating),
+            personalRating: toNumber(movie?.user_rating), imdbRating: toNumber(movie?.imdb_rating),
+            bayesianImdb: toNumber(movie?.imdb_rating), votes: toNumber(movie?.num_votes),
+            voteConfidence: 0, freshnessBonus: 0, ageDays: null, ratedAt: getDateValue(movie?.date_rated)
+        };
+    }
+
+    function formatVotes(value) {
+        return window.CinemaVaultRating?.formatVotes(value) || Math.round(toNumber(value)).toLocaleString('en-US');
+    }
+
+    function compareVaultRank(a, b) {
+        return window.CinemaVaultRating?.compare(a, b)
+            ?? ((rankingMetrics(b).score - rankingMetrics(a).score)
+                || (rankingMetrics(b).votes - rankingMetrics(a).votes)
+                || (getDateValue(b.date_rated) - getDateValue(a.date_rated)));
+    }
+
     function ratingEmoji(rating) {
         const r = toNumber(rating);
         if (r >= 9.5) return '🤯🔥🏆';
@@ -365,6 +385,13 @@
                 const vb = getYearNumber(b.year);
                 return desc ? vb - va : va - vb;
             }
+            if (field === 'vault_score') {
+                return desc ? compareVaultRank(a, b) : compareVaultRank(b, a);
+            }
+            if (field === 'num_votes') {
+                const delta = rankingMetrics(a).votes - rankingMetrics(b).votes;
+                return desc ? -delta : delta;
+            }
             const va = toNumber(a[field]);
             const vb = toNumber(b[field]);
             return desc ? vb - va : va - vb;
@@ -421,6 +448,7 @@
                     <span class="imdb-rating">IMDb: ${escapeHtml(movie.imdb_rating || 'N/A')}</span>
                     ${ratingEmoji(rating) ? `<span title="${escapeHtml(ratingLabel(rating))}">${ratingEmoji(rating)}</span>` : ''}
                 </div>
+                <div class="movie-ranking-meta"><span class="vault-score">🧠 ${rankingMetrics(movie).score.toFixed(2)}</span><span>🗳️ ${escapeHtml(formatVotes(rankingMetrics(movie).votes))} رأی</span></div>
             </div>
             ${ratingBadge ? `<div class="movie-badge">${escapeHtml(ratingBadge)}</div>` : ''}
             ${typeBadge}
@@ -485,6 +513,14 @@
         const avg = rated.length
             ? rated.reduce((sum, m) => sum + toNumber(m.user_rating), 0) / rated.length
             : 0;
+        const imdbRated = allMovies.filter(m => toNumber(m.imdb_rating) > 0);
+        const avgImdb = imdbRated.length
+            ? imdbRated.reduce((sum, m) => sum + toNumber(m.imdb_rating), 0) / imdbRated.length
+            : 0;
+        const totalVotes = allMovies.reduce((sum, m) => sum + rankingMetrics(m).votes, 0);
+        const avgVault = rated.length
+            ? rated.reduce((sum, m) => sum + rankingMetrics(m).score, 0) / rated.length
+            : 0;
 
         const genres = new Set();
         allMovies.forEach(m => {
@@ -503,6 +539,9 @@
 
         if ($('avgRating')) $('avgRating').textContent = avg ? avg.toFixed(1) : '0.0';
         if ($('totalGenres')) $('totalGenres').textContent = genres.size.toLocaleString('en-US');
+        if ($('statAvgImdb')) $('statAvgImdb').textContent = avgImdb ? avgImdb.toFixed(2) : '0.00';
+        if ($('statTotalVotes')) $('statTotalVotes').textContent = formatVotes(totalVotes);
+        if ($('statVaultScore')) $('statVaultScore').textContent = avgVault ? avgVault.toFixed(2) : '0.00';
         if ($('statTotalEpisodes')) $('statTotalEpisodes').textContent = episodes.toLocaleString('en-US');
     }
 
@@ -560,6 +599,14 @@
         });
 
         const topGenre = Object.entries(genreCount).sort((a,b) => b[1] - a[1])[0]?.[0] || '-';
+        const imdbRows = allMovies.filter(m => toNumber(m.imdb_rating) > 0);
+        const avgImdb = imdbRows.length ? imdbRows.reduce((sum,m) => sum + toNumber(m.imdb_rating), 0) / imdbRows.length : 0;
+        const ratedRows = allMovies.filter(m => toNumber(m.user_rating) > 0);
+        const avgVault = ratedRows.length ? ratedRows.reduce((sum,m) => sum + rankingMetrics(m).score, 0) / ratedRows.length : 0;
+        const totalVotes = allMovies.reduce((sum,m) => sum + rankingMetrics(m).votes, 0);
+        if ($('statAvgImdb')) $('statAvgImdb').textContent = avgImdb.toFixed(2);
+        if ($('statVaultScore')) $('statVaultScore').textContent = avgVault.toFixed(2);
+        if ($('statTotalVotes')) $('statTotalVotes').textContent = formatVotes(totalVotes);
         if ($('statDirectors')) $('statDirectors').textContent = directors.size;
         if ($('statYears')) $('statYears').textContent = years.size;
         if ($('statTopRating')) $('statTopRating').textContent = maxRating || 0;
@@ -576,12 +623,20 @@
         createChart('monthChart', 'bar', monthNames, Array.from({length:12}, (_,i) => monthCount[i+1] || 0), colors);
         const avgs = Object.entries(genreRatings).filter(([,v]) => v.count >= 3).map(([g,v]) => [g, Number((v.sum/v.count).toFixed(1))]).sort((a,b) => b[1]-a[1]).slice(0,15);
         createChart('genreRatingChart', 'bar', avgs.map(x => x[0]), avgs.map(x => x[1]), ['#ffd700','#fdcb6e','#f9ca24','#f0932b','#e94560','#e17055','#6c5ce7','#0984e3','#00d2d3','#00b894','#55efc4','#74b9ff','#a29bfe','#fd79a8','#fdcb6e']);
-        const compareData = allMovies.filter(m => toNumber(m.user_rating) > 0 && toNumber(m.imdb_rating) > 0).slice(0,30).reverse();
+        const compareData = allMovies.filter(m => toNumber(m.user_rating) > 0 && toNumber(m.imdb_rating) > 0)
+            .sort(compareVaultRank).slice(0,30).reverse();
         createChart('compareChart', 'bar', compareData.map(m => String(m.title).length > 20 ? `${String(m.title).slice(0,18)}…` : m.title), [compareData.map(m => toNumber(m.user_rating)), compareData.map(m => toNumber(m.imdb_rating))], ['#ffd700','#e94560'], ['امتیاز من','امتیاز IMDb']);
 
-        const top = allMovies.filter(m => toNumber(m.user_rating) === 10).sort((a,b) => getDateValue(b.date_rated)-getDateValue(a.date_rated)).slice(0,20);
+        const top = allMovies.filter(m => toNumber(m.user_rating) > 0)
+            .sort(compareVaultRank)
+            .slice(0,20);
         const topEl = $('topMoviesList');
-        if (topEl) topEl.innerHTML = top.length ? top.map((m,i) => `<div class="top-movie-item" data-id="${escapeHtml(m.imdb_id)}"><div class="top-movie-rank">#${i+1}</div><div class="top-movie-info"><div class="title">${escapeHtml(m.title)}</div><div class="year">${escapeHtml(m.year || 'N/A')} • ${escapeHtml(splitValues(m.genres).slice(0,2).join(', '))}</div></div><div class="top-movie-rating">⭐ ${m.user_rating} ${ratingEmoji(m.user_rating)}</div></div>`).join('') : '<p style="color:var(--text-muted);text-align:center;">هنوز عنوانی با امتیاز ۱۰ ثبت نشده است.</p>';
+        if (topEl) topEl.innerHTML = top.length ? top.map((m,i) => {
+            const r = rankingMetrics(m);
+            return `<div class="top-movie-item" data-id="${escapeHtml(m.imdb_id)}"><div class="top-movie-rank">#${i+1}</div><div class="top-movie-info"><div class="title">${escapeHtml(m.title)}</div><div class="year">${escapeHtml(m.year || 'N/A')} • ${escapeHtml(splitValues(m.genres).slice(0,2).join(', '))} • 📅 ${escapeHtml(formatDate(m.date_rated))}</div><div class="top-movie-sub">شما ${r.personalRating.toFixed(1)} · IMDb ${r.imdbRating ? r.imdbRating.toFixed(1) : '—'} · ${escapeHtml(formatVotes(r.votes))} رأی</div></div><div class="top-movie-rating"><strong>🧠 ${r.score.toFixed(2)}</strong><small>Vault Rank</small></div></div>`;
+        }).join('') : '<p style="color:var(--text-muted);text-align:center;">هنوز عنوان امتیازدهی‌شده‌ای ثبت نشده است.</p>';
+        const scoreTop = top.slice(0,10).reverse();
+        createChart('scoreChart', 'bar', scoreTop.map(m => String(m.title).length > 22 ? `${String(m.title).slice(0,20)}…` : m.title), scoreTop.map(m => Number(rankingMetrics(m).score.toFixed(2))), ['#55efc4']);
     }
 
     function createChart(id, type, labels, data, colors, labelsForDatasets) {
@@ -634,7 +689,8 @@
         setText('modalActors', movie.actors);
         setText('modalWriter', movie.writer);
         setText('modalReleased', movie.release_date);
-        setText('modalVotes', movie.num_votes);
+        setText('modalVotes', `${formatVotes(rankingMetrics(movie).votes)} (${toNumber(rankingMetrics(movie).votes).toLocaleString('en-US')})`);
+        setText('modalVaultScore', `${rankingMetrics(movie).score.toFixed(2)}/10 · IMDb تعدیل‌شده ${rankingMetrics(movie).bayesianImdb.toFixed(2)}`);
         setText('modalDateRated', formatDate(movie.date_rated));
         setText('modalOriginalTitle', movie.original_title || movie.title);
         setText('modalCountry', movie.country);
@@ -729,7 +785,7 @@
 
         safeAddEventListener('sortBtn', 'click', () => {
             const options = [
-                ['date_rated-desc','📅 تاریخ (جدید به قدیم)'],['date_rated-asc','📅 تاریخ (قدیم به جدید)'],['user_rating-desc','⭐ امتیاز من (بالا به پایین)'],['user_rating-asc','⭐ امتیاز من (پایین به بالا)'],['imdb_rating-desc','⭐ IMDb (بالا به پایین)'],['title-asc','🔤 عنوان (الفبا)'],['year-desc','📅 سال (جدید به قدیم)']
+                ['date_rated-desc','📅 تاریخ (جدید به قدیم)'],['date_rated-asc','📅 تاریخ (قدیم به جدید)'],['vault_score-desc','🧠 Vault Rank (امتیاز ترکیبی)'],['user_rating-desc','⭐ امتیاز من (بالا به پایین)'],['user_rating-asc','⭐ امتیاز من (پایین به بالا)'],['imdb_rating-desc','⭐ IMDb (بالا به پایین)'],['num_votes-desc','🗳️ تعداد رأی IMDb'],['title-asc','🔤 عنوان (الفبا)'],['year-desc','📅 سال (جدید به قدیم)']
             ];
             const choice = window.prompt(`مرتب‌سازی:\n${options.map((o,i)=>`${i+1}. ${o[1]}`).join('\n')}`);
             if (!choice) return;

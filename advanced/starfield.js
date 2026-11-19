@@ -1,5 +1,16 @@
 (() => {
-  if (matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-  const a=document.querySelector('.n1'),b=document.querySelector('.n2'),c=document.querySelector('.n3');let t=0,id;
-  const tick=()=>{t+=0.002;if(a)a.style.transform=`translate3d(${Math.sin(t)*22}px,${Math.cos(t*.8)*12}px,0)`;if(b)b.style.transform=`translate3d(${Math.cos(t)*16}px,${Math.sin(t*.7)*18}px,0)`;if(c)c.style.transform=`translate3d(${Math.sin(t*1.2)*13}px,${Math.cos(t)*11}px,0)`;id=requestAnimationFrame(tick)};id=requestAnimationFrame(tick);addEventListener('pagehide',()=>cancelAnimationFrame(id),{once:true});
+  'use strict';
+  const root = document.querySelector('.stars');
+  if (!root || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  const frag = document.createDocumentFragment();
+  for (let i = 0; i < 110; i++) {
+    const star = document.createElement('i');
+    star.style.left = `${Math.random() * 100}%`;
+    star.style.top = `${Math.random() * 100}%`;
+    star.style.setProperty('--size', `${Math.random() * 2 + .5}px`);
+    star.style.setProperty('--delay', `${Math.random() * 5}s`);
+    star.style.setProperty('--duration', `${Math.random() * 4 + 3}s`);
+    frag.appendChild(star);
+  }
+  root.appendChild(frag);
 })();

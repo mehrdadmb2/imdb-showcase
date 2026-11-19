@@ -15,7 +15,7 @@
     type: 'all',
     genre: 'all',
     year: 'all',
-    sort: 'date_desc',
+    sort: 'vault_desc',
     diagnostics: {
       system: null,
       keyState: null,
@@ -86,6 +86,25 @@
     return new Intl.DateTimeFormat('en-GB', {
       year: 'numeric', month: 'short', day: '2-digit'
     }).format(d);
+  }
+
+  function rank(movie) {
+    return window.CinemaVaultRating?.metrics(movie) || {
+      score: num(movie.user_rating), personalRating: num(movie.user_rating),
+      imdbRating: num(movie.imdb_rating), bayesianImdb: num(movie.imdb_rating),
+      votes: num(movie.num_votes), freshnessBonus: 0, ageDays: null
+    };
+  }
+
+  function formatVotes(value) {
+    return window.CinemaVaultRating?.formatVotes(value) || formatInt(value);
+  }
+
+  function rankCompare(a, b) {
+    return window.CinemaVaultRating?.compare(a, b)
+      ?? ((rank(b).score - rank(a).score)
+        || (rank(b).votes - rank(a).votes)
+        || (dateValue(b.date_rated) - dateValue(a.date_rated)));
   }
 
   function localPoster(movie) {
@@ -240,8 +259,10 @@
 
     state.filtered.sort((a, b) => {
       switch (state.sort) {
+        case 'vault_desc': return rankCompare(a, b);
         case 'rating_desc': return num(b.user_rating) - num(a.user_rating);
         case 'imdb_desc': return num(b.imdb_rating) - num(a.imdb_rating);
+        case 'votes_desc': return rank(b).votes - rank(a).votes;
         case 'year_desc': return year(b.year) - year(a.year);
         case 'title_asc': return a.title.localeCompare(b.title);
         default: return dateValue(b.date_rated) - dateValue(a.date_rated);
@@ -278,6 +299,10 @@
     const minutes = state.movies.reduce((sum, m) => sum + num(String(m.runtime).match(/\d+/)?.[0]), 0);
     const rated = state.movies.filter(m => m.user_rating > 0);
     const avg = rated.length ? rated.reduce((s,m) => s + m.user_rating, 0) / rated.length : 0;
+    const imdbRows = state.movies.filter(m => num(m.imdb_rating) > 0);
+    const avgImdb = imdbRows.length ? imdbRows.reduce((s,m) => s + num(m.imdb_rating), 0) / imdbRows.length : 0;
+    const totalVotes = state.movies.reduce((s,m) => s + rank(m).votes, 0);
+    const avgVault = rated.length ? rated.reduce((s,m) => s + rank(m).score, 0) / rated.length : 0;
     const localPosters = state.movies.filter(m => localPoster(m)).length;
     const enriched = state.movies.filter(m => Object.keys(m.raw_omdb || {}).length > 0 || m.data_status === 'fresh' || m.data_status === 'cached').length;
 
@@ -287,6 +312,9 @@
     setText('mEpisodes', formatInt(episodes.length));
     setText('mRuntime', formatRuntime(minutes));
     setText('mAvg', avg ? avg.toFixed(1) : '—');
+    setText('mAvgIMDb', avgImdb ? avgImdb.toFixed(2) : '—');
+    setText('mVotes', formatVotes(totalVotes));
+    setText('mVault', avgVault ? avgVault.toFixed(2) : '—');
     setText('mPosterCoverage', `${state.movies.length ? Math.round(localPosters / state.movies.length * 100) : 0}%`);
     setText('mOmdbCoverage', `${state.movies.length ? Math.round(enriched / state.movies.length * 100) : 0}%`);
   }
@@ -326,7 +354,8 @@
         <div class="card-title">${escapeHtml(movie.title)}</div>
         <div class="card-sub">${escapeHtml(movie.year || '—')}${movie.series_title ? ` • ${escapeHtml(movie.series_title)}` : ''}</div>
         <div class="tags">${split(movie.genres).slice(0,3).map(g => `<span>${escapeHtml(g)}</span>`).join('')}</div>
-        <div class="card-score"><span class="mine">${ratingEmoji(movie.user_rating)} ${movie.user_rating || '—'}</span><span class="imdb">IMDb ${escapeHtml(movie.imdb_rating || '—')}</span></div>
+        <div class="card-score"><span class="mine">${ratingEmoji(movie.user_rating)} ${movie.user_rating || '—'}</span><span class="imdb">IMDb ${escapeHtml(movie.imdb_rating || '—')}</span><b class="vault-mini">🧠 ${rank(movie).score.toFixed(2)}</b></div>
+        <div class="card-votes">🗳️ ${escapeHtml(formatVotes(rank(movie).votes))} IMDb votes <span>·</span> 📅 ${escapeHtml(formatDate(movie.date_rated))}</div>
       </div>
     </article>`;
   }
@@ -379,7 +408,7 @@
     const latest = [...state.movies].filter(m => m.date_rated).sort((a,b) => dateValue(b.date_rated)-dateValue(a.date_rated)).slice(0,6);
     box.innerHTML = latest.length ? latest.map(movie => `<article class="latest-card" data-id="${escapeHtml(movie.imdb_id)}">
       ${posterSrc(movie) ? `<img src="${escapeHtml(posterSrc(movie))}" alt="${escapeHtml(movie.title)}" loading="lazy" data-fallback="latest-${escapeHtml(movie.imdb_id)}">` : ''}
-      <div class="latest-copy"><b>${escapeHtml(movie.title)}</b><small>${formatDate(movie.date_rated)} • ⭐ ${movie.user_rating || '—'}</small><div class="latest-rating">${ratingEmoji(movie.user_rating)}</div></div>
+      <div class="latest-copy"><b>${escapeHtml(movie.title)}</b><small>${formatDate(movie.date_rated)} • ⭐ ${movie.user_rating || '—'} • IMDb ${escapeHtml(movie.imdb_rating || '—')}</small><div class="latest-rating">🧠 ${rank(movie).score.toFixed(2)} · 🗳️ ${escapeHtml(formatVotes(rank(movie).votes))} رأی</div></div>
     </article>`).join('') : '<div class="muted">No rated titles yet.</div>';
   }
 
@@ -433,6 +462,7 @@
     setText('modalOriginal', movie.original_title);
     setText('modalUser', movie.user_rating || '—');
     setText('modalIMDb', movie.imdb_rating || '—');
+    setText('modalVault', `${rank(movie).score.toFixed(2)}/10`);
     setText('modalMeta', movie.metascore || '—');
     setText('modalPlot', movie.plot || 'No plot information available.');
 
@@ -442,7 +472,7 @@
     const details = [
       ['Year', movie.year], ['Runtime', formatRuntime(movie.runtime)], ['Rated', movie.rated], ['Released', movie.release_date],
       ['Genres', movie.genres], ['Director', movie.directors], ['Writer', movie.writer], ['Actors', movie.actors],
-      ['Country', movie.country], ['Language', movie.language], ['Votes', movie.num_votes], ['Date Rated', formatDate(movie.date_rated)],
+      ['Country', movie.country], ['Language', movie.language], ['IMDb Votes', `${formatVotes(rank(movie).votes)} (${formatInt(rank(movie).votes)})`], ['Vault Rank', `${rank(movie).score.toFixed(2)}/10 · IMDb adjusted ${rank(movie).bayesianImdb.toFixed(2)}`], ['Date Rated', formatDate(movie.date_rated)],
       ['Awards', movie.awards], ['Box Office', movie.box_office], ['Production', movie.production], ['Data Status', movie.data_status],
       ['Poster Status', movie.poster_status], ['Cache Updated', movie.cache_updated_at ? formatDate(movie.cache_updated_at) : '—']
     ];
@@ -576,12 +606,12 @@
     $('year')?.addEventListener('change', e => { state.year = e.target.value; state.currentPage = 1; applyFilters(); });
     $('sort')?.addEventListener('change', e => { state.sort = e.target.value; state.currentPage = 1; applyFilters(); });
     $('reset')?.addEventListener('click', () => {
-      state.query = ''; state.type = 'all'; state.genre = 'all'; state.year = 'all'; state.sort = 'date_desc'; state.currentPage = 1;
+      state.query = ''; state.type = 'all'; state.genre = 'all'; state.year = 'all'; state.sort = 'vault_desc'; state.currentPage = 1;
       if ($('search')) $('search').value = '';
       if ($('type')) $('type').value = 'all';
       if ($('genre')) $('genre').value = 'all';
       if ($('year')) $('year').value = 'all';
-      if ($('sort')) $('sort').value = 'date_desc';
+      if ($('sort')) $('sort').value = 'vault_desc';
       applyFilters();
     });
     $('pageSize')?.addEventListener('change', e => {
@@ -660,6 +690,8 @@
     charts.rating = new Chart($('ratingChart'), {type:'bar',data:{labels:Object.keys(rating).sort((a,b)=>a-b),datasets:[{label:'Ratings',data:Object.keys(rating).sort((a,b)=>a-b).map(x=>rating[x]),backgroundColor:'#d7fff0',borderRadius:7}]},options:common});
     const ys = Object.keys(years).sort((a,b)=>a-b).slice(-18);
     charts.year = new Chart($('yearChart'), {type:'line',data:{labels:ys,datasets:[{label:'Titles',data:ys.map(y=>years[y]),borderColor:'#21F1A8',backgroundColor:'rgba(33,241,168,.08)',fill:true,tension:.3}]},options:common});
+    const top = state.movies.filter(m => m.user_rating > 0).sort(rankCompare).slice(0,12).reverse();
+    if ($('vaultChart')) charts.vault = new Chart($('vaultChart'), {type:'bar',data:{labels:top.map(m => m.title.length > 22 ? `${m.title.slice(0,20)}…` : m.title),datasets:[{label:'Vault Rank / 10',data:top.map(m => Number(rank(m).score.toFixed(2))),backgroundColor:'#21F1A8',borderRadius:7}]},options:common});
   }
 
   init();

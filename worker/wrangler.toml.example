@@ -1,0 +1,22 @@
+# Copy to wrangler.toml and replace the D1 database_id with the ID of the
+# EXISTING production database. Do not create a new DB unless you intend to
+# migrate subscriber / favourites / notification history.
+name = "imdb-showcase-telegram-bot"
+main = "index.js"
+compatibility_date = "2026-11-19"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "REPLACE_WITH_EXISTING_D1_DATABASE_NAME"
+database_id = "REPLACE_WITH_EXISTING_D1_DATABASE_ID"
+
+[vars]
+SITE_URL = "https://mehrdadmb2.github.io/imdb-showcase"
+DATA_URL = "https://raw.githubusercontent.com/mehrdadmb2/imdb-showcase/main/docs/movies.json"
+REPO_OWNER = "mehrdadmb2"
+REPO_NAME = "imdb-showcase"
+REPO_BRANCH = "main"
+DATA_CSV_PATH = "src/ratings.csv"
+WORKFLOW_FILE = "update-movies.yml"
+BOT_DISPLAY_NAME = "Cinema Vault"
+MAX_IMPORT_BYTES = "8388608"
