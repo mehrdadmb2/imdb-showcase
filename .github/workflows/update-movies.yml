@@ -136,6 +136,17 @@ jobs:
           print('posters_dir:',Path('docs/posters').exists())
           print('local_posters_referenced:',sum(bool(m.get('poster_local')) for m in movies))
           print('omdb_enriched:',sum(bool(m.get('omdb_found') or (m.get('raw_omdb') or {}).get('imdbID')) for m in movies))
+          def number(value):
+              try: return float(str(value or '').replace(',', '').strip())
+              except (TypeError, ValueError): return 0.0
+          imdb=[number(m.get('imdb_rating') or (m.get('raw_omdb') or {}).get('imdbRating')) for m in movies]
+          imdb=[v for v in imdb if v > 0]
+          votes=sum(number(m.get('num_votes') or (m.get('raw_csv') or {}).get('Num Votes') or (m.get('raw_omdb') or {}).get('imdbVotes')) for m in movies)
+          user=[number(m.get('user_rating')) for m in movies if number(m.get('user_rating')) > 0]
+          print('imdb_scored:',len(imdb))
+          print('imdb_average:',round(sum(imdb)/len(imdb),3) if imdb else 0)
+          print('imdb_votes_total:',int(votes))
+          print('user_average:',round(sum(user)/len(user),3) if user else 0)
           PY
 
       - name: Commit dataset, local posters and diagnostics

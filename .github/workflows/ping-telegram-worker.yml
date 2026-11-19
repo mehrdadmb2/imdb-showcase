@@ -2,9 +2,13 @@ name: Trigger Cinema Vault Telegram Worker
 
 on:
   schedule:
-    # Replace Cloudflare Cron Triggers: invoke the protected worker endpoint every 30 minutes.
+    # Safety net: retry pending notifications even without a new data-pipeline run.
     - cron: "7,37 * * * *"
   workflow_dispatch:
+  workflow_run:
+    workflows: ["IMDb Showcase — resilient data pipeline"]
+    types: [completed]
+    branches: [main]
 
 permissions: {}
 
@@ -14,6 +18,7 @@ concurrency:
 
 jobs:
   run-scheduler:
+    if: ${{ github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success' }}
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
@@ -64,4 +69,4 @@ jobs:
             echo "::error::Worker response did not confirm success."
             exit 1
           }
-          echo "Scheduler completed successfully."
+          echo "Cinema Vault notification scheduler completed successfully."
