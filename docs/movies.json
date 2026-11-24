@@ -1,17 +1,17 @@
 {
   "schema_version": 6,
-  "last_manual_update": "2026-11-24T09:46:57.949092+00:00",
+  "last_manual_update": "2026-11-24T22:21:01.634412+00:00",
   "data_meta": {
     "source_records": 1824,
-    "cache_reused": 1824,
-    "api_attempts": 0,
-    "omdb_success": 0,
+    "cache_reused": 1816,
+    "api_attempts": 8,
+    "omdb_success": 8,
     "omdb_not_found": 0,
     "omdb_errors": 0,
     "stale_preserved": 0,
     "partial_records": 0,
     "records_missing_enrichment": 0,
-    "records_due_monthly_refresh": 0,
+    "records_due_monthly_refresh": 8,
     "records_deferred_retry": 0,
     "poster_reused": 1678,
     "poster_attempts": 95,
@@ -34,9 +34,9 @@
       {
         "label": "key-1",
         "fingerprint": "85c6a9535c01",
-        "status": "not_tested",
-        "requests_this_run": 0,
-        "success_this_run": 0,
+        "status": "active",
+        "requests_this_run": 2,
+        "success_this_run": 2,
         "not_found_this_run": 0,
         "errors_this_run": 0,
         "last_error": ""
@@ -44,9 +44,9 @@
       {
         "label": "key-2",
         "fingerprint": "409c1abd8842",
-        "status": "not_tested",
-        "requests_this_run": 0,
-        "success_this_run": 0,
+        "status": "active",
+        "requests_this_run": 2,
+        "success_this_run": 2,
         "not_found_this_run": 0,
         "errors_this_run": 0,
         "last_error": ""
@@ -54,9 +54,9 @@
       {
         "label": "key-3",
         "fingerprint": "b9708d2c4dbb",
-        "status": "not_tested",
-        "requests_this_run": 0,
-        "success_this_run": 0,
+        "status": "active",
+        "requests_this_run": 2,
+        "success_this_run": 2,
         "not_found_this_run": 0,
         "errors_this_run": 0,
         "last_error": ""
@@ -64,9 +64,9 @@
       {
         "label": "key-4",
         "fingerprint": "2caed1031b1c",
-        "status": "not_tested",
-        "requests_this_run": 0,
-        "success_this_run": 0,
+        "status": "active",
+        "requests_this_run": 2,
+        "success_this_run": 2,
         "not_found_this_run": 0,
         "errors_this_run": 0,
         "last_error": ""
@@ -1599,10 +1599,6 @@
           "Value": "7.8/10"
         },
         {
-          "Source": "Rotten Tomatoes",
-          "Value": "71%"
-        },
-        {
           "Source": "Metacritic",
           "Value": "55/100"
         }
@@ -1635,10 +1631,6 @@
             "Value": "7.8/10"
           },
           {
-            "Source": "Rotten Tomatoes",
-            "Value": "71%"
-          },
-          {
             "Source": "Metacritic",
             "Value": "55/100"
           }
@@ -1655,10 +1647,10 @@
         "Response": "True"
       },
       "omdb_found": true,
-      "data_status": "cached",
-      "data_fetched_at": "2026-10-25T20:06:18.978908+00:00",
-      "cache_updated_at": "2026-10-25T20:06:18.978908+00:00",
-      "last_api_attempt_at": "2026-10-25T20:06:18.978908+00:00",
+      "data_status": "fresh",
+      "data_fetched_at": "2026-11-24T22:20:29.568479+00:00",
+      "cache_updated_at": "2026-11-24T22:20:29.568479+00:00",
+      "last_api_attempt_at": "2026-11-24T22:20:29.568479+00:00",
       "next_retry_at": "",
       "failure_count": 0,
       "data_stale_reason": "",
@@ -1756,10 +1748,10 @@
         "Response": "True"
       },
       "omdb_found": true,
-      "data_status": "cached",
-      "data_fetched_at": "2026-10-25T20:06:19.245339+00:00",
-      "cache_updated_at": "2026-10-25T20:06:19.245339+00:00",
-      "last_api_attempt_at": "2026-10-25T20:06:19.245339+00:00",
+      "data_status": "fresh",
+      "data_fetched_at": "2026-11-24T22:20:29.631278+00:00",
+      "cache_updated_at": "2026-11-24T22:20:29.631278+00:00",
+      "last_api_attempt_at": "2026-11-24T22:20:29.631278+00:00",
       "next_retry_at": "",
       "failure_count": 0,
       "data_stale_reason": "",
@@ -1857,10 +1849,10 @@
         "Response": "True"
       },
       "omdb_found": true,
-      "data_status": "cached",
-      "data_fetched_at": "2026-10-25T20:06:19.379482+00:00",
-      "cache_updated_at": "2026-10-25T20:06:19.379482+00:00",
-      "last_api_attempt_at": "2026-10-25T20:06:19.379482+00:00",
+      "data_status": "fresh",
+      "data_fetched_at": "2026-11-24T22:20:29.694533+00:00",
+      "cache_updated_at": "2026-11-24T22:20:29.694533+00:00",
+      "last_api_attempt_at": "2026-11-24T22:20:29.694533+00:00",
       "next_retry_at": "",
       "failure_count": 0,
       "data_stale_reason": "",
@@ -1906,21 +1898,17 @@
       "rated": "R",
       "actors": "Cristin Milioti, Delaney Quinn, Topher Grace",
       "writer": "Casper Kelly, Jamie King",
-      "country": "United States",
+      "country": "Israel, United States",
       "language": "English",
-      "awards": "1 nomination total",
-      "box_office": "$15,822,917",
+      "awards": "2 nominations total",
+      "box_office": "$26,976,839",
       "production": "",
       "website": "",
       "metascore": "67",
       "ratings": [
         {
           "Source": "Internet Movie Database",
-          "Value": "7.1/10"
-        },
-        {
-          "Source": "Rotten Tomatoes",
-          "Value": "88%"
+          "Value": "6.6/10"
         },
         {
           "Source": "Metacritic",
@@ -1940,23 +1928,19 @@
         "Rated": "R",
         "Released": "28 Aug 2026",
         "Runtime": "96 min",
-        "Genre": "Horror",
+        "Genre": "Fantasy, Horror, Thriller",
         "Director": "Casper Kelly",
         "Writer": "Casper Kelly, Jamie King",
         "Actors": "Cristin Milioti, Delaney Quinn, Topher Grace",
         "Plot": "In 1999, a group of amnesiac children live in the episodic world of It's Buddy!, a children's television show hosted by the tyrannical Buddy, a bright orange, humanoid unicorn with a purple heart on his chest who lives in his wacky clubhouse. When the children begin to defy their captor after one of the kids disappears, Buddy grinds his teeth and sends them on a perilous journey to the mythical Diamond City. Meanwhile, in the real world, traumatized suburban mother Grace is drawn into Buddy's abomination.",
         "Language": "English",
-        "Country": "United States",
-        "Awards": "1 nomination total",
+        "Country": "Israel, United States",
+        "Awards": "2 nominations total",
         "Poster": "https://m.media-amazon.com/images/M/MV5BMWRkNWJhNjYtY2FkZC00YjFlLWFjMjUtZGFhMjc5MGYyODE4XkEyXkFqcGc@._V1_QL75_UX380_CR0,0,380,562_.jpg",
         "Ratings": [
           {
             "Source": "Internet Movie Database",
-            "Value": "7.1/10"
-          },
-          {
-            "Source": "Rotten Tomatoes",
-            "Value": "88%"
+            "Value": "6.6/10"
           },
           {
             "Source": "Metacritic",
@@ -1964,21 +1948,21 @@
           }
         ],
         "Metascore": "67",
-        "imdbRating": "7.1",
-        "imdbVotes": "5,019",
+        "imdbRating": "6.6",
+        "imdbVotes": "25,548",
         "imdbID": "tt37281055",
         "Type": "movie",
         "DVD": "N/A",
-        "BoxOffice": "$15,822,917",
+        "BoxOffice": "$26,976,839",
         "Production": "N/A",
         "Website": "N/A",
         "Response": "True"
       },
       "omdb_found": true,
-      "data_status": "cached",
-      "data_fetched_at": "2026-10-25T20:06:19.504929+00:00",
-      "cache_updated_at": "2026-10-25T20:06:19.504929+00:00",
-      "last_api_attempt_at": "2026-10-25T20:06:19.504929+00:00",
+      "data_status": "fresh",
+      "data_fetched_at": "2026-11-24T22:20:29.758440+00:00",
+      "cache_updated_at": "2026-11-24T22:20:29.758440+00:00",
+      "last_api_attempt_at": "2026-11-24T22:20:29.758440+00:00",
       "next_retry_at": "",
       "failure_count": 0,
       "data_stale_reason": "",
@@ -2037,10 +2021,6 @@
           "Value": "8.7/10"
         },
         {
-          "Source": "Rotten Tomatoes",
-          "Value": "100%"
-        },
-        {
           "Source": "Metacritic",
           "Value": "95/100"
         }
@@ -2073,10 +2053,6 @@
             "Value": "8.7/10"
           },
           {
-            "Source": "Rotten Tomatoes",
-            "Value": "100%"
-          },
-          {
             "Source": "Metacritic",
             "Value": "95/100"
           }
@@ -2093,10 +2069,10 @@
         "Response": "True"
       },
       "omdb_found": true,
-      "data_status": "cached",
-      "data_fetched_at": "2026-10-25T20:06:19.683944+00:00",
-      "cache_updated_at": "2026-10-25T20:06:19.683944+00:00",
-      "last_api_attempt_at": "2026-10-25T20:06:19.683944+00:00",
+      "data_status": "fresh",
+      "data_fetched_at": "2026-11-24T22:20:29.822837+00:00",
+      "cache_updated_at": "2026-11-24T22:20:29.822837+00:00",
+      "last_api_attempt_at": "2026-11-24T22:20:29.822837+00:00",
       "next_retry_at": "",
       "failure_count": 0,
       "data_stale_reason": "",
@@ -2194,10 +2170,10 @@
         "Response": "True"
       },
       "omdb_found": true,
-      "data_status": "cached",
-      "data_fetched_at": "2026-10-25T20:06:19.833896+00:00",
-      "cache_updated_at": "2026-10-25T20:06:19.833896+00:00",
-      "last_api_attempt_at": "2026-10-25T20:06:19.833896+00:00",
+      "data_status": "fresh",
+      "data_fetched_at": "2026-11-24T22:20:29.887965+00:00",
+      "cache_updated_at": "2026-11-24T22:20:29.887965+00:00",
+      "last_api_attempt_at": "2026-11-24T22:20:29.887965+00:00",
       "next_retry_at": "",
       "failure_count": 0,
       "data_stale_reason": "",
@@ -2295,10 +2271,10 @@
         "Response": "True"
       },
       "omdb_found": true,
-      "data_status": "cached",
-      "data_fetched_at": "2026-10-25T20:06:19.946683+00:00",
-      "cache_updated_at": "2026-10-25T20:06:19.946683+00:00",
-      "last_api_attempt_at": "2026-10-25T20:06:19.946683+00:00",
+      "data_status": "fresh",
+      "data_fetched_at": "2026-11-24T22:20:29.959333+00:00",
+      "cache_updated_at": "2026-11-24T22:20:29.959333+00:00",
+      "last_api_attempt_at": "2026-11-24T22:20:29.959333+00:00",
       "next_retry_at": "",
       "failure_count": 0,
       "data_stale_reason": "",
@@ -2355,10 +2331,6 @@
         {
           "Source": "Internet Movie Database",
           "Value": "5.2/10"
-        },
-        {
-          "Source": "Rotten Tomatoes",
-          "Value": "88%"
         }
       ],
       "series_id": "",
@@ -2387,10 +2359,6 @@
           {
             "Source": "Internet Movie Database",
             "Value": "5.2/10"
-          },
-          {
-            "Source": "Rotten Tomatoes",
-            "Value": "88%"
           }
         ],
         "Metascore": "N/A",
@@ -2405,10 +2373,10 @@
         "Response": "True"
       },
       "omdb_found": true,
-      "data_status": "cached",
-      "data_fetched_at": "2026-10-25T20:06:20.077721+00:00",
-      "cache_updated_at": "2026-10-25T20:06:20.077721+00:00",
-      "last_api_attempt_at": "2026-10-25T20:06:20.077721+00:00",
+      "data_status": "fresh",
+      "data_fetched_at": "2026-11-24T22:20:30.027300+00:00",
+      "cache_updated_at": "2026-11-24T22:20:30.027300+00:00",
+      "last_api_attempt_at": "2026-11-24T22:20:30.027300+00:00",
       "next_retry_at": "",
       "failure_count": 0,
       "data_stale_reason": "",
