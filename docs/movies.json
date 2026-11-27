@@ -1,17 +1,17 @@
 {
   "schema_version": 6,
-  "last_manual_update": "2026-11-26T21:26:30.603361+00:00",
+  "last_manual_update": "2026-11-27T08:17:04.657364+00:00",
   "data_meta": {
     "source_records": 1824,
-    "cache_reused": 1824,
-    "api_attempts": 0,
-    "omdb_success": 0,
+    "cache_reused": 1815,
+    "api_attempts": 9,
+    "omdb_success": 9,
     "omdb_not_found": 0,
     "omdb_errors": 0,
     "stale_preserved": 0,
     "partial_records": 0,
     "records_missing_enrichment": 0,
-    "records_due_monthly_refresh": 0,
+    "records_due_monthly_refresh": 9,
     "records_deferred_retry": 0,
     "poster_reused": 1678,
     "poster_attempts": 95,
@@ -34,9 +34,9 @@
       {
         "label": "key-1",
         "fingerprint": "85c6a9535c01",
-        "status": "not_tested",
-        "requests_this_run": 0,
-        "success_this_run": 0,
+        "status": "active",
+        "requests_this_run": 3,
+        "success_this_run": 3,
         "not_found_this_run": 0,
         "errors_this_run": 0,
         "last_error": ""
@@ -44,9 +44,9 @@
       {
         "label": "key-2",
         "fingerprint": "409c1abd8842",
-        "status": "not_tested",
-        "requests_this_run": 0,
-        "success_this_run": 0,
+        "status": "active",
+        "requests_this_run": 2,
+        "success_this_run": 2,
         "not_found_this_run": 0,
         "errors_this_run": 0,
         "last_error": ""
@@ -54,9 +54,9 @@
       {
         "label": "key-3",
         "fingerprint": "b9708d2c4dbb",
-        "status": "not_tested",
-        "requests_this_run": 0,
-        "success_this_run": 0,
+        "status": "active",
+        "requests_this_run": 2,
+        "success_this_run": 2,
         "not_found_this_run": 0,
         "errors_this_run": 0,
         "last_error": ""
@@ -64,9 +64,9 @@
       {
         "label": "key-4",
         "fingerprint": "2caed1031b1c",
-        "status": "not_tested",
-        "requests_this_run": 0,
-        "success_this_run": 0,
+        "status": "active",
+        "requests_this_run": 2,
+        "success_this_run": 2,
         "not_found_this_run": 0,
         "errors_this_run": 0,
         "last_error": ""
@@ -5251,10 +5251,10 @@
         "Response": "True"
       },
       "omdb_found": true,
-      "data_status": "cached",
-      "data_fetched_at": "2026-10-28T05:30:52.621272+00:00",
-      "cache_updated_at": "2026-10-28T05:30:52.621272+00:00",
-      "last_api_attempt_at": "2026-10-28T05:30:52.621272+00:00",
+      "data_status": "fresh",
+      "data_fetched_at": "2026-11-27T08:16:19.626872+00:00",
+      "cache_updated_at": "2026-11-27T08:16:19.626872+00:00",
+      "last_api_attempt_at": "2026-11-27T08:16:19.626872+00:00",
       "failure_count": 0,
       "poster_last_attempt_at": "2026-09-27T18:42:19.787371+00:00",
       "poster_local": "posters/tt0705241.webp",
@@ -5352,10 +5352,10 @@
         "Response": "True"
       },
       "omdb_found": true,
-      "data_status": "cached",
-      "data_fetched_at": "2026-10-28T05:30:52.696338+00:00",
-      "cache_updated_at": "2026-10-28T05:30:52.696338+00:00",
-      "last_api_attempt_at": "2026-10-28T05:30:52.696338+00:00",
+      "data_status": "fresh",
+      "data_fetched_at": "2026-11-27T08:16:19.691663+00:00",
+      "cache_updated_at": "2026-11-27T08:16:19.691663+00:00",
+      "last_api_attempt_at": "2026-11-27T08:16:19.691663+00:00",
       "failure_count": 0,
       "poster_last_attempt_at": "2026-09-27T18:42:20.126873+00:00",
       "poster_local": "posters/tt0705270.webp",
@@ -5453,10 +5453,10 @@
         "Response": "True"
       },
       "omdb_found": true,
-      "data_status": "cached",
-      "data_fetched_at": "2026-10-28T05:30:52.772751+00:00",
-      "cache_updated_at": "2026-10-28T05:30:52.772751+00:00",
-      "last_api_attempt_at": "2026-10-28T05:30:52.772751+00:00",
+      "data_status": "fresh",
+      "data_fetched_at": "2026-11-27T08:16:19.756683+00:00",
+      "cache_updated_at": "2026-11-27T08:16:19.756683+00:00",
+      "last_api_attempt_at": "2026-11-27T08:16:19.756683+00:00",
       "failure_count": 0,
       "poster_last_attempt_at": "2026-09-27T18:42:20.265444+00:00",
       "poster_local": "posters/tt0705236.webp",
@@ -5554,10 +5554,10 @@
         "Response": "True"
       },
       "omdb_found": true,
-      "data_status": "cached",
-      "data_fetched_at": "2026-10-28T05:30:52.849793+00:00",
-      "cache_updated_at": "2026-10-28T05:30:52.849793+00:00",
-      "last_api_attempt_at": "2026-10-28T05:30:52.849793+00:00",
+      "data_status": "fresh",
+      "data_fetched_at": "2026-11-27T08:16:19.818085+00:00",
+      "cache_updated_at": "2026-11-27T08:16:19.818085+00:00",
+      "last_api_attempt_at": "2026-11-27T08:16:19.818085+00:00",
       "failure_count": 0,
       "poster_last_attempt_at": "2026-09-27T18:42:20.419310+00:00",
       "poster_local": "posters/tt0705263.webp",
@@ -5655,10 +5655,10 @@
         "Response": "True"
       },
       "omdb_found": true,
-      "data_status": "cached",
-      "data_fetched_at": "2026-10-28T05:30:52.922248+00:00",
-      "cache_updated_at": "2026-10-28T05:30:52.922248+00:00",
-      "last_api_attempt_at": "2026-10-28T05:30:52.922248+00:00",
+      "data_status": "fresh",
+      "data_fetched_at": "2026-11-27T08:16:19.882497+00:00",
+      "cache_updated_at": "2026-11-27T08:16:19.882497+00:00",
+      "last_api_attempt_at": "2026-11-27T08:16:19.882497+00:00",
       "failure_count": 0,
       "poster_last_attempt_at": "2026-09-27T18:42:20.645703+00:00",
       "poster_local": "posters/tt0705239.webp",
@@ -5756,10 +5756,10 @@
         "Response": "True"
       },
       "omdb_found": true,
-      "data_status": "cached",
-      "data_fetched_at": "2026-10-28T05:30:53.013988+00:00",
-      "cache_updated_at": "2026-10-28T05:30:53.013988+00:00",
-      "last_api_attempt_at": "2026-10-28T05:30:53.013988+00:00",
+      "data_status": "fresh",
+      "data_fetched_at": "2026-11-27T08:16:19.947403+00:00",
+      "cache_updated_at": "2026-11-27T08:16:19.947403+00:00",
+      "last_api_attempt_at": "2026-11-27T08:16:19.947403+00:00",
       "failure_count": 0,
       "poster_last_attempt_at": "2026-09-27T18:42:20.785519+00:00",
       "poster_local": "posters/tt0705223.webp",
@@ -5822,10 +5822,6 @@
           "Value": "5.5/10"
         },
         {
-          "Source": "Rotten Tomatoes",
-          "Value": "51%"
-        },
-        {
           "Source": "Metacritic",
           "Value": "54/100"
         }
@@ -5856,10 +5852,6 @@
             "Value": "5.5/10"
           },
           {
-            "Source": "Rotten Tomatoes",
-            "Value": "51%"
-          },
-          {
             "Source": "Metacritic",
             "Value": "54/100"
           }
@@ -5876,10 +5868,10 @@
         "Response": "True"
       },
       "omdb_found": true,
-      "data_status": "cached",
-      "data_fetched_at": "2026-10-28T05:30:53.101284+00:00",
-      "cache_updated_at": "2026-10-28T05:30:53.101284+00:00",
-      "last_api_attempt_at": "2026-10-28T05:30:53.101284+00:00",
+      "data_status": "fresh",
+      "data_fetched_at": "2026-11-27T08:16:20.011170+00:00",
+      "cache_updated_at": "2026-11-27T08:16:20.011170+00:00",
+      "last_api_attempt_at": "2026-11-27T08:16:20.011170+00:00",
       "failure_count": 0,
       "poster_last_attempt_at": "2026-09-27T18:42:21.015970+00:00",
       "poster_local": "posters/tt32332404.webp",
@@ -5940,10 +5932,6 @@
           "Value": "6.1/10"
         },
         {
-          "Source": "Rotten Tomatoes",
-          "Value": "17%"
-        },
-        {
           "Source": "Metacritic",
           "Value": "23/100"
         }
@@ -5974,10 +5962,6 @@
             "Value": "6.1/10"
           },
           {
-            "Source": "Rotten Tomatoes",
-            "Value": "17%"
-          },
-          {
             "Source": "Metacritic",
             "Value": "23/100"
           }
@@ -5994,10 +5978,10 @@
         "Response": "True"
       },
       "omdb_found": true,
-      "data_status": "cached",
-      "data_fetched_at": "2026-10-28T05:30:53.175692+00:00",
-      "cache_updated_at": "2026-10-28T05:30:53.175692+00:00",
-      "last_api_attempt_at": "2026-10-28T05:30:53.175692+00:00",
+      "data_status": "fresh",
+      "data_fetched_at": "2026-11-27T08:16:20.075784+00:00",
+      "cache_updated_at": "2026-11-27T08:16:20.075784+00:00",
+      "last_api_attempt_at": "2026-11-27T08:16:20.075784+00:00",
       "failure_count": 0,
       "poster_last_attempt_at": "2026-09-27T18:42:21.159054+00:00",
       "poster_local": "posters/tt1428538.webp",
@@ -6058,10 +6042,6 @@
           "Value": "5.6/10"
         },
         {
-          "Source": "Rotten Tomatoes",
-          "Value": "63%"
-        },
-        {
           "Source": "Metacritic",
           "Value": "64/100"
         }
@@ -6092,10 +6072,6 @@
             "Value": "5.6/10"
           },
           {
-            "Source": "Rotten Tomatoes",
-            "Value": "63%"
-          },
-          {
             "Source": "Metacritic",
             "Value": "64/100"
           }
@@ -6112,10 +6088,10 @@
         "Response": "True"
       },
       "omdb_found": true,
-      "data_status": "cached",
-      "data_fetched_at": "2026-10-28T05:30:53.246877+00:00",
-      "cache_updated_at": "2026-10-28T05:30:53.246877+00:00",
-      "last_api_attempt_at": "2026-10-28T05:30:53.246877+00:00",
+      "data_status": "fresh",
+      "data_fetched_at": "2026-11-27T08:16:20.135896+00:00",
+      "cache_updated_at": "2026-11-27T08:16:20.135896+00:00",
+      "last_api_attempt_at": "2026-11-27T08:16:20.135896+00:00",
       "failure_count": 0,
       "poster_last_attempt_at": "2026-09-27T18:42:21.310123+00:00",
       "poster_local": "posters/tt9086228.webp",
